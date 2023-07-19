@@ -744,7 +744,11 @@ dt <- dt %>%
 dt_x <- dt %>% select(-c(Country, ID))
 
 pre_SEA_plot_max <- pre_SEA_plot %>% group_by(country) %>% slice(1)
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 44797502e96750608e13b3a7dacbfbe862df29a5
 ggplot() + geom_sf() + geom_sf(data=pre_SEA_plot_max, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
   geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:180], color=NA, alpha=0.8) +
   guides(fill=guide_legend(nrow=18, byrow=TRUE)) +
