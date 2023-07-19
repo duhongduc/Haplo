@@ -126,6 +126,7 @@ if (AlignNeeded) {
 # Reading multiple DNA sequences from msa package
 # fname = "all_seq_align.fasta"
 fname = "countriesAlign.fasta"
+# fname = "all_seq_align.rmdup.fasta"
 file <- Biostrings::readDNAStringSet(fname)#for reading multiple DNA sequences from msa package
 file
 
@@ -324,17 +325,690 @@ options(ignore.negative.edge=TRUE)
 
 # Vietnam
 
-VN <- dat %>% filter(country=="Vietnam")
-nbin_VN <- nbin[labels(nbin) %in% hap_VN$name]
+VN <- dat %>% filter(country=="Vietnam") %>%
+  mutate(ethnic = ifelse(str_detect(ethnic, "Cham") == TRUE, "Cham",
+                         ifelse(str_detect(ethnic, "CoLao") == TRUE, "CoLao",
+                                ifelse(str_detect(ethnic, "Dao") == TRUE, "Dao",
+                                       ifelse(str_detect(ethnic, "DHX") == TRUE, "Unspecified",
+                                              ifelse(str_detect(ethnic, "DKK") == TRUE, "Unspecified",
+                                                     ifelse(str_detect(ethnic, "DKX") == TRUE, "Unspecified",
+                                                            ifelse(str_detect(ethnic, "DOX") == TRUE, "Unspecified",
+                                                                   ifelse(str_detect(ethnic, "Ede") == TRUE, "Ede",
+                                                                          ifelse(str_detect(ethnic, "Giarai") == TRUE, "Giarai",
+                                                                                 ifelse(str_detect(ethnic, "HaNhi") == TRUE, "HaNhi",
+                                                                                        ifelse(str_detect(ethnic, "HMong") == TRUE, "HMong",
+                                                                                               ifelse(str_detect(ethnic, "Hui") == TRUE, "Unspecified",
+                                                                                                      ifelse(str_detect(ethnic, "KDH") == TRUE, "Unspecified",
+                                                                                                             ifelse(str_detect(ethnic, "Kinh") == TRUE, "Kinh",
+                                                                                                                    ifelse(str_detect(ethnic, "LaChi") == TRUE, "LaChi",
+                                                                                                                           ifelse(str_detect(ethnic, "LaHu") == TRUE, "LaHu",
+                                                                                                                                  ifelse(str_detect(ethnic, "LoLo") == TRUE, "LoLo",
+                                                                                                                                         ifelse(str_detect(ethnic, "Mang") == TRUE, "Mang",
+                                                                                                                                                ifelse(str_detect(ethnic, "Nung") == TRUE, "Nung",
+                                                                                                                                                       ifelse(str_detect(ethnic, "PaThen") == TRUE, "PaThen",
+                                                                                                                                                              ifelse(str_detect(ethnic, "PhuLa") == TRUE, "PhuLa",
+                                                                                                                                                                     ifelse(str_detect(ethnic, "SiLa") == TRUE, "SiLa",
+                                                                                                                                                                            ifelse(str_detect(ethnic, "Tay") == TRUE, "Tay",
+                                                                                                                                                                                   ifelse(str_detect(ethnic, "Thai") == TRUE, "Thai",
+                                                                                                                                                                                          ifelse(str_detect(ethnic, "V206") == TRUE, "Viet",
+                                                                                                                                                                                                 ifelse(str_detect(ethnic, "VIET") == TRUE, "Viet",
+                                                                                                                                                                                                        ifelse(str_detect(ethnic, "VN") == TRUE, "Viet",
+                                                                                                                                                                                                               ifelse(str_detect(ethnic, "Yao") == TRUE, "Yao",
+                                                                                                                                                                                                                      ethnic)))))))))))))))))))))))))))))
+
+nbin_VN <- nbin[labels(nbin) %in% VN$name]
 class(nbin_VN)
-dnbin_VN<-dist.dna(nbin_VN, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+dnbin_VN <- dist.dna(nbin_VN, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+library(pegas)
+hap.div(nbin_VN, variance = TRUE)
+nuc.div(nbin_VN, variance = TRUE, pairwise.deletion = FALSE)
+library(picante)
+x_VN <- as.matrix.DNAbin(nbin_VN)  #converting DNAbin to matrix
+
+library(haplotypes)
+h_VN <- pegas::haplotype(nbin_VN)
+d_VN <- dist.dna(h_VN, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+nt_VN <- rmst(d_VN, quiet = TRUE)#constructs the haplotype network
+sz_VN <- summary(h_VN)
+nt.labs_VN <- attr(nt_VN, "labels")
+sz_VN <- sz_VN[nt.labs_VN]
+
+library(ape)
+x_VN <- as.matrix.DNAbin(nbin_VN)
+name_VN <- VN$name
+R <- haploFreq(x_VN, fac = name_VN, haplo = h_VN)
+R <- R[nt.labs_VN, ]
+samp<-R %>% t()
+library(ggmuller)
+phylo_VN <- as.phylo(nt_VN)
+dis <- cophenetic(phylo_VN)
+
+dis<-dis[,phylo_VN$tip.label]
+samp<-samp[,phylo_VN$tip.label]
+
+library(picante) 
+library(iCAMP)
+pd(samp, phylo_VN, include.root = TRUE)
+mpd(samp, dis, abundance.weighted=TRUE)
+mpdn(R, cophenetic(phylo_VN), abundance.weighted = TRUE, time.output = FALSE)
+
 tree_VN<-nj(dnbin_VN)
 library(ggtree)
-ggt_VN<-ggtree::ggtree(tree_M, cex = 0.8, aes(color=branch.length))+
+ggt_VN<-ggtree::ggtree(tree_VN, cex = 0.8, aes(color=branch.length))+
   scale_color_continuous(high='lightskyblue1',low='coral4')+
   geom_tiplab(align=TRUE, size=2)+
   geom_treescale(y = - 5, color = "coral4", fontsize = 4)
 ggt_VN
+
+## Cham
+
+Cham <- VN %>% filter(ethnic=="Cham")
+nbin_Cham <- nbin[labels(nbin) %in% Cham$name]
+class(nbin_Cham)
+dnbin_Cham <- dist.dna(nbin_Cham, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+hap.div(nbin_Cham, variance = TRUE)
+nuc.div(nbin_Cham, variance = TRUE, pairwise.deletion = FALSE)
+x_Cham <- as.matrix.DNAbin(nbin_Cham)  #converting DNAbin to matrix
+
+h_Cham <- pegas::haplotype(nbin_Cham)
+d_Cham <- dist.dna(h_Cham, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+nt_Cham <- rmst(d_Cham, quiet = TRUE)#constructs the haplotype network
+sz_Cham <- summary(h_Cham)
+nt.labs_Cham <- attr(nt_Cham, "labels")
+sz_Cham <- sz_VN[nt.labs_Cham]
+
+name_Cham <- Cham$name
+R <- haploFreq(x_Cham, fac = name_Cham, haplo = h_Cham)
+R <- R[nt.labs_Cham, ]
+samp<-R %>% t()
+phylo_Cham <- ape::as.phylo(nt_Cham)
+dis <- cophenetic(phylo_Cham)
+
+dis<-dis[,phylo_Cham$tip.label]
+samp<-samp[,phylo_Cham$tip.label]
+
+comdist(samp, dis, abundance.weighted=TRUE)
+pd(samp, phylo_Cham, include.root = TRUE)
+mpd(samp, dis)
+mpdn(samp, dis, abundance.weighted = TRUE, time.output = FALSE)
+
+tree_Cham<-nj(dnbin_Cham)
+ggt_Cham<-ggtree::ggtree(tree_Cham, cex = 0.8, aes(color=branch.length))+
+  scale_color_continuous(high='lightskyblue1',low='coral4')+
+  geom_tiplab(size=3)+
+  geom_treescale(y = - 5, color = "coral4", fontsize = 4)
+ggt_Cham
+
+# Plotting Phylogenetic Distribution in Southeast Asia
+
+library(sf)
+library(readr)
+library(proj4)
+library(magick)
+library(ggmap)
+library(ggimage)
+library(usethis)
+library(scatterpie)
+library(scales)
+library(cowplot)
+
+# library(sf)  # "plot"
+# library(sp)  # "plot"
+# # devtools::install_github("choisy/gadmSEA")
+# # devtools::install_github("choisy/mcutils")
+# library(mcutils)
+# library(gadmSEA)
+# library(magrittr)
+# 
+# ## defining colors:
+# rgb2 <- function(...) rgb(..., max = 255)
+# blue   <- rgb2(200, 237, 255)
+# grey   <- rgb2(225, 225, 225)
+# yellow <- rgb2(253, 252, 235)
+# ## the map:
+# plot(vietnam, xlab = "longitude (decimal degree)", border = NA,
+#             ylab = "latitude (decimal degree)", bg = blue)
+# mcutils::datasets("gadmSEA") %>%
+# as.data.frame(stringsAsFactors = FALSE) %>%
+# setNames("country") %>%
+# mutate(col = ifelse(country == "vietnam", yellow, grey)) %$%
+# invisible(purrr::map2(country, col, ~ plot(get(.x), col = .y, add = TRUE)))
+# axis(1); axis(2); box(bty = "o")
+# 
+# # Plotting some countries in southeast Asia:
+# library(sp)  # for "plot"
+# library(gadmSEA) # for the countries
+# library(magrittr) # for " %$% " and " %>% "
+# 
+# rgb2 <- function(...) rgb(..., max = 255)
+# blue   <- rgb2(200, 237, 255)
+# grey   <- rgb2(225, 225, 225)
+# yellow <- rgb2(253, 252, 235)
+# 
+# ## the map:
+# plot(vietnam, xlab = "longitude (decimal degree)", border = NA,
+#               ylab = "latitude (decimal degree)", bg = blue,
+#              xlim = c(68, 146), ylim = c(-11, 54))
+# ctr <- c("vietnam", "philippines", "cambodia", "japan", "china", "thailand",
+#        "singapore", "indonesia", "malaysia", "taiwan", "bangladesh", "laos",
+#       "india", "nepal")
+# mcutils::datasets("gadmSEA") %>%
+# as.data.frame(stringsAsFactors = FALSE) %>%
+# setNames("country") %>%
+# dplyr::mutate(col = ifelse(country %in% ctr, yellow, grey)) %$%
+# invisible(purrr::map2(country, col, ~ plot(get(.x), col = .y, add = TRUE)))
+# axis(1); axis(2); box(bty = "o")
+# 
+# points(109.215971, 13.715266, col = "red", pch = 19)
+# points(109.215971, 13.715266, col = "red", cex = 2)
+# points(109.215971, 13.715266, col = "red", cex = 3)
+# points(109.215971, 13.715266, col = "red", cex = 4)
+
+# brunei_BRN0_sf <- readRDS("data/gadm36_BRN_0_sf.rds")
+# brunei_BRN1_sf <- readRDS("data/gadm36_BRN_1_sf.rds")
+# indonesia_IDN0_sf <- readRDS("data/gadm36_IDN_0_sf.rds")
+# indonesia_IDN1_sf <- readRDS("data/gadm36_IDN_1_sf.rds")
+# cambodia_KHM0_sf <- readRDS("data/gadm36_KHM_0_sf.rds")
+# cambodia_KHM1_sf <- readRDS("data/gadm36_KHM_1_sf.rds")
+# laos_LAO0_sf <- readRDS("data/gadm36_LAO_0_sf.rds")
+# laos_LAO1_sf <- readRDS("data/gadm36_LAO_1_sf.rds")
+# myanmar_MMR0_sf <- readRDS("data/gadm36_MMR_0_sf.rds")
+# myanmar_MMR1_sf <- readRDS("data/gadm36_MMR_1_sf.rds")
+# malaysia_MYS0_sf <- readRDS("data/gadm36_MYS_0_sf.rds")
+# malaysia_MYS1_sf <- readRDS("data/gadm36_MYS_1_sf.rds")
+# philippines_PHL0_sf <- readRDS("data/gadm36_PHL_0_sf.rds")
+# philippines_PHL1_sf <- readRDS("data/gadm36_PHL_1_sf.rds")
+# singapore_SGP0_sf <- readRDS("data/gadm36_SGP_0_sf.rds")
+# singapore_SGP1_sf <- readRDS("data/gadm36_SGP_1_sf.rds")
+# thailand_THA0_sf <- readRDS("data/gadm36_THA_0_sf.rds")
+# thailand_THA1_sf <- readRDS("data/gadm36_THA_1_sf.rds")
+# easttimor_TLS0_sf <- readRDS("data/gadm36_TLS_0_sf.rds")
+# easttimor_TLS1_sf <- readRDS("data/gadm36_TLS_1_sf.rds")
+# vietnam_VNM0_sf <- readRDS("data/gadm36_VNM_0_sf.rds")
+# vietnam_VNM1_sf <- readRDS("data/gadm36_VNM_1_sf.rds")
+# paracelislands_XPI0_sf <- readRDS("data/gadm36_XPI_0_sf.rds")
+# spratlyislands_XSP0_sf <- readRDS("data/gadm36_XSP_0_sf.rds")
+# 
+# SEA0_sf <- rbind(brunei_BRN0_sf, indonesia_IDN0_sf, cambodia_KHM0_sf, laos_LAO0_sf, myanmar_MMR0_sf, malaysia_MYS0_sf, philippines_PHL0_sf, singapore_SGP0_sf, 
+#                  thailand_THA0_sf, easttimor_TLS0_sf, vietnam_VNM0_sf, paracelislands_XPI0_sf, spratlyislands_XSP0_sf)
+# 
+# save(SEA0_sf, file = "data/SEA0_sf.RData")
+
+load("data/SEA0_sf.RData")
+SEA0_sf <- SEA0_sf %>% rename(country=NAME_0)
+
+## Ancient DNA
+
+library(readxl)
+ancient <- read_excel("all-ancient-dna-2-07-73-full.xlsx")
+ancient_SEA <- ancient %>% filter(Country %in% c("Brunei", "Cambodia", "Indonesia", "Laos", "Malaysia", "Myanmar", "Philippines", "Singapore", "Thailand", "Timor-Leste", "Vietnam"))
+dat_ancient_SEA <- ancient_SEA %>%
+  rename(haplo="mtDNA-haplogroup",
+         country="Country") %>%
+  mutate(haplo1=str_extract(haplo, "^([A-Z])\\d\\w"),
+         haplo1=ifelse(is.na(haplo1), haplo, haplo1)) %>% setDT()
+
+hap_ancient_SEA <- dat_ancient_SEA[, .N, by = .(haplo1, country)] %>% arrange(desc(N))
+hap_ancient_SEA1 <- dat_ancient_SEA[, .N, by = .(haplo1)] %>% arrange(desc(N))
+
+country_ancient_SEA <- dat_ancient_SEA[, .N, by = .(country, haplo)]
+country_ancient_SEA <- country_ancient_SEA %>%
+  group_by(country) %>% arrange(haplo, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+g5 <- ggplot(country_ancient_SEA) +      
+  # Add the stacked bar
+  geom_bar(aes(x=as.factor(country), y=percent, fill=factor(haplo)), position = "stack", stat="identity", alpha=0.5) +
+  guides(fill=guide_legend(nrow=8, byrow=TRUE)) +
+  scale_fill_viridis(discrete=TRUE) +
+  scale_x_discrete(name = "Country") +
+  scale_y_continuous(name = "Percent") +
+  theme(axis.title.x = element_text(size = 15),
+        axis.title.y = element_text(size = 15),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm")) +
+  coord_flip()
+g5
+ggsave(filename = file.path("figures", "country_haplo5.png"), width = 15, height = 10)
+
+dat_f <- dat %>% mutate(count=1) %>% setDF()
+
+an_SEA <- dat_ancient_SEA %>% 
+  mutate(haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1),
+         count=1) %>%
+  group_by(country, haplo) %>%  mutate(sum=sum(count), max=max(sum)) %>%
+  group_by(country) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo_max=haplo[order==1]) %>% ungroup %>%
+  group_by(country, haplo1) %>% mutate(sum1=sum(count), max1=max(sum1)) %>%
+  group_by(country) %>% arrange(desc(max1)) %>% 
+  mutate(order1=order(max1, decreasing = T), haplo1_max=haplo1[order1==1]) %>%
+  ungroup() %>%
+  select(c(`Object-ID`, Latitude, Longitude, Sex, haplo, haplo1, haplo_max, haplo1_max, Age, Location, Label, Date, country))
+
+an_SEA_sf <- merge(an_SEA, SEA0_sf, by=c("country"))
+an_SEA_plot <- an_SEA_sf %>% st_as_sf(crs = 4326)
+
+countries <- SEA0_sf
+countries_coords <- st_coordinates(st_centroid(SEA0_sf)) %>%
+  data.frame(stringsAsFactors = FALSE) %>%
+  mutate(ID = countries$country)
+
+res <- country_ancient_SEA %>%
+  mutate(haplo1=str_extract(haplo, "^([A-Z])\\d\\w"),
+         haplo1=ifelse(is.na(haplo1), haplo, haplo1),
+         haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1)) %>%
+  rename(ID=country) %>%
+  group_by(haplo1) %>%
+  mutate(Country=order(ID)) %>%
+  ungroup() %>%
+  rename(key=haplo1, value=N) %>%
+  select(-percent, -haplo) %>%
+  arrange(key)
+
+res <- res %>% left_join(countries_coords)
+
+dt_res <- spread(res, key = key, value = value) %>% replace(is.na(.), 0)
+DT <- dt_res %>% select(-c(ID, X, Y, Country))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+Country <- dt_res$Country
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(Country=order(ID)) %>% left_join(countries_coords) %>% rename(x=X, y=Y)
+dt_x <- dt %>% select(-c(Country, ID))
+
+ggplot() + geom_sf() + geom_sf(data=an_SEA_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_point(aes(x = Longitude, y = Latitude,  colour = factor(haplo1)), data = an_SEA_plot, size = 8) +
+  geom_label(aes(x = Longitude, y = Latitude,  colour = factor(haplo1), label = Location), data = an_SEA_plot, size = 7.5, hjust=-0.1, vjust=1, label.size = 1) +
+  geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:33], color=NA, alpha=0.8) +
+  guides(fill=guide_legend(nrow=5, byrow=TRUE)) +
+  theme(text = element_text(size=45), 
+        axis.text.x = element_text(size=30), 
+        axis.text.y = element_text(size=30), 
+        legend.text=element_text(size=30), 
+        legend.key.size = unit(2, "cm"),
+        legend.position = "bottom")
+ggsave(filename = file.path("figures", "Ancient_SEA.png"), width = 49, height = 33)
+
+### Make pie
+
+# make_pie <- function(dt, title = NA, legend.position = 0){
+#   if(is.na(title)){
+#     title <- unique(dt$ID)
+#   }
+#   ggplot() +
+#     geom_bar(data = dt,
+#              aes(x = "", y = value, fill = key),
+#              stat = "identity", width = 1) +
+#     coord_polar("y") +
+#     theme_void() +
+#     theme(legend.position = legend.position) +
+#     ggtitle(title)
+# }
+# 
+# con1 <- make_pie(dplyr::filter(res, Country == 1))
+# con2 <- make_pie(dplyr::filter(res, Country == 2))
+# con3 <- make_pie(dplyr::filter(res, Country == 3))
+# con4 <- make_pie(dplyr::filter(res, Country == 4))
+# con5 <- make_pie(dplyr::filter(res, Country == 5))
+# con6 <- make_pie(dplyr::filter(res, Country == 6))
+# con7 <- make_pie(dplyr::filter(res, Country == 7))
+# con8 <- make_pie(dplyr::filter(res, Country == 8))
+# 
+# (gg_countries <- ggplot(data = countries) +
+#     geom_sf() +
+#     scale_x_continuous(expand = c(0, 0)) +
+#     scale_y_continuous(expand = c(0, 0 )) +
+#     theme(legend.position = 0,
+#           plot.margin = unit(c(0,0,0,0), "cm"))
+# )
+# 
+# leg <- get_legend(make_pie(res, "", legend.position = "left"))
+# 
+# draw_plot_loc <- function(plot, dt){
+#   draw_plot(plot, x = dt$X[1], y = dt$Y[1],
+#             height = 0.2)
+# }
+# 
+# (all <-
+# ggdraw(gg_countries) +
+#     draw_plot_loc(con1, dplyr::filter(res, Country == 1)) +
+#     draw_plot_loc(con2, dplyr::filter(res, Country == 2)) +
+#     draw_plot_loc(con3, dplyr::filter(res, Country == 3)) +
+#     draw_plot_loc(con4, dplyr::filter(res, Country == 4)) +
+#     draw_plot_loc(con5, dplyr::filter(res, Country == 5)) +
+#     draw_plot_loc(con6, dplyr::filter(res, Country == 6)) +
+#     draw_plot_loc(con7, dplyr::filter(res, Country == 7)) +
+#     draw_plot_loc(con8, dplyr::filter(res, Country == 8)) +
+#     draw_plot_loc(con9, dplyr::filter(res, Country == 9))
+#   )
+# 
+# cowplot::plot_grid(all, leg, rel_widths = c(1, 0.1))
+
+## Present DNA
+
+dat_f <- dat %>% mutate(count=1) %>% setDF()
+
+pre_SEA <- dat %>% 
+  mutate(haplo1=ifelse(!(haplogroup3 %in% c("A+152", "A+152+16362", " A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
+         haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), haplo, haplo1),
+         count=1) %>%
+  group_by(country, haplo) %>%  mutate(sum=sum(count), max=max(sum)) %>%
+  group_by(country) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo_max=haplo[order==1]) %>% ungroup %>%
+  group_by(country, haplo1) %>% mutate(sum1=sum(count), max1=max(sum1)) %>%
+  group_by(country) %>% arrange(desc(max1)) %>% 
+  mutate(order1=order(max1, decreasing = T), haplo1_max=haplo1[order1==1]) %>%
+  ungroup() %>% setDT()
+
+pre_SEA_sf <- merge(pre_SEA, SEA0_sf, by=c("country"))
+pre_SEA_plot <- pre_SEA_sf %>% st_as_sf(crs = 4326)
+
+country_present_SEA <- pre_SEA[, .N, by = .(country, haplo1)]
+country_present_SEA <- country_present_SEA %>%
+  group_by(country) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+res_pre <- country_present_SEA %>%
+  rename(ID=country) %>%
+  group_by(haplo1) %>%
+  mutate(Country=order(ID)) %>%
+  ungroup() %>%
+  rename(key=haplo1, value=N) %>%
+  select(-percent) %>%
+  arrange(key)
+
+res_pre <- res_pre %>% left_join(countries_coords)
+
+dt_res <- spread(res_pre, key = key, value = value) %>% replace(is.na(.), 0)
+DT <- dt_res %>% select(-c(ID, X, Y, Country))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+Country <- dt_res$Country
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(Country=order(ID)) %>% left_join(countries_coords) %>% rename(x=X, y=Y)
+dt_x <- dt %>% select(-c(Country, ID))
+
+pre_SEA_plot_max <- pre_SEA_plot %>% group_by(country) %>% slice(1)
+
+ggplot() + geom_sf() + geom_sf(data=pre_SEA_plot_max, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:180], color=NA, alpha=0.8) +
+  guides(fill=guide_legend(nrow=18, byrow=TRUE)) +
+  theme(text = element_text(size=45), 
+        axis.text.x = element_text(size=30), 
+        axis.text.y = element_text(size=30), 
+        legend.text=element_text(size=30), 
+        legend.key.size = unit(1, "cm"),
+        legend.position = "bottom")
+ggsave(filename = file.path("figures", "Present_SEA.png"), width = 49, height = 33)
+
+# Haplogroup F1f
+hap_F1f <- dat %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="F1", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  filter(haplogroup4 == "F1f")
+nbin_F1f <- nbin[labels(nbin) %in% hap_F1f$name]
+class(nbin_F1f)
+dnbin_F1f<-dist.dna(nbin_F1f, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+tree_F1f<-nj(dnbin_F1f)
+library(ggtree)
+ggt_F1f<-ggtree::ggtree(tree_F1f, cex = 0.8, aes(color=branch.length))+
+  scale_color_continuous(high='lightskyblue1',low='coral4')+
+  geom_tiplab(align=TRUE, size=2)+
+  geom_treescale(y = - 5, color = "coral4", fontsize = 2)
+ggt_F1f
+
+library(treeio)
+png("figures/Viet_Indo_F1f.png", width = 1200, height = 1600)
+zoom(tree_F1f, grep("Vietnam|Indonesia", tree_F1f$tip.label, value = TRUE))
+dev.off()
+png("figures/Viet_Thai_F1f.png", width = 1200, height = 1600)
+zoom(tree_F1f, grep("Vietnam|Thailand", tree_F1f$tip.label, value = TRUE))
+dev.off()
+
+# Haplogroup F1a
+hap_F1a <- dat %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="F1", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  filter(haplogroup4 == "F1a")
+nbin_F1a <- nbin[labels(nbin) %in% hap_F1a$name]
+class(nbin_F1a)
+dnbin_F1a<-dist.dna(nbin_F1a, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+tree_F1a<-nj(dnbin_F1a)
+library(ggtree)
+ggt_F1a<-ggtree::ggtree(tree_F1a, cex = 0.8, aes(color=branch.length))+
+  scale_color_continuous(high='lightskyblue1',low='coral4')+
+  geom_tiplab(align=TRUE, size=2)+
+  geom_treescale(y = - 5, color = "coral4", fontsize = 2)
+ggt_F1a
+
+library(treeio)
+png("figures/Viet_Indo_F1a.png", width = 1200, height = 1600)
+zoom(tree_F1a, grep("Vietnam|Indonesia", tree_F1a$tip.label, value = TRUE))
+dev.off()
+png("figures/Viet_Thai_F1a.png", width = 1200, height = 1600)
+zoom(tree_F1a, grep("Vietnam|Thailand", tree_F1a$tip.label, value = TRUE))
+dev.off()
+
+# Haplogroup F1a
+
+F1a <- dat_f %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="F1", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
+         prop.F1a=(sum(subset(., haplogroup4=="F1a")[, "count"])/sum(.$count))*100) %>%
+  group_by(country) %>% mutate(prop.pop=(sum(subset(dat_f, haplogroup4=="F1a")[, "count"])/sum(dat_f$count))*100) %>% ungroup() %>%
+  filter(haplogroup4 == "F1a") %>% group_by(country) %>% slice(1)
+
+F1a_sf <- merge(F1a, SEA0_sf, by=c("country"))
+F1a_plot <- F1a_sf %>% select(prop.pop, prop.F1a, geometry) %>% st_as_sf(crs = 4326)
+ggplot() + geom_sf() + geom_sf(data=F1a_plot, aes(fill=prop.pop), lwd=0) +
+  annotate(geom="text", x=130, y=23, color="red", size=18, label= paste(round(F1a_plot$prop.F1a[1],1), "% dân số", sep = "")) +
+  scale_fill_viridis("Tỉ lệ (%) trên dân số", direction = -1, option = "viridis") +
+  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
+  ggtitle("Haplogroup F1a")
+ggsave(filename = file.path("figures", "F1a-PerPop.png"), width = 49, height = 33)
+
+
+geom_point(aes(x = Lon, y = Lat,  colour = Facility), data = df, size = 0.5) + 
+  theme(legend.position="bottom")
+
+# Haplogroup F1f
+
+F1f <- dat_f %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="F1", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
+         prop.F1f=(sum(subset(., haplogroup4=="F1f")[, "count"])/sum(.$count))*100) %>%
+  group_by(country) %>% mutate(prop.pop=(sum(subset(dat_f, haplogroup4=="F1f")[, "count"])/sum(dat_f$count))*100) %>% ungroup() %>%
+  filter(haplogroup4 == "F1f") %>% group_by(country) %>% slice(1)
+
+F1f_sf <- merge(F1f, SEA0_sf, by=c("country"))
+F1f_plot <- F1f_sf %>% select(prop.pop, prop.F1f, geometry) %>% st_as_sf(crs = 4326)
+ggplot() + geom_sf() + geom_sf(data=F1f_plot, aes(fill=prop.pop), lwd=0) +
+  annotate(geom="text", x=130, y=23, color="red", size=18, label= paste(round(F1f_plot$prop.F1f[1],1), "% dân số", sep = "")) +
+  scale_fill_viridis("Tỉ lệ (%) trên dân số", direction = -1, option = "viridis") +
+  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
+  ggtitle("Haplogroup F1f")
+ggsave(filename = file.path("figures", "F1f-PerPop.png"), width = 49, height = 33)
+
+# Haplogroup F1c
+
+F1c <- dat_f %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="F1", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
+         prop.F1c=(sum(subset(., haplogroup4=="F1c")[, "count"])/sum(.$count))*100) %>%
+  group_by(country) %>% mutate(prop.pop=(sum(subset(dat_f, haplogroup4=="F1c")[, "count"])/sum(dat_f$count))*100) %>% ungroup() %>%
+  filter(haplogroup4 == "F1c") %>% group_by(country) %>% slice(1)
+
+F1c_sf <- merge(F1c, SEA0_sf, by=c("country"))
+F1c_plot <- F1c_sf %>% select(prop.pop, prop.F1c, geometry) %>% st_as_sf(crs = 4326)
+ggplot() + geom_sf() + geom_sf(data=F1c_plot, aes(fill=prop.pop), lwd=0) +
+  annotate(geom="text", x=115, y=23, color="red", size=18, label= paste(round(F1c_plot$prop.F1c[1],1), "% dân số", sep = "")) +
+  scale_fill_viridis("Tỉ lệ (%) trên dân số", direction = -1, option = "viridis") +
+  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
+  ggtitle("Haplogroup F1c")
+ggsave(filename = file.path("figures", "F1c-PerPop.png"), width = 49, height = 33)
+
+# Haplogroup F1e
+
+F1e <- dat_f %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="F1", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
+         prop.F1e=(sum(subset(., haplogroup4=="F1e")[, "count"])/sum(.$count))*100) %>%
+  group_by(country) %>% mutate(prop.pop=(sum(subset(dat_f, haplogroup4=="F1e")[, "count"])/sum(dat_f$count))*100) %>% ungroup() %>%
+  filter(haplogroup4 == "F1e") %>% group_by(country) %>% slice(1)
+
+F1e_sf <- merge(F1e, SEA0_sf, by=c("country"))
+F1e_plot <- F1e_sf %>% select(prop.pop, prop.F1e, geometry) %>% st_as_sf(crs = 4326)
+ggplot() + geom_sf() + geom_sf(data=F1e_plot, aes(fill=prop.pop), lwd=0) +
+  annotate(geom="text", x=115, y=23, color="red", size=18, label= paste(round(F1e_plot$prop.F1e[1],1), "% dân số", sep = "")) +
+  scale_fill_viridis("Tỉ lệ (%) trên dân số", direction = -1, option = "viridis") +
+  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
+  ggtitle("Haplogroup F1e")
+ggsave(filename = file.path("figures", "F1e-PerPop.png"), width = 49, height = 33)
+
+# Haplogroup M7b
+
+M7b <- dat_f %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="M7", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
+         prop.M7b=(sum(subset(., haplogroup4=="M7b")[, "count"])/sum(.$count))*100) %>%
+  group_by(country) %>% mutate(prop.pop=(sum(subset(dat_f, haplogroup4=="M7b")[, "count"])/sum(dat_f$count))*100) %>% ungroup() %>%
+  filter(haplogroup4 == "M7b") %>% group_by(country) %>% slice(1)
+
+M7b_sf <- merge(M7b, SEA0_sf, by=c("country"))
+M7b_plot <- M7b_sf %>% select(prop.pop, prop.M7b, geometry) %>% st_as_sf(crs = 4326)
+ggplot() + geom_sf() + geom_sf(data=M7b_plot, aes(fill=prop.pop), lwd=0) +
+  annotate(geom="text", x=130, y=23, color="red", size=18, label= paste(round(M7b_plot$prop.M7b[1],1), "% dân số", sep = "")) +
+  scale_fill_viridis("Tỉ lệ (%) trên dân số", direction = -1, option = "viridis") +
+  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
+  ggtitle("Haplogroup M7b")
+ggsave(filename = file.path("figures", "M7b-PerPop.png"), width = 49, height = 33)
+
+# Haplogroup M7c
+
+M7c <- dat_f %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="M7", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
+         prop.M7c=(sum(subset(., haplogroup4=="M7c")[, "count"])/sum(.$count))*100) %>%
+  group_by(country) %>% mutate(prop.pop=(sum(subset(dat_f, haplogroup4=="M7c")[, "count"])/sum(dat_f$count))*100) %>% ungroup() %>%
+  filter(haplogroup4 == "M7c") %>% group_by(country) %>% slice(1)
+
+M7c_sf <- merge(M7c, SEA0_sf, by=c("country"))
+M7c_plot <- M7c_sf %>% select(prop.pop, prop.M7c, geometry) %>% st_as_sf(crs = 4326)
+ggplot() + geom_sf() + geom_sf(data=M7c_plot, aes(fill=prop.pop), lwd=0) +
+  annotate(geom="text", x=130, y=23, color="red", size=18, label= paste(round(M7c_plot$prop.M7c[1],1), "% dân số", sep = "")) +
+  scale_fill_viridis("Tỉ lệ (%) trên dân số", direction = -1, option = "viridis") +
+  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
+  ggtitle("Haplogroup M7c")
+ggsave(filename = file.path("figures", "M7c-PerPop.png"), width = 49, height = 33)
+
+# Haplogroup B5a
+
+B5a <- dat_f %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="B5", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
+         prop.B5a=(sum(subset(., haplogroup4=="B5a")[, "count"])/sum(.$count))*100) %>%
+  group_by(country) %>% mutate(prop.pop=(sum(subset(dat_f, haplogroup4=="B5a")[, "count"])/sum(dat_f$count))*100) %>% ungroup() %>%
+  filter(haplogroup4 == "B5a") %>% group_by(country) %>% slice(1)
+
+B5a_sf <- merge(B5a, SEA0_sf, by=c("country"))
+B5a_plot <- B5a_sf %>% select(prop.pop, prop.B5a, geometry) %>% st_as_sf(crs = 4326)
+ggplot() + geom_sf() + geom_sf(data=B5a_plot, aes(fill=prop.pop), lwd=0) +
+  annotate(geom="text", x=130, y=23, color="red", size=18, label= paste(round(B5a_plot$prop.B5a[1],1), "% dân số", sep = "")) +
+  scale_fill_viridis("Tỉ lệ (%) trên dân số", direction = -1, option = "viridis") +
+  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
+  ggtitle("Haplogroup B5a")
+ggsave(filename = file.path("figures", "B5a-PerPop.png"), width = 49, height = 33)
+
+# Haplogroup B4a
+
+B4a <- dat_f %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="B4", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
+         prop.B4a=(sum(subset(., haplogroup4=="B4a")[, "count"])/sum(.$count))*100) %>%
+  group_by(country) %>% mutate(prop.pop=(sum(subset(dat_f, haplogroup4=="B4a")[, "count"])/sum(dat_f$count))*100) %>% ungroup() %>%
+  filter(haplogroup4 == "B4a") %>% group_by(country) %>% slice(1)
+
+B4a_sf <- merge(B4a, SEA0_sf, by=c("country"))
+B4a_plot <- B4a_sf %>% select(prop.pop, prop.B4a, geometry) %>% st_as_sf(crs = 4326)
+ggplot() + geom_sf() + geom_sf(data=B4a_plot, aes(fill=prop.pop), lwd=0) +
+  annotate(geom="text", x=130, y=23, color="red", size=18, label= paste(round(B4a_plot$prop.B4a[1],1), "% dân số", sep = "")) +
+  scale_fill_viridis("Tỉ lệ (%) trên dân số", direction = -1, option = "viridis") +
+  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
+  ggtitle("Haplogroup B4a")
+ggsave(filename = file.path("figures", "B4a-PerPop.png"), width = 49, height = 33)
+
+# Haplogroup N9a
+
+N9a <- dat_f %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="N9", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
+         prop.N9a=(sum(subset(., haplogroup4=="N9a")[, "count"])/sum(.$count))*100) %>%
+  group_by(country) %>% mutate(prop.pop=(sum(subset(dat_f, haplogroup4=="N9a")[, "count"])/sum(dat_f$count))*100) %>% ungroup() %>%
+  filter(haplogroup4 == "N9a") %>% group_by(country) %>% slice(1)
+
+N9a_sf <- merge(N9a, SEA0_sf, by=c("country"))
+N9a_plot <- N9a_sf %>% select(prop.pop, prop.N9a, geometry) %>% st_as_sf(crs = 4326)
+ggplot() + geom_sf() + geom_sf(data=N9a_plot, aes(fill=prop.pop), lwd=0) +
+  annotate(geom="text", x=130, y=23, color="red", size=18, label= paste(round(N9a_plot$prop.N9a[1],1), "% dân số", sep = "")) +
+  scale_fill_viridis("Tỉ lệ (%) trên dân số", direction = -1, option = "viridis") +
+  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
+  ggtitle("Haplogroup N9a")
+ggsave(filename = file.path("figures", "N9a-PerPop.png"), width = 49, height = 33)
+
+# Haplogroup R9b
+
+R9b <- dat_f %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="R9", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
+         prop.R9b=(sum(subset(., haplogroup4=="R9b")[, "count"])/sum(.$count))*100) %>%
+  group_by(country) %>% mutate(prop.pop=(sum(subset(dat_f, haplogroup4=="R9b")[, "count"])/sum(dat_f$count))*100) %>% ungroup() %>%
+  filter(haplogroup4 == "R9b") %>% group_by(country) %>% slice(1)
+
+R9b_sf <- merge(R9b, SEA0_sf, by=c("country"))
+R9b_plot <- R9b_sf %>% select(prop.pop, prop.R9b, geometry) %>% st_as_sf(crs = 4326)
+ggplot() + geom_sf() + geom_sf(data=R9b_plot, aes(fill=prop.pop), lwd=0) +
+  annotate(geom="text", x=130, y=23, color="red", size=18, label= paste(round(R9b_plot$prop.R9b[1],1), "% dân số", sep = "")) +
+  scale_fill_viridis("Tỉ lệ (%) trên dân số", direction = -1, option = "viridis") +
+  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
+  ggtitle("Haplogroup R9b")
+ggsave(filename = file.path("figures", "R9b-PerPop.png"), width = 49, height = 33)
+
+# Haplogroup R9c
+
+R9c <- dat_f %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="R9", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
+         prop.R9c=(sum(subset(., haplogroup4=="R9c")[, "count"])/sum(.$count))*100) %>%
+  group_by(country) %>% mutate(prop.pop=(sum(subset(dat_f, haplogroup4=="R9c")[, "count"])/sum(dat_f$count))*100) %>% ungroup() %>%
+  filter(haplogroup4 == "R9c") %>% group_by(country) %>% slice(1)
+
+R9c_sf <- merge(R9c, SEA0_sf, by=c("country"))
+R9c_plot <- R9c_sf %>% select(prop.pop, prop.R9c, geometry) %>% st_as_sf(crs = 4326)
+ggplot() + geom_sf() + geom_sf(data=R9c_plot, aes(fill=prop.pop), lwd=0) +
+  annotate(geom="text", x=130, y=23, color="red", size=18, label= paste(round(R9c_plot$prop.R9c[1],1), "% dân số", sep = "")) +
+  scale_fill_viridis("Tỉ lệ (%) trên dân số", direction = -1, option = "viridis") +
+  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
+  ggtitle("Haplogroup R9c")
+ggsave(filename = file.path("figures", "R9c-PerPop.png"), width = 49, height = 33)
+
+# Haplogroup G2b
+
+G2b <- dat_f %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="G2", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
+         prop.G2b=(sum(subset(., haplogroup4=="G2b")[, "count"])/sum(.$count))*100) %>%
+  group_by(country) %>% mutate(prop.pop=(sum(subset(dat_f, haplogroup4=="G2b")[, "count"])/sum(dat_f$count))*100) %>% ungroup() %>%
+  filter(haplogroup4 == "G2b") %>% group_by(country) %>% slice(1)
+
+G2b_sf <- merge(G2b, SEA0_sf, by=c("country"))
+G2b_plot <- G2b_sf %>% select(prop.pop, prop.G2b, geometry) %>% st_as_sf(crs = 4326)
+ggplot() + geom_sf() + geom_sf(data=G2b_plot, aes(fill=prop.pop), lwd=0) +
+  annotate(geom="text", x=130, y=23, color="red", size=18, label= paste(round(G2b_plot$prop.G2b[1],1), "% dân số", sep = "")) +
+  scale_fill_viridis("Tỉ lệ (%) trên dân số", direction = -1, option = "viridis") +
+  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
+  ggtitle("Haplogroup G2b")
+ggsave(filename = file.path("figures", "G2b-PerPop.png"), width = 49, height = 33)
 
 # Haplogroup M
 
@@ -640,27 +1314,6 @@ ggt_F1
 library(treeio)
 zoom(tree_F1, grep("Vietnam|Indonesia", tree_F1$tip.label, value = TRUE))
 zoom(tree_F1, grep("Vietnam|Thailand", tree_F1$tip.label, value = TRUE))
-
-# Haplogroup F1a
-hap_F1a <- dat %>% 
-  mutate(haplogroup4 = ifelse(haplogroup3=="F1", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
-  filter(haplogroup4 == "F1a")
-nbin_F1a <- nbin[labels(nbin) %in% hap_F1a$name]
-class(nbin_F1a)
-dnbin_F1a<-dist.dna(nbin_F1a, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
-tree_F1a<-nj(dnbin_F1a)
-library(ggtree)
-ggt_F1a<-ggtree::ggtree(tree_F1a, cex = 0.8, aes(color=branch.length))+
-  scale_color_continuous(high='lightskyblue1',low='coral4')+
-  geom_tiplab(align=TRUE, size=2)+
-  geom_treescale(y = - 5, color = "coral4", fontsize = 2)
-ggt_F1a
-
-library(treeio)
-png("figures/Viet_Indo_F1a.png", width = 1200, height = 1600)
-zoom(tree_F1a, grep("Vietnam|Indonesia", tree_F1a$tip.label, value = TRUE))
-dev.off()
-zoom(tree_F1a, grep("Vietnam|Thailand", tree_F1a$tip.label, value = TRUE))
 
 # Haplogroup R9
 hap_R9 <- dat %>% filter(haplogroup2=="R9")
