@@ -235,8 +235,10 @@ dat_write <- data %>% mutate(
   haplogroup3=case_when(haplogroup3 %in% c("134", "157", "161", "168", "171", "174", "241", "257", "259", "260", "262", "268", "279", "281", "295", "30", "304", 
                                  "313", "315", "32", "351", "375", "381", "425", "433", "439", "483", "489", "496", "50", "501", "51", "53", "530", 
                                  "563", "564", "567", "589", "607", "62", "73", "78", "90") ~ haplo,
-                        TRUE ~ haplogroup3)
+                        TRUE ~ haplogroup3),
+  ID=order(name)
   ) %>% setDT()
+dat_write <- dat_write[, c(9,5,1,2,3,4,6,7,8)]
 write_xlsx(dat_write, "SEA_haplogroups.xlsx")
 
 hap_country <- dat[, .N, by = .(haplo, country)]
