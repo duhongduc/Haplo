@@ -226,7 +226,18 @@ dat <- data %>% mutate(
 ) %>% setDT()
 
 library(writexl)
-write_xlsx(dat, "dat_annotate.xlsx")
+dat_write <- data %>% mutate(
+  haplogroup1 = substr(haplo, 1, 1),
+  haplogroup2 = str_extract(haplo, "^([A-Z])\\d+"),
+  haplogroup2 = ifelse(is.na(haplogroup2), haplo, haplogroup2),
+  haplogroup3=ifelse(!(haplo %in% c("A+152", "A+152+16362", " A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
+  haplogroup3=ifelse(is.na(haplogroup3), haplo, haplogroup3),
+  haplogroup3=case_when(haplogroup3 %in% c("134", "157", "161", "168", "171", "174", "241", "257", "259", "260", "262", "268", "279", "281", "295", "30", "304", 
+                                 "313", "315", "32", "351", "375", "381", "425", "433", "439", "483", "489", "496", "50", "501", "51", "53", "530", 
+                                 "563", "564", "567", "589", "607", "62", "73", "78", "90") ~ haplo,
+                        TRUE ~ haplogroup3)
+  ) %>% setDT()
+write_xlsx(dat_write, "SEA_haplogroups.xlsx")
 
 hap_country <- dat[, .N, by = .(haplo, country)]
 hap1_country <- dat[, .N, by = .(haplogroup1, country)]
