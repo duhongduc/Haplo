@@ -559,10 +559,16 @@ dat_ancient_SEA <- ancient_SEA %>%
   rename(haplo="mtDNA-haplogroup",
          country="Country") %>%
   mutate(haplo1=str_extract(haplo, "^([A-Z])\\d\\w"),
-         haplo1=ifelse(is.na(haplo1), haplo, haplo1)) %>% setDT()
+         haplo1=ifelse(is.na(haplo1), haplo, haplo1),
+         haplo2 = substr(haplo, 1, 1),
+         haplo3 = str_extract(haplo, "^([A-Z])\\d+"),
+         haplo3 = ifelse(is.na(haplo3), haplo, haplo3)
+  ) %>% setDT()
 
 hap_ancient_SEA <- dat_ancient_SEA[, .N, by = .(haplo1, country)] %>% arrange(desc(N))
 hap_ancient_SEA1 <- dat_ancient_SEA[, .N, by = .(haplo1)] %>% arrange(desc(N))
+
+### Haplo
 
 country_ancient_SEA <- dat_ancient_SEA[, .N, by = .(country, haplo)]
 country_ancient_SEA <- country_ancient_SEA %>%
@@ -586,7 +592,7 @@ g5 <- ggplot(country_ancient_SEA) +
         legend.key.size = unit(0.5, "cm")) +
   coord_flip()
 g5
-ggsave(filename = file.path("figures", "country_haplo5.png"), width = 15, height = 10)
+ggsave(filename = file.path("figures", "country_ancient_haplo.png"), width = 15, height = 10)
 
 dat_f <- dat %>% mutate(count=1) %>% setDF()
 
@@ -640,17 +646,205 @@ dt <- dt %>%
 dt_x <- dt %>% select(-c(Country, ID))
 
 ggplot() + geom_sf() + geom_sf(data=an_SEA_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_point(aes(x = Longitude, y = Latitude,  colour = factor(haplo1)), data = an_SEA_plot, size = 8) +
-  geom_label(aes(x = Longitude, y = Latitude,  colour = factor(haplo1), label = Location), data = an_SEA_plot, size = 7.5, hjust=-0.1, vjust=1, label.size = 1) +
+  geom_point(aes(x = Longitude, y = Latitude,  colour = haplo1), data = an_SEA_plot, size = 8) +
+  geom_label(aes(x = Longitude, y = Latitude,  colour = haplo1, label = Location), data = an_SEA_plot, size = 7.5, hjust=-0.1, vjust=1, label.size = 1) +
   geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:33], color=NA, alpha=0.8) +
-  guides(fill=guide_legend(nrow=5, byrow=TRUE)) +
-  theme(text = element_text(size=45), 
+  scale_fill_discrete(name="") +
+  scale_color_discrete(name="") +
+  guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
+  theme_bw() +
+  theme(text = element_text(size=36), 
         axis.text.x = element_text(size=30), 
         axis.text.y = element_text(size=30), 
         legend.text=element_text(size=30), 
         legend.key.size = unit(2, "cm"),
-        legend.position = "bottom")
+        legend.position = "bottom") +
+  ggtitle("Geographic distribution of Ancient Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia")
 ggsave(filename = file.path("figures", "Ancient_SEA.png"), width = 49, height = 33)
+
+### Haplo 1
+
+country_ancient_SEA1 <- dat_ancient_SEA[, .N, by = .(country, haplo1)]
+country_ancient_SEA1 <- country_ancient_SEA1 %>%
+  group_by(country) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup() %>%
+  mutate(haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1))
+
+g6 <- ggplot(country_ancient_SEA1) +      
+  # Add the stacked bar
+  geom_bar(aes(x=as.factor(country), y=percent, fill=factor(haplo1)), position = "stack", stat="identity", alpha=0.5) +
+  guides(fill=guide_legend(nrow=8, byrow=TRUE)) +
+  scale_fill_viridis(discrete=TRUE) +
+  scale_x_discrete(name = "Country") +
+  scale_y_continuous(name = "Percent") +
+  theme(axis.title.x = element_text(size = 15),
+        axis.title.y = element_text(size = 15),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm")) +
+  coord_flip()
+g6
+ggsave(filename = file.path("figures", "country_ancient_haplo1.png"), width = 15, height = 10)
+
+dat_f <- dat %>% mutate(count=1) %>% setDF()
+
+an_SEA1 <- dat_ancient_SEA %>% 
+  mutate(haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1),
+         count=1) %>%
+  group_by(country, haplo) %>%  mutate(sum=sum(count), max=max(sum)) %>%
+  group_by(country) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo_max=haplo[order==1]) %>% ungroup %>%
+  group_by(country, haplo1) %>% mutate(sum1=sum(count), max1=max(sum1)) %>%
+  group_by(country) %>% arrange(desc(max1)) %>% 
+  mutate(order1=order(max1, decreasing = T), haplo1_max=haplo1[order1==1]) %>%
+  ungroup() %>%
+  select(c(`Object-ID`, Latitude, Longitude, Sex, haplo, haplo1, haplo_max, haplo1_max, Age, Location, Label, Date, country))
+
+an_SEA1_sf <- merge(an_SEA1, SEA0_sf, by=c("country"))
+an_SEA1_plot <- an_SEA1_sf %>% st_as_sf(crs = 4326)
+
+countries <- SEA0_sf
+countries_coords <- st_coordinates(st_centroid(SEA0_sf)) %>%
+  data.frame(stringsAsFactors = FALSE) %>%
+  mutate(ID = countries$country)
+
+res <- country_ancient_SEA1 %>%
+  rename(ID=country) %>%
+  group_by(haplo1) %>%
+  mutate(Country=order(ID)) %>%
+  ungroup() %>%
+  rename(key=haplo1, value=N) %>%
+  select(-percent) %>%
+  arrange(key)
+
+res <- res %>% left_join(countries_coords)
+
+dt_res <- spread(res, key = key, value = value) %>% replace(is.na(.), 0)
+DT <- dt_res %>% select(-c(ID, X, Y, Country))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+Country <- dt_res$Country
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(Country=order(ID)) %>% left_join(countries_coords) %>% rename(x=X, y=Y)
+dt_x <- dt %>% select(-c(Country, ID))
+
+ggplot() + geom_sf() + geom_sf(data=an_SEA1_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_point(aes(x = Longitude, y = Latitude,  colour = haplo1), data = an_SEA1_plot, size = 8) +
+  geom_label(aes(x = Longitude, y = Latitude,  colour = haplo1, label = Location), data = an_SEA1_plot, size = 7.5, hjust=-0.1, vjust=1, label.size = 1) +
+  geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:33], color=NA, alpha=0.8) +
+  scale_fill_discrete(name="") +
+  scale_color_discrete(name="") +
+  guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
+  theme_bw() +
+  theme(text = element_text(size=36), 
+        axis.text.x = element_text(size=30), 
+        axis.text.y = element_text(size=30), 
+        legend.text=element_text(size=30), 
+        legend.key.size = unit(2, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Geographic distribution of Ancient Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia")
+ggsave(filename = file.path("figures", "Ancient_SEA1.png"), width = 49, height = 33)
+
+### Haplo 3
+
+country_ancient_SEA3 <- dat_ancient_SEA[, .N, by = .(country, haplo3)]
+country_ancient_SEA3 <- country_ancient_SEA3 %>%
+  group_by(country) %>% arrange(haplo3, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup() %>%
+  mutate(haplo3=ifelse((is.na(haplo3) | haplo3==".."), "Unspecified", haplo3))
+
+g7 <- ggplot(country_ancient_SEA3) +      
+  # Add the stacked bar
+  geom_bar(aes(x=as.factor(country), y=percent, fill=factor(haplo3)), position = "stack", stat="identity", alpha=0.5) +
+  guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
+  scale_fill_viridis(discrete=TRUE) +
+  scale_x_discrete(name = "Country") +
+  scale_y_continuous(name = "Percent") +
+  theme(axis.title.x = element_text(size = 15),
+        axis.title.y = element_text(size = 15),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(1, "cm")) +
+  coord_flip()
+g7
+ggsave(filename = file.path("figures", "country_ancient_haplo3.png"), width = 15, height = 10)
+
+dat_f <- dat %>% mutate(count=1) %>% setDF()
+
+an_SEA3 <- dat_ancient_SEA %>% 
+  mutate(haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo3=ifelse((is.na(haplo3) | haplo3==".."), "Unspecified", haplo3),
+         count=1) %>%
+  group_by(country, haplo) %>%  mutate(sum=sum(count), max=max(sum)) %>%
+  group_by(country) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo_max=haplo[order==1]) %>% ungroup %>%
+  group_by(country, haplo1) %>% mutate(sum1=sum(count), max1=max(sum1)) %>%
+  group_by(country) %>% arrange(desc(max1)) %>%
+  group_by(country, haplo3) %>% mutate(sum3=sum(count), max3=max(sum3)) %>%
+  group_by(country) %>% arrange(desc(max3)) %>%
+  mutate(order3=order(max3, decreasing = T), haplo3_max=haplo3[order3==1]) %>%
+  ungroup() %>%
+  select(c(`Object-ID`, Latitude, Longitude, Sex, haplo, haplo3, haplo_max, haplo3_max, Age, Location, Label, Date, country))
+
+an_SEA3_sf <- merge(an_SEA3, SEA0_sf, by=c("country"))
+an_SEA3_plot <- an_SEA3_sf %>% st_as_sf(crs = 4326)
+
+countries <- SEA0_sf
+countries_coords <- st_coordinates(st_centroid(SEA0_sf)) %>%
+  data.frame(stringsAsFactors = FALSE) %>%
+  mutate(ID = countries$country)
+
+res <- country_ancient_SEA3 %>%
+  rename(ID=country) %>%
+  group_by(haplo3) %>%
+  mutate(Country=order(ID)) %>%
+  ungroup() %>%
+  rename(key=haplo3, value=N) %>%
+  select(-percent) %>%
+  arrange(key)
+
+res <- res %>% left_join(countries_coords)
+
+dt_res <- spread(res, key = key, value = value) %>% replace(is.na(.), 0)
+DT <- dt_res %>% select(-c(ID, X, Y, Country))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+Country <- dt_res$Country
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(Country=order(ID)) %>% left_join(countries_coords) %>% rename(x=X, y=Y)
+dt_x <- dt %>% select(-c(Country, ID))
+
+ggplot() + geom_sf() + geom_sf(data=an_SEA3_plot, aes(fill=haplo3_max), lwd=0, alpha=0.6) +
+  geom_point(aes(x = Longitude, y = Latitude,  colour = haplo3), data = an_SEA3_plot, size = 8) +
+  geom_label(aes(x = Longitude, y = Latitude,  colour = haplo3, label = Location), data = an_SEA3_plot, size = 7.5, hjust=-0.1, vjust=1, label.size = 1) +
+  geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:28], color=NA, alpha=0.8) +
+  scale_fill_discrete(name="") +
+  scale_color_discrete(name="") +
+  guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
+  theme_bw() +
+  theme(text = element_text(size=36), 
+        axis.text.x = element_text(size=30), 
+        axis.text.y = element_text(size=30), 
+        legend.text=element_text(size=30), 
+        legend.key.size = unit(2, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Geographic distribution of Ancient Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia")
+ggsave(filename = file.path("figures", "Ancient_SEA3.png"), width = 49, height = 33)
 
 ### Make pie
 
@@ -925,7 +1119,7 @@ pre_ethnic_SEA <- dat_ethnic_SEA %>%
   group_by(ethnicity) %>% arrange(haplo1, .by_group = TRUE) %>% 
   mutate(percent=(N1*100)/sum(N1)) %>% ungroup()
 
-g6 <- ggplot(pre_ethnic_SEA) +      
+g8 <- ggplot(pre_ethnic_SEA) +      
   # Add the stacked bar
   geom_bar(aes(x=as.factor(ethnicity), y=percent, fill=factor(haplo1)), position = "stack", stat="identity", alpha=0.5) +
   guides(fill=guide_legend(nrow=10, byrow=TRUE)) +
@@ -941,10 +1135,10 @@ g6 <- ggplot(pre_ethnic_SEA) +
         legend.text = element_text(size = 8),
         legend.key.size = unit(0.3, "cm")) +
   coord_flip()
-g6
+g8
 ggsave(filename = file.path("figures", "pre_ethnicity_haplo.png"), width = 20, height = 15)
 
-g7 <- ggplot(pre_ethnic_SEA) +      
+g9 <- ggplot(pre_ethnic_SEA) +      
   # Add the stacked bar
   geom_bar(aes(x=as.factor(ethnicity), y=percent, fill=factor(haplo1)), position = "stack", stat="identity", alpha=0.5) +
   guides(fill=guide_legend(nrow=10, byrow=TRUE)) +
@@ -956,7 +1150,7 @@ g7 <- ggplot(pre_ethnic_SEA) +
         legend.text = element_text(size = 8),
         legend.key.size = unit(0.3, "cm")) +
   coord_polar()
-g7
+g9
 ggsave(filename = file.path("figures", "pre_ethnicity_haplo_polar.png"), width = 20, height = 15)
 
 # library(writexl)
