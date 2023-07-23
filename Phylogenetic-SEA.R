@@ -578,7 +578,7 @@ country_ancient_SEA <- country_ancient_SEA %>%
 g5 <- ggplot(country_ancient_SEA) +      
   # Add the stacked bar
   geom_bar(aes(x=as.factor(country), y=percent, fill=factor(haplo)), position = "stack", stat="identity", alpha=0.5) +
-  guides(fill=guide_legend(nrow=8, byrow=TRUE)) +
+  guides(fill=guide_legend(nrow=3, byrow=TRUE)) +
   scale_fill_viridis(discrete=TRUE) +
   scale_x_discrete(name = "Country") +
   scale_y_continuous(name = "Percent") +
@@ -673,7 +673,7 @@ country_ancient_SEA1 <- country_ancient_SEA1 %>%
 g6 <- ggplot(country_ancient_SEA1) +      
   # Add the stacked bar
   geom_bar(aes(x=as.factor(country), y=percent, fill=factor(haplo1)), position = "stack", stat="identity", alpha=0.5) +
-  guides(fill=guide_legend(nrow=8, byrow=TRUE)) +
+  guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
   scale_fill_viridis(discrete=TRUE) +
   scale_x_discrete(name = "Country") +
   scale_y_continuous(name = "Percent") +
@@ -909,6 +909,9 @@ pre_SEA <- dat %>%
   mutate(haplo1=ifelse(!(haplogroup3 %in% c("A+152", "A+152+16362", " A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
          haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
          haplo1=ifelse((is.na(haplo1) | haplo1==".."), haplo, haplo1),
+         haplo2 = substr(haplo, 1, 1),
+         haplo3 = str_extract(haplo, "^([A-Z])\\d+"),
+         haplo3 = ifelse(is.na(haplo3  | haplo3==".."), haplo, haplo3),
          count=1) %>%
   group_by(country, haplo) %>%  mutate(sum=sum(count), max=max(sum)) %>%
   group_by(country) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo_max=haplo[order==1]) %>% ungroup %>%
@@ -965,6 +968,74 @@ ggplot() + geom_sf() + geom_sf(data=pre_SEA_plot_max, aes(fill=haplo1_max), lwd=
         legend.position = "bottom") +
   ggtitle("Geographic distribution of Present Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia")
 ggsave(filename = file.path("figures", "Present_SEA.png"), width = 49, height = 33)
+
+### Haplo 3
+
+pre_SEA3 <- dat %>% 
+  mutate(haplo1=ifelse(!(haplogroup3 %in% c("A+152", "A+152+16362", "A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
+         haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), haplo, haplo1),
+         haplo2 = substr(haplo, 1, 1),
+         haplo3 = str_extract(haplo, "^([A-Z])\\d+"),
+         haplo3 = ifelse(haplogroup3 %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo3),
+         haplo3 = ifelse(haplogroup3 %in% c("R+16189"), "R+", haplo3),
+         haplo3 = ifelse(is.na(haplo3), haplogroup3, haplo3),
+         count=1) %>%
+  group_by(country, haplo) %>%  mutate(sum=sum(count), max=max(sum)) %>%
+  group_by(country) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo_max=haplo[order==1]) %>% ungroup %>%
+  group_by(country, haplo3) %>% mutate(sum3=sum(count), max3=max(sum3)) %>%
+  group_by(country) %>% arrange(desc(max3)) %>% 
+  mutate(order3=order(max3, decreasing = T), haplo3_max=haplo3[order3==1]) %>%
+  ungroup() %>% setDT()
+
+pre_SEA3_sf <- merge(pre_SEA3, SEA0_sf, by=c("country"))
+pre_SEA3_plot <- pre_SEA3_sf %>% st_as_sf(crs = 4326)
+
+country_present_SEA3 <- pre_SEA3[, .N, by = .(country, haplo3)]
+country_present_SEA3 <- country_present_SEA3 %>%
+  group_by(country) %>% arrange(haplo3, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+res_pre <- country_present_SEA3 %>%
+  rename(ID=country) %>%
+  group_by(haplo3) %>%
+  mutate(Country=order(ID)) %>%
+  ungroup() %>%
+  rename(key=haplo3, value=N) %>%
+  select(-percent) %>%
+  arrange(key)
+
+res_pre <- res_pre %>% left_join(countries_coords)
+
+dt_res <- spread(res_pre, key = key, value = value) %>% replace(is.na(.), 0)
+DT <- dt_res %>% select(-c(ID, X, Y, Country))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+Country <- dt_res$Country
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(Country=order(ID)) %>% left_join(countries_coords) %>% rename(x=X, y=Y)
+dt_x <- dt %>% select(-c(Country, ID))
+
+pre_SEA3_plot_max <- pre_SEA3_plot %>% group_by(country) %>% slice(1)
+
+ggplot() + geom_sf() + geom_sf(data=pre_SEA3_plot_max, aes(fill=haplo3_max), lwd=0, alpha=0.6) +
+  geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:139], color=NA, alpha=0.8) +
+  guides(fill=guide_legend(nrow=8, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(text = element_text(size=36), 
+        axis.text.x = element_text(size=30), 
+        axis.text.y = element_text(size=30), 
+        legend.text=element_text(size=30), 
+        legend.key.size = unit(1, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Geographic distribution of Present Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia")
+ggsave(filename = file.path("figures", "Present_SEA3.png"), width = 49, height = 33)
 
 ## Ethnicity
 
