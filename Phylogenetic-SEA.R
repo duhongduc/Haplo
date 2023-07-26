@@ -601,6 +601,10 @@ dat_ancient_SEA <- ancient_SEA %>%
          haplo3 = ifelse((is.na(haplo3) | haplo3==".."), haplo, haplo3)
   ) %>% setDT() %>% filter(haplo1!="Unspecified")
 
+# library(writexl)
+# write_xlsx(dat_ancient_SEA, "dat_ancient_SEA.xlsx")
+dat_ancient_SEA <- read_excel("dat_ancient_SEA.xlsx")
+
 hap_ancient_SEA <- dat_ancient_SEA[, .N, by = .(haplo1, country)] %>% arrange(desc(N))
 hap_ancient_SEA1 <- dat_ancient_SEA[, .N, by = .(haplo1)] %>% arrange(desc(N))
 
