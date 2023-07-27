@@ -603,7 +603,8 @@ dat_ancient_SEA <- ancient_SEA %>%
 
 # library(writexl)
 # write_xlsx(dat_ancient_SEA, "dat_ancient_SEA.xlsx")
-dat_ancient_SEA <- read_excel("dat_ancient_SEA.xlsx")
+dat_ancient_SEA <- read_excel("dat_ancient_SEA_extra.xlsx") %>%
+  mutate(Time=paste(Time1, "(", Time1_LB, "-", Time1_UB, ")", "BP", sep = "")) %>% setDT() %>% filter(haplo1!="Unspecified")
 
 hap_ancient_SEA <- dat_ancient_SEA[, .N, by = .(haplo1, country)] %>% arrange(desc(N))
 hap_ancient_SEA1 <- dat_ancient_SEA[, .N, by = .(haplo1)] %>% arrange(desc(N))
@@ -644,7 +645,7 @@ an_SEA <- dat_ancient_SEA %>%
   group_by(country) %>% arrange(desc(max1)) %>% 
   mutate(order1=order(max1, decreasing = T), haplo1_max=haplo1[order1==1]) %>%
   ungroup() %>%
-  select(c(`Object-ID`, Latitude, Longitude, Sex, haplo, haplo1, haplo_max, haplo1_max, Age, Location, Label, Date, country)) %>% 
+  select(c(`Object-ID`, Latitude, Longitude, Sex, haplo, haplo1, haplo_max, haplo1_max, Age, Location, Label, Date, Time, country)) %>% 
   filter(haplo1!="Unspecified")
 
 an_SEA_sf <- merge(an_SEA, SEA0p_sf, by=c("country"))
@@ -705,7 +706,7 @@ ggplot() +
   # geom_sf(data=SEA0p_sf, aes(fill="white"), alpha=0.1) + 
   geom_sf(data=an_SEA_plot_max, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
   geom_point(aes(x = Longitude, y = Latitude,  colour = haplo1), data = an_SEA_plot, size = 6) +
-  geom_label(aes(x = Longitude, y = Latitude,  colour = haplo1, label = haplo1), data = an_SEA_plot, size = 2.5, hjust=-0.1, vjust=0.5, nudge_x = -0.45, nudge_y = 0.5, label.size = 0.5) +
+  geom_label(aes(x = Longitude, y = Latitude,  colour = haplo1, label = Time), data = an_SEA_plot, size = 2.5, hjust=-0.1, vjust=0.5, nudge_x = -0.45, nudge_y = 0.5, label.size = 0.5) +
   geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:217], color=NA, alpha=0.8) +
   scale_fill_discrete(name="") +
   scale_color_discrete(name="") +
@@ -718,7 +719,7 @@ ggplot() +
         legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Geographic distribution of Ancient Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia (+)")
-ggsave(filename = file.path("figures", "Ancient_SEA_plus_label.png"), width = 49, height = 33)
+ggsave(filename = file.path("figures", "Ancient_SEA_plus_time.png"), width = 49, height = 33)
 
 ## Ancient DNA
 
