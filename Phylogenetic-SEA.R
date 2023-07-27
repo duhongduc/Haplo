@@ -684,7 +684,7 @@ dt_x <- dt %>% select(-c(Country, ID))
 an_SEA_plot_max <- an_SEA_plot %>% group_by(country) %>% slice(1)
 
 ggplot() + 
-  # geom_sf(data=SEA0p_sf, aes(fill="white"), alpha=0.1) + 
+  # geom_sf(data=SEA0p_sf, aes(fill="white"), alpha=0.1) +
   geom_sf(data=an_SEA_plot_max, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
   geom_point(aes(x = Longitude, y = Latitude,  colour = haplo1), data = an_SEA_plot, size = 6) +
   geom_label(aes(x = Longitude, y = Latitude,  colour = haplo1, label = Date), data = an_SEA_plot, size = 2.5, hjust=-0.1, vjust=0.5, nudge_x = -0.45, nudge_y = 0.5, label.size = 0.5) +
