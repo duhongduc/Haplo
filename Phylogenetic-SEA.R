@@ -682,6 +682,9 @@ dt <- dt %>%
 dt_x <- dt %>% select(-c(Country, ID))
 
 an_SEA_plot_max <- an_SEA_plot %>% group_by(country) %>% slice(1)
+an_SEA_max <- an_SEA_plot_max %>% st_drop_geometry() %>% select(country, haplo1_max) %>% rename(Country=country, `Max Haplogroup`=haplo1_max) %>% setDT()
+
+library("ggpmisc")
 
 ggplot() + 
   # geom_sf(data=SEA0p_sf, aes(fill="white"), alpha=0.1) +
@@ -689,6 +692,7 @@ ggplot() +
   geom_point(aes(x = Longitude, y = Latitude,  colour = haplo1), data = an_SEA_plot, size = 6) +
   geom_label(aes(x = Longitude, y = Latitude,  colour = haplo1, label = Date), data = an_SEA_plot, size = 2.5, hjust=-0.1, vjust=0.5, nudge_x = -0.45, nudge_y = 0.5, label.size = 0.5) +
   geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:217], color=NA, alpha=0.8) +
+  annotate(geom = "table", x = 80, y = -10, label = list(an_SEA_max), size = 6.5) +
   scale_fill_discrete(name="") +
   scale_color_discrete(name="") +
   guides(fill=guide_legend(nrow=10, byrow=TRUE)) +
@@ -708,6 +712,7 @@ ggplot() +
   geom_point(aes(x = Longitude, y = Latitude,  colour = haplo1), data = an_SEA_plot, size = 6) +
   geom_label(aes(x = Longitude, y = Latitude,  colour = haplo1, label = Time), data = an_SEA_plot, size = 2.5, hjust=-0.1, vjust=0.5, nudge_x = -0.45, nudge_y = 0.5, label.size = 0.5) +
   geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:217], color=NA, alpha=0.8) +
+  annotate(geom = "table", x = 80, y = -10, label = list(an_SEA_max), size = 6.5) +
   scale_fill_discrete(name="") +
   scale_color_discrete(name="") +
   guides(fill=guide_legend(nrow=10, byrow=TRUE)) +
