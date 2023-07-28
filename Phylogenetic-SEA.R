@@ -1109,7 +1109,7 @@ pre_SEA <- dat %>%
          haplo1=ifelse((is.na(haplo1) | haplo1==".."), haplo, haplo1),
          haplo2 = substr(haplo, 1, 1),
          haplo3 = str_extract(haplo, "^([A-Z])\\d+"),
-         haplo3 = ifelse(is.na(haplo3  | haplo3==".."), haplo, haplo3),
+         haplo3 = ifelse(is.na(haplo3), haplo, haplo3),
          count=1) %>%
   group_by(country, haplo) %>%  mutate(sum=sum(count), max=max(sum)) %>%
   group_by(country) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo_max=haplo[order==1]) %>% ungroup %>%
@@ -1531,6 +1531,9 @@ dev.off()
 png("figures/Viet_Thai_F1a.png", width = 1200, height = 1600)
 zoom(tree_F1a, grep("Vietnam|Thailand", tree_F1a$tip.label, value = TRUE))
 dev.off()
+
+cat(file="data/F1a.fasta", paste(paste0(">",names(nbin_F1a)),
+                                 sapply(nbin_F1a, paste, collapse=""), sep="\n"), sep="\n")
 
 # Haplogroup F1a
 
