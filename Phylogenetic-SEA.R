@@ -689,8 +689,8 @@ library("ggpmisc")
 ggplot() + 
   # geom_sf(data=SEA0p_sf, aes(fill="white"), alpha=0.1) +
   geom_sf(data=an_SEA_plot_max, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_point(aes(x = Longitude, y = Latitude,  colour = haplo1), data = an_SEA_plot, size = 6) +
-  geom_label(aes(x = Longitude, y = Latitude,  colour = haplo1, label = Date), data = an_SEA_plot, size = 2.5, hjust=-0.1, vjust=0.5, nudge_x = -0.45, nudge_y = 0.5, label.size = 0.5) +
+  geom_point(aes(x = Longitude, y = Latitude,  colour = haplo1), data = an_SEA_plot, position=position_jitter(width=1,height=1), size = 6) +
+  geom_label(aes(x = Longitude, y = Latitude,  colour = haplo1, label = Date), data = an_SEA_plot, size = 2.5, hjust=-0.1, vjust=0.5, position=position_jitter(width=1,height=1), label.size = 0.5) +
   geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:217], color=NA, alpha=0.8) +
   annotate(geom = "table", x = 80, y = -10, label = list(an_SEA_max), size = 6.5) +
   scale_fill_discrete(name="") +
@@ -704,13 +704,13 @@ ggplot() +
         legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Geographic distribution of Ancient Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia (+)")
-ggsave(filename = file.path("figures", "Ancient_SEA_plus.png"), width = 49, height = 33)
+ggsave(filename = file.path("figures", "Ancient_SEA_plus_date.png"), width = 49, height = 33)
 
 ggplot() + 
   # geom_sf(data=SEA0p_sf, aes(fill="white"), alpha=0.1) + 
   geom_sf(data=an_SEA_plot_max, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_point(aes(x = Longitude, y = Latitude,  colour = haplo1), data = an_SEA_plot, size = 6) +
-  geom_label(aes(x = Longitude, y = Latitude,  colour = haplo1, label = Time), data = an_SEA_plot, size = 2.5, hjust=-0.1, vjust=0.5, nudge_x = -0.45, nudge_y = 0.5, label.size = 0.5) +
+  geom_point(aes(x = Longitude, y = Latitude,  colour = haplo1), data = an_SEA_plot, position=position_jitter(width=1,height=1), size = 6) +
+  geom_label(aes(x = Longitude, y = Latitude,  colour = haplo1, label = Time), data = an_SEA_plot, size = 2.5, hjust=-0.1, vjust=0.5, position=position_jitter(width=1,height=1), label.size = 0.5) +
   geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:217], color=NA, alpha=0.8) +
   annotate(geom = "table", x = 80, y = -10, label = list(an_SEA_max), size = 6.5) +
   scale_fill_discrete(name="") +
@@ -725,6 +725,26 @@ ggplot() +
         legend.position = "bottom") +
   ggtitle("Geographic distribution of Ancient Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia (+)")
 ggsave(filename = file.path("figures", "Ancient_SEA_plus_time.png"), width = 49, height = 33)
+
+ggplot() + 
+  # geom_sf(data=SEA0p_sf, aes(fill="white"), alpha=0.1) + 
+  geom_sf(data=an_SEA_plot_max, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_point(aes(x = Longitude, y = Latitude,  colour = haplo1), data = an_SEA_plot, position=position_jitter(width=1,height=1), size = 6) +
+  geom_label(aes(x = Longitude, y = Latitude,  colour = haplo1, label = haplo1), data = an_SEA_plot, size = 2.5, hjust=-0.1, vjust=0.5, position=position_jitter(width=1,height=1), label.size = 0.5) +
+  geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:217], color=NA, alpha=0.8) +
+  annotate(geom = "table", x = 80, y = -10, label = list(an_SEA_max), size = 6.5) +
+  scale_fill_discrete(name="") +
+  scale_color_discrete(name="") +
+  guides(fill=guide_legend(nrow=10, byrow=TRUE)) +
+  theme_bw() +
+  theme(text = element_text(size=28), 
+        axis.text.x = element_text(size=15), 
+        axis.text.y = element_text(size=15), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Geographic distribution of Ancient Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia (+)")
+ggsave(filename = file.path("figures", "Ancient_SEA_plus_label.png"), width = 49, height = 33)
 
 ## Ancient DNA
 
