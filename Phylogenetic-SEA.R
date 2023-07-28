@@ -1532,8 +1532,11 @@ png("figures/Viet_Thai_F1a.png", width = 1200, height = 1600)
 zoom(tree_F1a, grep("Vietnam|Thailand", tree_F1a$tip.label, value = TRUE))
 dev.off()
 
-cat(file="data/F1a.fasta", paste(paste0(">",names(nbin_F1a)),
-                                 sapply(nbin_F1a, paste, collapse=""), sep="\n"), sep="\n")
+F1a <- file[hap_F1a$name]
+writeXStringSet(F1a, "data/F1a.fasta")
+
+# cat(file="data/F1a.fasta", paste(paste0(">",names(nbin_F1a)),
+#                                  sapply(nbin_F1a, paste, collapse=""), sep="\n"), sep="\n")
 
 # Haplogroup F1a
 
