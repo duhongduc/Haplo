@@ -1555,7 +1555,6 @@ ggplot() + geom_sf() + geom_sf(data=F1a_plot, aes(fill=prop.pop), lwd=0) +
   ggtitle("Haplogroup F1a")
 ggsave(filename = file.path("figures", "F1a-PerPop.png"), width = 49, height = 33)
 
-
 geom_point(aes(x = Lon, y = Lat,  colour = Facility), data = df, size = 0.5) + 
   theme(legend.position="bottom")
 
@@ -1871,6 +1870,9 @@ ggt_M7b<-ggtree::ggtree(tree_M7b, cex = 0.8, aes(color=branch.length))+
   geom_tiplab(align=TRUE, size=2)+
   geom_treescale(y = - 5, color = "coral4", fontsize = 2)
 ggt_M7b
+
+M7b <- file[hap_M7b$name]
+writeXStringSet(M7b, "data/M7b.fasta")
 
 library(treeio)
 png("figures/Viet_Indo_M7b.png", width = 1200, height = 1600)
