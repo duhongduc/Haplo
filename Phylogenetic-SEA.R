@@ -560,7 +560,7 @@ library(cowplot)
 # 
 # save(SEA0p_sf, file = "data/SEA0p_sf.RData")
 
-## Ancient DNA plus
+## Ancient mtDNA plus
 
 load("data/SEA0p_sf.RData")
 SEA0p_sf <- SEA0p_sf %>% rename(country=NAME_0)
@@ -570,6 +570,7 @@ ancient <- read_excel("all-ancient-dna-2-07-73-full.xlsx")
 ancient_SEA <- ancient %>% filter(Country %in% c("Bangladesh", "Brunei", "Cambodia", "China", "Indonesia", "India", "Laos", "Malaysia", "Myanmar", "Philippines", "Singapore", "Thailand", "Taiwan", "Timor-Leste", "Vietnam"))
 dat_ancient_SEA <- ancient_SEA %>%
   rename(haplo="mtDNA-haplogroup",
+         haploY="Y-Haplotree-Public",
          country="Country") %>%
   mutate(haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200", "A+152+16362+16189", "C4+152", "C4+152+16093", "D*", "E (95.07%)", "G1 (94.06%)", "M4″67", "n/a", "n/a (<2x)", "n/a (exome capture)", "R+16189", "R+16189C (76.45%)", "R+16189C (80.01%)", "R+16189C (81.67%)", "R2+13500", "U4'9", "W1+119")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
          haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
@@ -616,6 +617,7 @@ country_ancient_SEA <- country_ancient_SEA %>%
   group_by(country) %>% arrange(haplo1, .by_group = TRUE) %>% 
   mutate(percent=(N*100)/sum(N)) %>% ungroup()
 
+library(viridis)
 g5 <- ggplot(country_ancient_SEA) +      
   # Add the stacked bar
   geom_bar(aes(x=as.factor(country), y=percent, fill=factor(haplo1)), position = "stack", stat="identity", alpha=0.5) +
@@ -638,14 +640,18 @@ ggsave(filename = file.path("figures", "country_ancient_haplo_plus.png"), width 
 an_SEA <- dat_ancient_SEA %>% 
   mutate(haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
          haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1),
-         count=1) %>%
+         count=1,
+         haploY=ifelse((is.na(haploY) | haploY==".."), "Unspecified", haploY),
+         countY=1) %>%
   group_by(country, haplo) %>%  mutate(sum=sum(count), max=max(sum)) %>%
   group_by(country) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo_max=haplo[order==1]) %>% ungroup %>%
   group_by(country, haplo1) %>% mutate(sum1=sum(count), max1=max(sum1)) %>%
   group_by(country) %>% arrange(desc(max1)) %>% 
-  mutate(order1=order(max1, decreasing = T), haplo1_max=haplo1[order1==1]) %>%
-  ungroup() %>%
-  select(c(`Object-ID`, Latitude, Longitude, Sex, haplo, haplo1, haplo_max, haplo1_max, Age, Location, Label, Date, Time, country)) %>% 
+  mutate(order1=order(max1, decreasing = T), haplo1_max=haplo1[order1==1]) %>% ungroup() %>%
+  group_by(country, haploY) %>% mutate(sumY=sum(countY), maxY=max(sumY)) %>%
+  group_by(country) %>% arrange(desc(maxY)) %>% 
+  mutate(orderY=order(maxY, decreasing = T), haploY_max=haploY[orderY==1]) %>% ungroup() %>%
+  select(c(`Object-ID`, Latitude, Longitude, Sex, haplo, haplo1, haploY, haplo_max, haplo1_max, haploY_max, Age, Location, Label, Date, country)) %>% 
   filter(haplo1!="Unspecified")
 
 an_SEA_sf <- merge(an_SEA, SEA0p_sf, by=c("country"))
@@ -1043,6 +1049,310 @@ ggplot() + geom_sf() + geom_sf(data=an_SEA3_plot, aes(fill=haplo3_max), lwd=0, a
         legend.position = "bottom") +
   ggtitle("Geographic distribution of Ancient Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia")
 ggsave(filename = file.path("figures", "Ancient_SEA3.png"), width = 49, height = 33)
+
+## Ancient Y-DNA plus
+
+load("data/SEA0p_sf.RData")
+SEA0p_sf <- SEA0p_sf %>% rename(country=NAME_0)
+
+library(readxl)
+ancient <- read_excel("all-ancient-dna-2-07-73-full.xlsx")
+ancient_SEA <- ancient %>% filter(Country %in% c("Bangladesh", "Brunei", "Cambodia", "China", "Indonesia", "India", "Laos", "Malaysia", "Myanmar", "Philippines", "Singapore", "Thailand", "Taiwan", "Timor-Leste", "Vietnam"))
+dat_ancientY_SEA <- ancient_SEA %>%
+  rename(haplo="mtDNA-haplogroup",
+         haploY="Y-Haplotree-Public",
+         country="Country") %>%
+  mutate(haploY1=ifelse(!is.na(`Y-New`), `Y-New`, `Y-Simple`),
+         haploY1=ifelse(`Y-New` %in% c("CT low coverage", "D1(xD1a1a1a1b,xD1a1b1a,xD1a2) low coverage", "F low coverage", "F or J2a1a low coverage", "FTDNA: Forms a new branch D-Y65054 under D-PH344 with a Big Y tester from Kazakhstan", "ISOGG2015?", "ISOGG2015??", "ISOGG2016??", "ISOGG2018?", "J2b:FGC3945.1/FGC3945.2/FGC3945/Z526.1/Z526.2/Z526, J2b2a:AM01367/Z605", "K low coverage", "K2 low coverage", "M9, M526, M1221, L405, P295, F115", "NO1 low coverage", "O low coverage", "O1 low coverage", "O1a low coverage", "O1b1a1a1a(xO1b1a1a1a1a1)", "O2a1 low coverage", "O2a2b2a low coverage"), `Y-Simple`, haploY1),
+         haploY2=ifelse(haploY1 %in% c("C", "C2", "CT", "D", "F", "K", "N", "N-L735", "NO", "O", "O2", "P*", "Q", "Q1", "R2"), haploY1, `Y-Simple`),
+         haploY2=ifelse(!haploY1 %in% c("C", "C2", "CT", "D", "F", "K", "N", "N-L735", "NO", "O", "O2", "P*", "Q", "Q1", "R2"), str_extract(haploY1, "^([A-Z]+)\\d\\w"), haploY2),
+         haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200", "A+152+16362+16189", "C4+152", "C4+152+16093", "D*", "E (95.07%)", "G1 (94.06%)", "M4″67", "n/a", "n/a (<2x)", "n/a (exome capture)", "R+16189", "R+16189C (76.45%)", "R+16189C (80.01%)", "R+16189C (81.67%)", "R2+13500", "U4'9", "W1+119")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
+         haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haploY=ifelse((is.na(haploY) | haplo==".."), "Unspecified", haploY),
+         haplo1 = ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200", "A+152+16362+16189"), "A+", haplo1),
+         haplo1 = ifelse(haplo %in% c("C4+152", "C4+152+16093"), "C4+", haplo1),
+         haplo1 = ifelse(haplo %in% c("D*"), "D", haplo1),
+         haplo1 = ifelse(haplo %in% c("E (95.07%)"), "E", haplo1),
+         haplo1 = ifelse(haplo %in% c("G1 (94.06%)"), "G1", haplo1),
+         haplo1 = ifelse(haplo %in% c("M4″67"), "M4", haplo1),
+         haplo1 = ifelse(haplo %in% c("n/a", "n/a (<2x)", "n/a (exome capture)"), "Unspecified", haplo1),
+         haplo1 = ifelse(haplo %in% c("R+16189", "R+16189C (76.45%)", "R+16189C (80.01%)", "R+16189C (81.67%)"), "R+", haplo1),
+         haplo1 = ifelse(haplo %in% c("R2+13500"), "R2+", haplo1),
+         haplo1 = ifelse(haplo %in% c("U4'9"), "U4", haplo1),
+         haplo1 = ifelse(haplo %in% c("W1+119"), "W1", haplo1),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), haplo, haplo1),
+         haplo2 = substr(haplo, 1, 1),
+         haplo3 = str_extract(haplo, "^([A-Z])\\d+"),
+         haplo3 = ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200", "A+152+16362+16189"), "A+", haplo3),
+         haplo3 = ifelse(haplo %in% c("C4+152", "C4+152+16093"), "C4+", haplo3),
+         haplo3 = ifelse(haplo %in% c("D*"), "D", haplo3),
+         haplo3 = ifelse(haplo %in% c("E (95.07%)"), "E", haplo3),
+         haplo3 = ifelse(haplo %in% c("G1 (94.06%)"), "G1", haplo3),
+         haplo3 = ifelse(haplo %in% c("M4″67"), "M4", haplo3),
+         haplo3 = ifelse(haplo %in% c("n/a", "n/a (<2x)", "n/a (exome capture)"), "Unspecified", haplo3),
+         haplo3 = ifelse(haplo %in% c("R+16189", "R+16189C (76.45%)", "R+16189C (80.01%)", "R+16189C (81.67%)"), "R+", haplo3),
+         haplo3 = ifelse(haplo %in% c("R2+13500"), "R2+", haplo3),
+         haplo3 = ifelse(haplo %in% c("U4'9"), "U4", haplo3),
+         haplo3 = ifelse(haplo %in% c("W1+119"), "W1", haplo3),
+         haplo3 = ifelse((is.na(haplo3) | haplo3==".."), haplo, haplo3)
+  ) %>% setDT() %>% filter(!is.na(haploY) & haploY!="Unspecified")
+
+# library(writexl)
+# write_xlsx(dat_ancient_SEA, "dat_ancient_SEA.xlsx")
+# dat_ancient_SEA <- read_excel("dat_ancient_SEA_extra.xlsx") %>%
+#   mutate(Time=paste(Time1, "(", Time1_LB, "-", Time1_UB, ")", "BP", sep = "")) %>% setDT() %>% filter(haplo1!="Unspecified")
+
+hapY_ancient_SEA <- dat_ancientY_SEA[, .N, by = .(haploY, country)] %>% arrange(desc(N))
+hapY_ancient_SEA1 <- dat_ancientY_SEA[, .N, by = .(haploY)] %>% arrange(desc(N))
+
+### Haplo
+
+country_ancientY_SEA <- dat_ancientY_SEA[, .N, by = .(country, haploY)]
+country_ancientY_SEA <- country_ancientY_SEA %>%
+  group_by(country) %>% arrange(haploY, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+library(viridis)
+g5Y <- ggplot(country_ancientY_SEA) +      
+  # Add the stacked bar
+  geom_bar(aes(x=as.factor(country), y=percent, fill=factor(haploY)), position = "stack", stat="identity", alpha=0.5) +
+  guides(fill=guide_legend(nrow=5, byrow=TRUE)) +
+  scale_fill_viridis(discrete=TRUE) +
+  scale_x_discrete(name = "Country") +
+  scale_y_continuous(name = "Percent") +
+  theme(axis.title.x = element_text(size = 15),
+        axis.title.y = element_text(size = 15),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm")) +
+  coord_flip()
+g5Y
+ggsave(filename = file.path("figures", "country_ancient_haploY_plus.png"), width = 15, height = 10)
+
+anY_SEA <- dat_ancientY_SEA %>% 
+  mutate(haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1),
+         count=1,
+         haploY=ifelse((is.na(haploY) | haploY==".."), "Unspecified", haploY),
+         countY=1) %>%
+  group_by(country, haplo) %>%  mutate(sum=sum(count), max=max(sum)) %>%
+  group_by(country) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo_max=haplo[order==1]) %>% ungroup %>%
+  group_by(country, haplo1) %>% mutate(sum1=sum(count), max1=max(sum1)) %>%
+  group_by(country) %>% arrange(desc(max1)) %>% 
+  mutate(order1=order(max1, decreasing = T), haplo1_max=haplo1[order1==1]) %>% ungroup() %>%
+  group_by(country, haploY) %>% mutate(sumY=sum(countY), maxY=max(sumY)) %>%
+  group_by(country) %>% arrange(desc(maxY)) %>% 
+  mutate(orderY=order(maxY, decreasing = T), haploY_max=haploY[orderY==1]) %>% ungroup() %>%
+  select(c(`Object-ID`, Latitude, Longitude, Sex, haplo, haplo1, haploY, haplo_max, haplo1_max, haploY_max, Age, Location, Label, Date, country)) %>% 
+  filter(!is.na(haploY) & haploY!="Unspecified")
+
+anY_SEA_sf <- merge(anY_SEA, SEA0p_sf, by=c("country"))
+anY_SEA_plot <- anY_SEA_sf %>% st_as_sf(crs = 4326)
+
+countries <- SEA0p_sf
+countries_coords <- st_coordinates(st_centroid(SEA0p_sf)) %>%
+  data.frame(stringsAsFactors = FALSE) %>%
+  mutate(ID = countries$country)
+
+res <- country_ancientY_SEA %>%
+  rename(ID=country) %>%
+  group_by(haploY) %>%
+  mutate(Country=order(ID)) %>%
+  ungroup() %>%
+  rename(key=haploY, value=N) %>%
+  select(-percent) %>%
+  arrange(key)
+
+res <- res %>% left_join(countries_coords)
+
+dt_res <- spread(res, key = key, value = value) %>% replace(is.na(.), 0)
+DT <- dt_res %>% select(-c(ID, X, Y, Country))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+Country <- dt_res$Country
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(Country=order(ID)) %>% left_join(countries_coords) %>% rename(x=X, y=Y)
+dt_x <- dt %>% select(-c(Country, ID))
+
+anY_SEA_plot_max <- anY_SEA_plot %>% group_by(country) %>% slice(1)
+anY_SEA_max <- anY_SEA_plot_max %>% st_drop_geometry() %>% select(country, haploY_max) %>% rename(Country=country, `Max Y-Haplogroup`=haploY_max) %>% setDT()
+
+library("ggpmisc")
+
+ggplot() + 
+  # geom_sf(data=SEA0p_sf, aes(fill="white"), alpha=0.1) +
+  geom_sf(data=anY_SEA_plot_max, aes(fill=haploY_max), lwd=0, alpha=0.6) +
+  geom_point(aes(x = Longitude, y = Latitude,  colour = haploY), data = anY_SEA_plot, position=position_jitter(width=1,height=1), size = 6) +
+  geom_label(aes(x = Longitude, y = Latitude,  colour = haploY, label = Date), data = anY_SEA_plot, size = 2.5, hjust=-0.1, vjust=0.5, position=position_jitter(width=1,height=1), label.size = 0.5) +
+  geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:90], color=NA, alpha=0.8) +
+  annotate(geom = "table", x = 80, y = -10, label = list(anY_SEA_max), size = 6.5) +
+  scale_fill_discrete(name="") +
+  scale_color_discrete(name="") +
+  guides(fill=guide_legend(nrow=8, byrow=TRUE)) +
+  theme_bw() +
+  theme(text = element_text(size=28), 
+        axis.text.x = element_text(size=15), 
+        axis.text.y = element_text(size=15), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Geographic distribution of Ancient Human Y-DNA (Y-DNA) Haplogroups in Southeast Asia (+)")
+ggsave(filename = file.path("figures", "AncientY_SEA_plus_date.png"), width = 49, height = 33)
+
+ggplot() + 
+  # geom_sf(data=SEA0p_sf, aes(fill="white"), alpha=0.1) + 
+  geom_sf(data=anY_SEA_plot_max, aes(fill=haploY_max), lwd=0, alpha=0.6) +
+  geom_point(aes(x = Longitude, y = Latitude,  colour = haploY), data = anY_SEA_plot, position=position_jitter(width=1,height=1), size = 6) +
+  geom_label(aes(x = Longitude, y = Latitude,  colour = haploY, label = haploY), data = anY_SEA_plot, size = 2.5, hjust=-0.1, vjust=0.5, position=position_jitter(width=1,height=1), label.size = 0.5) +
+  geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:90], color=NA, alpha=0.8) +
+  annotate(geom = "table", x = 80, y = -10, label = list(anY_SEA_max), size = 6.5) +
+  scale_fill_discrete(name="") +
+  scale_color_discrete(name="") +
+  guides(fill=guide_legend(nrow=8, byrow=TRUE)) +
+  theme_bw() +
+  theme(text = element_text(size=28), 
+        axis.text.x = element_text(size=15), 
+        axis.text.y = element_text(size=15), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Geographic distribution of Ancient Human Y-DNA (Y-DNA) Haplogroups in Southeast Asia (+)")
+ggsave(filename = file.path("figures", "AncientY_SEA_plus_label.png"), width = 49, height = 33)
+
+## O1b - Ancient Y-DNA plus
+
+load("data/SEA0p_sf.RData")
+SEA0p_sf <- SEA0p_sf %>% rename(country=NAME_0)
+
+library(readxl)
+ancient <- read_excel("all-ancient-dna-2-07-73-full.xlsx")
+ancient_SEA <- ancient %>% filter(Country %in% c("Bangladesh", "Brunei", "Cambodia", "China", "Indonesia", "India", "Laos", "Malaysia", "Myanmar", "Philippines", "Singapore", "Thailand", "Taiwan", "Timor-Leste", "Vietnam"))
+O_ancientY_SEA <- ancient_SEA %>%
+  rename(haplo="mtDNA-haplogroup",
+         haploY="Y-Haplotree-Public",
+         country="Country") %>%
+  mutate(haploY1=ifelse(!is.na(`Y-New`), `Y-New`, `Y-Simple`),
+         haploY1=ifelse(`Y-New` %in% c("CT low coverage", "D1(xD1a1a1a1b,xD1a1b1a,xD1a2) low coverage", "F low coverage", "F or J2a1a low coverage", "FTDNA: Forms a new branch D-Y65054 under D-PH344 with a Big Y tester from Kazakhstan", "ISOGG2015?", "ISOGG2015??", "ISOGG2016??", "ISOGG2018?", "J2b:FGC3945.1/FGC3945.2/FGC3945/Z526.1/Z526.2/Z526, J2b2a:AM01367/Z605", "K low coverage", "K2 low coverage", "M9, M526, M1221, L405, P295, F115", "NO1 low coverage", "O low coverage", "O1 low coverage", "O1a low coverage", "O1b1a1a1a(xO1b1a1a1a1a1)", "O2a1 low coverage", "O2a2b2a low coverage"), `Y-Simple`, haploY1),
+         haploY2=ifelse(haploY1 %in% c("C", "C2", "CT", "D", "F", "K", "N", "N-L735", "NO", "O", "O2", "P*", "Q", "Q1", "R2"), haploY1, `Y-Simple`),
+         haploY2=ifelse(!haploY1 %in% c("C", "C2", "CT", "D", "F", "K", "N", "N-L735", "NO", "O", "O2", "P*", "Q", "Q1", "R2"), str_extract(haploY1, "^([A-Z]+)\\d\\w"), haploY2),
+         haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200", "A+152+16362+16189", "C4+152", "C4+152+16093", "D*", "E (95.07%)", "G1 (94.06%)", "M4″67", "n/a", "n/a (<2x)", "n/a (exome capture)", "R+16189", "R+16189C (76.45%)", "R+16189C (80.01%)", "R+16189C (81.67%)", "R2+13500", "U4'9", "W1+119")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
+         haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haploY=ifelse((is.na(haploY) | haplo==".."), "Unspecified", haploY),
+         haplo1 = ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200", "A+152+16362+16189"), "A+", haplo1),
+         haplo1 = ifelse(haplo %in% c("C4+152", "C4+152+16093"), "C4+", haplo1),
+         haplo1 = ifelse(haplo %in% c("D*"), "D", haplo1),
+         haplo1 = ifelse(haplo %in% c("E (95.07%)"), "E", haplo1),
+         haplo1 = ifelse(haplo %in% c("G1 (94.06%)"), "G1", haplo1),
+         haplo1 = ifelse(haplo %in% c("M4″67"), "M4", haplo1),
+         haplo1 = ifelse(haplo %in% c("n/a", "n/a (<2x)", "n/a (exome capture)"), "Unspecified", haplo1),
+         haplo1 = ifelse(haplo %in% c("R+16189", "R+16189C (76.45%)", "R+16189C (80.01%)", "R+16189C (81.67%)"), "R+", haplo1),
+         haplo1 = ifelse(haplo %in% c("R2+13500"), "R2+", haplo1),
+         haplo1 = ifelse(haplo %in% c("U4'9"), "U4", haplo1),
+         haplo1 = ifelse(haplo %in% c("W1+119"), "W1", haplo1),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), haplo, haplo1),
+         haplo2 = substr(haplo, 1, 1),
+         haplo3 = str_extract(haplo, "^([A-Z])\\d+"),
+         haplo3 = ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200", "A+152+16362+16189"), "A+", haplo3),
+         haplo3 = ifelse(haplo %in% c("C4+152", "C4+152+16093"), "C4+", haplo3),
+         haplo3 = ifelse(haplo %in% c("D*"), "D", haplo3),
+         haplo3 = ifelse(haplo %in% c("E (95.07%)"), "E", haplo3),
+         haplo3 = ifelse(haplo %in% c("G1 (94.06%)"), "G1", haplo3),
+         haplo3 = ifelse(haplo %in% c("M4″67"), "M4", haplo3),
+         haplo3 = ifelse(haplo %in% c("n/a", "n/a (<2x)", "n/a (exome capture)"), "Unspecified", haplo3),
+         haplo3 = ifelse(haplo %in% c("R+16189", "R+16189C (76.45%)", "R+16189C (80.01%)", "R+16189C (81.67%)"), "R+", haplo3),
+         haplo3 = ifelse(haplo %in% c("R2+13500"), "R2+", haplo3),
+         haplo3 = ifelse(haplo %in% c("U4'9"), "U4", haplo3),
+         haplo3 = ifelse(haplo %in% c("W1+119"), "W1", haplo3),
+         haplo3 = ifelse((is.na(haplo3) | haplo3==".."), haplo, haplo3)
+  ) %>% setDT() %>% filter(haploY2 %in% c("NO", "O", "O1a", "O1b", "O2", "O2a", "O3a"))
+
+country_O_SEA <- O_ancientY_SEA[, .N, by = .(country, haploY1)]
+country_O_SEA <- country_O_SEA %>%
+  group_by(country) %>% arrange(haploY1, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+O_SEA <- O_ancientY_SEA %>% 
+  mutate(haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1),
+         count=1,
+         haploY1=ifelse((is.na(haploY1) | haploY1==".."), "Unspecified", haploY1),
+         countY1=1) %>%
+  group_by(country, haplo) %>%  mutate(sum=sum(count), max=max(sum)) %>%
+  group_by(country) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo_max=haplo[order==1]) %>% ungroup %>%
+  group_by(country, haplo1) %>% mutate(sum1=sum(count), max1=max(sum1)) %>%
+  group_by(country) %>% arrange(desc(max1)) %>% 
+  mutate(order1=order(max1, decreasing = T), haplo1_max=haplo1[order1==1]) %>% ungroup() %>%
+  group_by(country, haploY1) %>% mutate(sumY1=sum(countY1), maxY1=max(sumY1)) %>%
+  group_by(country) %>% arrange(desc(maxY1)) %>% 
+  mutate(orderY1=order(maxY1, decreasing = T), haploY1_max=haploY1[orderY1==1]) %>% ungroup() %>%
+  select(c(`Object-ID`, Latitude, Longitude, Sex, haplo, haplo1, haploY1, haplo_max, haplo1_max, haploY1_max, Age, Location, Label, Date, country)) %>% 
+  filter(!is.na(haploY1) & haploY1!="Unspecified")
+
+O_SEA_sf <- merge(O_SEA, SEA0p_sf, by=c("country"))
+O_SEA_plot <- O_SEA_sf %>% st_as_sf(crs = 4326)
+
+countries <- SEA0p_sf
+countries_coords <- st_coordinates(st_centroid(SEA0p_sf)) %>%
+  data.frame(stringsAsFactors = FALSE) %>%
+  mutate(ID = countries$country)
+
+res <- country_O_SEA %>%
+  rename(ID=country) %>%
+  group_by(haploY1) %>%
+  mutate(Country=order(ID)) %>%
+  ungroup() %>%
+  rename(key=haploY1, value=N) %>%
+  select(-percent) %>%
+  arrange(key)
+
+res <- res %>% left_join(countries_coords)
+
+dt_res <- spread(res, key = key, value = value) %>% replace(is.na(.), 0)
+DT <- dt_res %>% select(-c(ID, X, Y, Country))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+Country <- dt_res$Country
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(Country=order(ID)) %>% left_join(countries_coords) %>% rename(x=X, y=Y)
+dt_x <- dt %>% select(-c(Country, ID))
+
+O_SEA_plot_max <- O_SEA_plot %>% group_by(country) %>% slice(1)
+O_SEA_max <- O_SEA_plot_max %>% st_drop_geometry() %>% select(country, haploY1_max) %>% rename(Country=country, `Dominant Y-Haplogroup`=haploY1_max) %>% setDT()
+
+library("ggpmisc")
+
+ggplot() + 
+  # geom_sf(data=SEA0p_sf, aes(fill="white"), alpha=0.1) + 
+  geom_sf(data=O_SEA_plot_max, aes(fill=haploY1_max), lwd=0, alpha=0.6) +
+  geom_point(aes(x = Longitude, y = Latitude,  colour = haploY1), data = O_SEA_plot, position=position_jitter(width=-0.5,height=0.5), size = 6) +
+  geom_label(aes(x = Longitude, y = Latitude,  colour = haploY1, label = haploY1), data = O_SEA_plot, size = 8, hjust=-0.1, vjust=0.5, position=position_jitter(width=-1.5,height=1.5), label.size = 0.5) +
+  geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:28], color=NA, alpha=0.8) +
+  annotate(geom = "table", x = 80, y = -10, label = list(O_SEA_max), size = 6.5) +
+  scale_fill_discrete(name="") +
+  scale_color_discrete(name="") +
+  guides(fill=guide_legend(nrow=4, byrow=TRUE)) +
+  theme_bw() +
+  theme(text = element_text(size=40), 
+        axis.text.x = element_text(size=30), 
+        axis.text.y = element_text(size=30), 
+        legend.text=element_text(size=30), 
+        legend.key.size = unit(2, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Geographic distribution of Ancient Human Y-DNA Haplogroup O in Southeast Asia (+)")
+ggsave(filename = file.path("figures", "AncientY_SEA_plus_haplo_O.png"), width = 49, height = 33)
 
 ### Make pie
 
