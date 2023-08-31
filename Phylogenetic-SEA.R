@@ -569,12 +569,8 @@ library(readxl)
 ancient <- read_excel("all-ancient-dna-2-07-73-full.xlsx")
 ancient_SEA <- ancient %>% filter(Country %in% c("Bangladesh", "Brunei", "Cambodia", "China", "Indonesia", "India", "Laos", "Malaysia", "Myanmar", "Philippines", "Singapore", "Thailand", "Taiwan", "Timor-Leste", "Vietnam"))
 dat_ancient_SEA <- ancient_SEA %>%
-<<<<<<< HEAD
   rename(haplo="mtDNA-haplogroup",
          haploY="Y-Haplotree-Public",
-=======
-  dplyr::rename(haplo="mtDNA-haplogroup",
->>>>>>> e21b6874c07ffc261da5e983f41730533f4331bb
          country="Country") %>%
   mutate(haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200", "A+152+16362+16189", "C4+152", "C4+152+16093", "D*", "E (95.07%)", "G1 (94.06%)", "M4″67", "n/a", "n/a (<2x)", "n/a (exome capture)", "R+16189", "R+16189C (76.45%)", "R+16189C (80.01%)", "R+16189C (81.67%)", "R2+13500", "U4'9", "W1+119")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
          haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
