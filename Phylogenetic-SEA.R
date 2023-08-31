@@ -216,7 +216,7 @@ library(data.table)
 
 names <- as.data.frame(nbinmat)
 data <- separate(names, V1, into = c("country", "ethnic", "access_no", "haplo"), sep = "\\.")
-data <- cbind(data, names) %>% rename(name=V1)
+data <- cbind(data, names) %>% dplyr::rename(name=V1)
 
 dat <- data %>% mutate(
   haplogroup1 = substr(haplo, 1, 1),
@@ -563,14 +563,18 @@ library(cowplot)
 ## Ancient mtDNA plus
 
 load("data/SEA0p_sf.RData")
-SEA0p_sf <- SEA0p_sf %>% rename(country=NAME_0)
+SEA0p_sf <- SEA0p_sf %>% dplyr::rename(country=NAME_0)
 
 library(readxl)
 ancient <- read_excel("all-ancient-dna-2-07-73-full.xlsx")
 ancient_SEA <- ancient %>% filter(Country %in% c("Bangladesh", "Brunei", "Cambodia", "China", "Indonesia", "India", "Laos", "Malaysia", "Myanmar", "Philippines", "Singapore", "Thailand", "Taiwan", "Timor-Leste", "Vietnam"))
 dat_ancient_SEA <- ancient_SEA %>%
+<<<<<<< HEAD
   rename(haplo="mtDNA-haplogroup",
          haploY="Y-Haplotree-Public",
+=======
+  dplyr::rename(haplo="mtDNA-haplogroup",
+>>>>>>> e21b6874c07ffc261da5e983f41730533f4331bb
          country="Country") %>%
   mutate(haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200", "A+152+16362+16189", "C4+152", "C4+152+16093", "D*", "E (95.07%)", "G1 (94.06%)", "M4″67", "n/a", "n/a (<2x)", "n/a (exome capture)", "R+16189", "R+16189C (76.45%)", "R+16189C (80.01%)", "R+16189C (81.67%)", "R2+13500", "U4'9", "W1+119")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
          haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
@@ -663,11 +667,11 @@ countries_coords <- st_coordinates(st_centroid(SEA0p_sf)) %>%
   mutate(ID = countries$country)
 
 res <- country_ancient_SEA %>%
-  rename(ID=country) %>%
+  dplyr::rename(ID=country) %>%
   group_by(haplo1) %>%
   mutate(Country=order(ID)) %>%
   ungroup() %>%
-  rename(key=haplo1, value=N) %>%
+  dplyr::rename(key=haplo1, value=N) %>%
   select(-percent) %>%
   arrange(key)
 
