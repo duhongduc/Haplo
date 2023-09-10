@@ -1796,7 +1796,16 @@ ggplot() + geom_sf(data=SEA1_sf, aes(fill="white"), alpha=0.1) +
   ggtitle("Geographic distribution of Present Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia")
 ggsave(filename = file.path("figures", "Ethnicity_SEA.png"), width = 49, height = 33)
 
+
+################ SUBCLADES #######################
+
+dat1 <- dat %>% mutate(haplogroup4 = str_extract(haplo, "^([A-Z])\\d\\w"),
+                       haplogroup4 = ifelse(is.na(haplogroup4), haplogroup3, haplogroup4))
+hap_present_SEA <- dat1[, .N, by = .(haplogroup4)] %>% arrange(desc(N))
+hap_precountry_SEA <- dat1[, .N, by = .(country, haplogroup4)] %>% arrange(desc(N))
+
 # Haplogroup F1f
+
 hap_F1f <- dat %>% 
   mutate(haplogroup4 = ifelse(haplogroup3=="F1", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
   filter(haplogroup4 == "F1f")
@@ -1848,6 +1857,96 @@ writeXStringSet(F1a, "data/F1a.fasta")
 # cat(file="data/F1a.fasta", paste(paste0(">",names(nbin_F1a)),
 #                                  sapply(nbin_F1a, paste, collapse=""), sep="\n"), sep="\n")
 
+# Haplogroup B5a
+
+hap_B5a <- dat %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="B5", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  filter(haplogroup4 == "B5a")
+
+B5a <- file[hap_B5a$name]
+writeXStringSet(B5a, "data/B5a.fasta")
+
+# Haplogroup M7b
+hap_M7b <- dat %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="M7", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  filter(haplogroup4 == "M7b")
+
+M7b <- file[hap_M7b$name]
+writeXStringSet(M7b, "data/M7b.fasta")
+
+hap_M7b1a1 <- dat %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="M7", str_extract(haplo, "^([A-Z])\\d\\w\\d\\w\\d"), haplogroup3)) %>%
+  filter(haplogroup4 == "M7b1a1")
+
+M7b1a1 <- file[hap_M7b1a1$name]
+writeXStringSet(M7b1a1, "data/M7b1a1.fasta")
+
+# Haplogroup B4a
+
+hap_B4a <- dat %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="B4", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  filter(haplogroup4 == "B4a")
+
+B4a <- file[hap_B4a$name]
+writeXStringSet(B4a, "data/B4a.fasta")
+
+# Haplogroup M7c
+hap_M7c <- dat %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="M7", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  filter(haplogroup4 == "M7c")
+
+M7c <- file[hap_M7c$name]
+writeXStringSet(M7c, "data/M7c.fasta")
+
+# Haplogroup B4c
+
+hap_B4c <- dat %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="B4", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  filter(haplogroup4 == "B4c")
+
+B4c <- file[hap_B4c$name]
+writeXStringSet(B4c, "data/B4c.fasta")
+
+# Haplogroup F1f
+hap_F1f <- dat %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="F1", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  filter(haplogroup4 == "F1f")
+
+F1f <- file[hap_F1f$name]
+writeXStringSet(F1f, "data/F1f.fasta")
+
+# Haplogroup N9a
+hap_N9a <- dat %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="N9", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  filter(haplogroup4 == "N9a")
+
+N9a <- file[hap_N9a$name]
+writeXStringSet(N9a, "data/N9a.fasta")
+
+# Haplogroup R9b
+hap_R9b <- dat %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="R9", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  filter(haplogroup4 == "R9b")
+
+R9b <- file[hap_R9b$name]
+writeXStringSet(R9b, "data/R9b.fasta")
+
+# Haplogroup M74
+hap_M74 <- dat %>%filter(haplogroup3 == "M74")
+
+M74 <- file[hap_M74$name]
+writeXStringSet(M74, "data/M74.fasta")
+
+# Haplogroup C7a
+hap_C7a <- dat %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="C7", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  filter(haplogroup4 == "C7a")
+
+C7a <- file[hap_C7a$name]
+writeXStringSet(C7a, "data/C7a.fasta")
+
+################ SUBCLADE DISTRIBUTION ##########################
+
 # Haplogroup F1a
 
 F1a <- dat_f %>% 
@@ -1867,6 +1966,23 @@ ggsave(filename = file.path("figures", "F1a-PerPop.png"), width = 49, height = 3
 
 geom_point(aes(x = Lon, y = Lat,  colour = Facility), data = df, size = 0.5) + 
   theme(legend.position="bottom")
+
+# Haplogroup B5a
+
+B5a <- dat_f %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="B5", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
+         prop.B5a=(sum(subset(., haplogroup4=="B5a")[, "count"])/sum(.$count))*100) %>%
+  group_by(country) %>% mutate(prop.pop=(sum(subset(dat_f, haplogroup4=="B5a")[, "count"])/sum(dat_f$count))*100) %>% ungroup() %>%
+  filter(haplogroup4 == "B5a") %>% group_by(country) %>% slice(1)
+
+B5a_sf <- merge(B5a, SEA0_sf, by=c("country"))
+B5a_plot <- B5a_sf %>% select(prop.pop, prop.B5a, geometry) %>% st_as_sf(crs = 4326)
+ggplot() + geom_sf() + geom_sf(data=B5a_plot, aes(fill=prop.pop), lwd=0) +
+  annotate(geom="text", x=130, y=23, color="red", size=18, label= paste(round(B5a_plot$prop.B5a[1],1), "% dân số", sep = "")) +
+  scale_fill_viridis("Tỉ lệ (%) trên dân số", direction = -1, option = "viridis") +
+  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
+  ggtitle("Haplogroup B5a")
+ggsave(filename = file.path("figures", "B5a-PerPop.png"), width = 49, height = 33)
 
 # Haplogroup F1f
 
@@ -1952,23 +2068,6 @@ ggplot() + geom_sf() + geom_sf(data=M7c_plot, aes(fill=prop.pop), lwd=0) +
   theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
   ggtitle("Haplogroup M7c")
 ggsave(filename = file.path("figures", "M7c-PerPop.png"), width = 49, height = 33)
-
-# Haplogroup B5a
-
-B5a <- dat_f %>% 
-  mutate(haplogroup4 = ifelse(haplogroup3=="B5", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
-         prop.B5a=(sum(subset(., haplogroup4=="B5a")[, "count"])/sum(.$count))*100) %>%
-  group_by(country) %>% mutate(prop.pop=(sum(subset(dat_f, haplogroup4=="B5a")[, "count"])/sum(dat_f$count))*100) %>% ungroup() %>%
-  filter(haplogroup4 == "B5a") %>% group_by(country) %>% slice(1)
-
-B5a_sf <- merge(B5a, SEA0_sf, by=c("country"))
-B5a_plot <- B5a_sf %>% select(prop.pop, prop.B5a, geometry) %>% st_as_sf(crs = 4326)
-ggplot() + geom_sf() + geom_sf(data=B5a_plot, aes(fill=prop.pop), lwd=0) +
-  annotate(geom="text", x=130, y=23, color="red", size=18, label= paste(round(B5a_plot$prop.B5a[1],1), "% dân số", sep = "")) +
-  scale_fill_viridis("Tỉ lệ (%) trên dân số", direction = -1, option = "viridis") +
-  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
-  ggtitle("Haplogroup B5a")
-ggsave(filename = file.path("figures", "B5a-PerPop.png"), width = 49, height = 33)
 
 # Haplogroup B4a
 
@@ -2602,6 +2701,34 @@ par(mar=c(0.01,0.01,0.01,15))
 plot(net, size=attr(net, "freq"), scale.ratio = 2, cex = 0.6, labels=TRUE, pie = ind.hap, show.mutation=1, font=2, fast=TRUE)
 legend(x= 57,y=15, colnames(ind.hap), fill=rainbow(ncol(ind.hap)), cex=0.52, ncol=6, x.intersp=0.2, text.width=11)
 dev.off()
+
+# M7b
+
+library(pegas)
+h_M7b<-pegas::haplotype(nbin_M7b, strict = FALSE, trailingGapsAsN = TRUE)#extracts haplotypes from DNAbin object
+hname_M7b<-paste("H", 1:nrow(h_M7b), sep = "")
+rownames(h_M7b)= paste(hname_M7b)
+net_M7b<-haploNet(h_M7b, d = NULL, getProb = TRUE)#constructs the haplotype network
+net_M7b
+ind.hap<-with(
+  utils::stack(setNames(attr(h_M7b, "index"), rownames(h_M7b))),
+  table(hap=ind, individuals=rownames(nbin_M7b))
+)
+
+par(mar=c(0.01,0.01,0.01,15))
+plot(net, size=attr(net, "freq"), scale.ratio = 2, cex = 0.6, labels=TRUE, pie = ind.hap, show.mutation=1, font=2, fast=TRUE)
+legend(x= 57,y=15, colnames(ind.hap), fill=rainbow(ncol(ind.hap)), cex=0.52, ncol=6, x.intersp=0.2, text.width=11)
+
+dev.new()
+plot(net, size=attr(net, "freq"), scale.ratio = 2, cex = 0.6, labels=TRUE, pie = ind.hap, show.mutation=1, font=2, fast=TRUE)
+legend(x= 57,y=30, colnames(ind.hap), fill=rainbow(ncol(ind.hap)), cex=0.5, ncol=6, x.intersp=0,003, text.width=9)
+
+pdf("hapind.pdf", width = 11, height = 5)
+par(mar=c(0.01,0.01,0.01,15))
+plot(net, size=attr(net, "freq"), scale.ratio = 2, cex = 0.6, labels=TRUE, pie = ind.hap, show.mutation=1, font=2, fast=TRUE)
+legend(x= 57,y=15, colnames(ind.hap), fill=rainbow(ncol(ind.hap)), cex=0.52, ncol=6, x.intersp=0.2, text.width=11)
+dev.off()
+
 
 #For a better position of the name table, you can optimize x and y coordinates in the "legend()" argument.
 
