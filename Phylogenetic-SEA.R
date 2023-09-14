@@ -268,6 +268,236 @@ library(reshape2)
 ethnic_hap <- ethnic %>% select(-Haplogroup) %>%
   melt(., id.vars="haplo")
 
+# Ethnicity
+
+ethnic <- read_excel("IsolateExplanation.xlsx")
+
+library(janitor)
+ethnic2 <- ethnic %>% dplyr::select(name, Country, Ethnicity, haplo, haplogroup1, haplogroup2, haplogroup3) %>% setDT()
+ethnic_rank <- ethnic2[, .N, by = .(Ethnicity)] %>% arrange(desc(N))
+
+ethnic_hap <- ethnic2[, .N, by = .(Ethnicity, haplo)]
+ethnic_hap <- ethnic_hap %>%
+  group_by(Ethnicity) %>% arrange(haplo, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+library(pegas)
+dat_e <- NULL
+for (i in ethnic_rank$Ethnicity) {
+  cat(i, "\n")
+  i <- ethnic2 %>% dplyr::filter(Ethnicity==i)
+  nbin_i <- nbin[labels(nbin) %in% i$name]
+  dnbin_i <- dist.dna(nbin_i, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+  hap.div_i <- hap.div(nbin_i, variance = TRUE)
+  nuc.div_i <- nuc.div(nbin_i, variance = TRUE, pairwise.deletion = FALSE)
+  dati <- data.frame(i$Ethnicity, hap.div_i[1], hap.div_i[2], nuc.div_i[1], nuc.div_i[2]) %>% slice(1)
+  ## combine
+  dat_e <- rbindlist(l = list(dat_e, dati)) %>% unique() %>% setDT()
+}
+## Rename
+setnames(x = dat_e,
+         old = c("i.Ethnicity", "hap.div_i.1.", "hap.div_i.2.", "nuc.div_i.1.", "nuc.div_i.2."),
+         new = c("ethnic", "hap.div", "hap.div.var", "nuc.div", "nuc.div.var"))
+
+df <- dat_e %>% na.omit() %>% select(1,2,4)
+# dist_matrix <- dist(dat_e[,-1])
+# mds_result <- cmdscale(dist_matrix)
+# plot(mds_result, col = dat_e$ethnic, pch = 19, xlab = "MDS1", ylab = "MDS2")
+
+# Compute MDS
+mds <- df %>% na.omit() %>% select(-1) %>%
+  dist() %>%          
+  cmdscale() %>%
+  as_tibble()
+colnames(mds) <- c("Dim.1", "Dim.2")
+# Plot MDS
+ggscatter(mds, x = "Dim.1", y = "Dim.2", 
+          label = df$ethnic,
+          size = 1,
+          repel = TRUE)
+
+# K-means clustering (K=10)
+clust <- kmeans(mds, 10)$cluster %>%
+  as.factor()
+mds <- mds %>%
+  mutate(groups = clust)
+# Plot and color by groups
+ggscatter(mds, x = "Dim.1", y = "Dim.2", 
+          label = df$ethnic,
+          color = "groups",
+          palette = "jco",
+          size = 1, 
+          ellipse = TRUE,
+          ellipse.type = "convex",
+          repel = TRUE)
+ggsave(filename = file.path("figures", "ethnic_K10.png"), width = 15, height = 10)
+
+# K-means clustering (K=6)
+clust <- kmeans(mds, 6)$cluster %>%
+  as.factor()
+mds <- mds %>%
+  mutate(groups = clust)
+# Plot and color by groups
+ggscatter(mds, x = "Dim.1", y = "Dim.2", 
+          label = df$ethnic,
+          color = "groups",
+          palette = "jco",
+          size = 1, 
+          ellipse = TRUE,
+          ellipse.type = "convex",
+          repel = TRUE)
+ggsave(filename = file.path("figures", "ethnic_K6.png"), width = 15, height = 10)
+
+library(cluster)    # clustering algorithms
+library(factoextra) # clustering algorithms & visualization
+set.seed(123)
+df2 <- tibble::column_to_rownames(df, var = "ethnic") %>% as.data.frame()
+distance <- get_dist(df2)
+
+fviz_dist(distance, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
+k2 <- kmeans(df2, centers = 2, nstart = 25)
+fviz_cluster(k2, data = df2)
+
+df2 %>%
+  as_tibble() %>%
+  mutate(cluster = k2$cluster,
+         ethnic = dat_e$ethnic) %>%
+  ggplot(aes(hap.div, nuc.div, color = factor(cluster), label = ethnic)) +
+  geom_text()
+
+k3 <- kmeans(df2, centers = 3, nstart = 25)
+k4 <- kmeans(df2, centers = 4, nstart = 25)
+k5 <- kmeans(df2, centers = 5, nstart = 25)
+k6 <- kmeans(df2, centers = 6, nstart = 25)
+k7 <- kmeans(df2, centers = 7, nstart = 25)
+k8 <- kmeans(df2, centers = 8, nstart = 25)
+k9 <- kmeans(df2, centers = 9, nstart = 25)
+k10 <- kmeans(df2, centers = 10, nstart = 25)
+
+# plots to compare
+p1 <- fviz_cluster(k2, geom = "point", data = df2) + ggtitle("k = 2")
+p2 <- fviz_cluster(k3, geom = "point",  data = df2) + ggtitle("k = 3")
+p3 <- fviz_cluster(k4, geom = "point",  data = df2) + ggtitle("k = 4")
+p4 <- fviz_cluster(k5, geom = "point",  data = df2) + ggtitle("k = 5")
+p5 <- fviz_cluster(k5, geom = "point",  data = df2) + ggtitle("k = 6")
+p6 <- fviz_cluster(k5, geom = "point",  data = df2) + ggtitle("k = 7")
+p7 <- fviz_cluster(k5, geom = "point",  data = df2) + ggtitle("k = 8")
+p8 <- fviz_cluster(k5, geom = "point",  data = df2) + ggtitle("k = 9")
+p9 <- fviz_cluster(k5, geom = "point",  data = df2) + ggtitle("k = 10")
+
+library(gridExtra)
+png(filename = file.path("figures", "ethnic_K2-5.png"), width = 1200, height = 800)
+grid.arrange(p1, p2, p3, p4, nrow = 2)
+dev.off()
+
+png(filename = file.path("figures", "ethnic_K6-10.png"), width = 1200, height = 800)
+grid.arrange(p5, p6, p7, p8, p9, nrow = 2)
+dev.off()
+
+fviz_cluster(k5, data = df2)
+ggsave(filename = file.path("figures", "ethnic_K5.png"), width = 15, height = 10)
+
+df2 %>%
+  as_tibble() %>%
+  mutate(cluster = k5$cluster,
+         ethnic = dat_e$ethnic) %>%
+  ggplot(aes(hap.div, nuc.div, color = factor(cluster), label = ethnic)) +
+  geom_text()
+
+fviz_nbclust(df2, kmeans, method = "wss")
+fviz_nbclust(df2, kmeans, method = "silhouette")
+
+# Compute k-means clustering with k = 5
+set.seed(123)
+final <- kmeans(df2, 5, nstart = 25)
+print(final)
+
+fviz_cluster(final, data = df2)
+ggsave(filename = file.path("figures", "ethnic_K5_final.png"), width = 15, height = 10)
+
+## Cham
+
+Cham <- VN %>% filter(ethnic=="Cham")
+nbin_Cham <- nbin[labels(nbin) %in% Cham$name]
+class(nbin_Cham)
+dnbin_Cham <- dist.dna(nbin_Cham, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+hap.div(nbin_Cham, variance = TRUE)
+nuc.div(nbin_Cham, variance = TRUE, pairwise.deletion = FALSE)
+x_Cham <- as.matrix.DNAbin(nbin_Cham)  #converting DNAbin to matrix
+
+h_Cham <- pegas::haplotype(nbin_Cham)
+d_Cham <- dist.dna(h_Cham, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+nt_Cham <- rmst(d_Cham, quiet = TRUE)#constructs the haplotype network
+sz_Cham <- summary(h_Cham)
+nt.labs_Cham <- attr(nt_Cham, "labels")
+sz_Cham <- sz_VN[nt.labs_Cham]
+
+name_Cham <- Cham$name
+R <- haploFreq(x_Cham, fac = name_Cham, haplo = h_Cham)
+R <- R[nt.labs_Cham, ]
+samp<-R %>% t()
+phylo_Cham <- ape::as.phylo(nt_Cham)
+dis <- cophenetic(phylo_Cham)
+
+dis<-dis[,phylo_Cham$tip.label]
+samp<-samp[,phylo_Cham$tip.label]
+
+comdist(samp, dis, abundance.weighted=TRUE)
+pd(samp, phylo_Cham, include.root = TRUE)
+mpd(samp, dis)
+mpdn(samp, dis, abundance.weighted = TRUE, time.output = FALSE)
+
+tree_Cham<-nj(dnbin_Cham)
+ggt_Cham<-ggtree::ggtree(tree_Cham, cex = 0.8, aes(color=branch.length))+
+  scale_color_continuous(high='lightskyblue1',low='coral4')+
+  geom_tiplab(size=3)+
+  geom_treescale(y = - 5, color = "coral4", fontsize = 4)
+ggt_Cham
+
+library(reshape2)
+ehap <- ethnic_hap %>%
+  dplyr::rename(ID=Ethnicity) %>%
+  group_by(haplo) %>%
+  mutate(Ethnicity=order(ID)) %>%
+  ungroup() %>%
+  dplyr::rename(key=haplo, value=N) %>%
+  dplyr::select(-percent) %>%
+  arrange(key)
+
+dt_e <- spread(ehap, key = key, value = value) %>% replace(is.na(.), 0)
+DT <- dt_e %>% dplyr::select(-c(ID, Ethnicity))
+m<-as.matrix(DT)
+ID <- dt_e$ID
+Ethnicity <- dt_e$Ethnicity
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+ethnic_hap_all <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(Ethnicity=order(ID))
+
+library(MASS)
+library(magrittr)
+library(dplyr)
+library(ggpubr)
+
+dist_matrix <- dist(ethnic_hap_all[,-c("ID", "Ethnicity")])
+mds_result <- cmdscale(dist_matrix)
+
+# Cmpute MDS
+mds <- ethnic_hap_all %>% select(-c("ID", "Ethnicity")) %>%
+  dist() %>%          
+  cmdscale() %>%
+  as_tibble()
+colnames(mds) <- c("Dim.1", "Dim.2")
+# Plot MDS
+ggscatter(mds, x = "Dim.1", y = "Dim.2", 
+          label = ethnic_hap_all$ID,
+          size = 1,
+          repel = TRUE)
+
+plot(mds_result, col = ethnic_hap_all$Ethnicity, pch = 19, xlab = "MDS1", ylab = "MDS2")
 
 library(viridis)
 g1 <- ggplot(country_hap) +      
