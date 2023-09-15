@@ -275,7 +275,7 @@ ethnic <- read_excel("IsolateExplanation.xlsx")
 library(janitor)
 ethnic2 <- ethnic %>%
   mutate(Ethnicity=ifelse(Ethnicity=="Lao, Akha, Hmong, Khmu, Yao/Mien, Phuan", "Lao, Akha, Hmong, Khmu, Yao, Mien, Phuan", Ethnicity)) %>%
-  dplyr::select(name, Country, Ethnicity, haplo, haplogroup1, haplogroup2, haplogroup3) %>% setDT()
+  dplyr::select(name, Country, Language, Ethnicity, haplo, haplogroup1, haplogroup2, haplogroup3) %>% setDT()
 ethnic_rank <- ethnic2[, .N, by = .(Ethnicity)] %>% arrange(desc(N))
 
 ethnic_hap <- ethnic2[, .N, by = .(Ethnicity, haplo)]
@@ -289,32 +289,42 @@ ethnic_hap3 <- ethnic_hap3 %>%
   mutate(percent=(N*100)/sum(N)) %>% ungroup()
 
 library(pegas)
+library(ape)
+
 dat_e <- NULL
 for (i in ethnic_rank$Ethnicity) {
   cat(i, "\n")
   df_i <- ethnic2 %>% dplyr::filter(Ethnicity==i)
+  n_i <- nrow(df_i)
   nbin_i <- nbin[labels(nbin) %in% df_i$name]
-  fas_i <- file[labels(nbin) %in% df_i$name]
-  writeXStringSet(fas_i, paste0("data/ethnic/", i, ".fasta"))
+  h_i <- pegas::haplotype(nbin_i)
+  n_hi <- length(as.list(h_i))
+  # fas_i <- file[labels(nbin) %in% df_i$name]
+  # writeXStringSet(fas_i, paste0("data/ethnic/", i, ".fasta"))
   # dnbin_i <- dist.dna(nbin_i, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+  x_i <- as.matrix.DNAbin(nbin_i)  #converting DNAbin to matrix
+  dist.gene_i <- dist.gene(x_i, method = "pairwise", variance = TRUE, pairwise.deletion = FALSE)
+  mpd_i <- mean(dist.gene_i)
   hap.div_i <- hap.div(nbin_i, variance = TRUE)
   nuc.div_i <- nuc.div(nbin_i, variance = TRUE, pairwise.deletion = FALSE) # hap.div = 1 all haplotypes are unique
-  dati <- data.frame(df_i$Ethnicity, hap.div_i[1], hap.div_i[2], nuc.div_i[1], nuc.div_i[2]) %>% slice(1)
+  dati <- data.frame(df_i$Ethnicity, df_i$Language, df_i$Country, n_i, n_hi, hap.div_i[1], hap.div_i[2], nuc.div_i[1], nuc.div_i[2], mpd_i) %>% slice(1)
   ## combine
   dat_e <- rbindlist(l = list(dat_e, dati)) %>% unique() %>% setDT()
 }
 ## Rename
 setnames(x = dat_e,
-         old = c("i.Ethnicity", "hap.div_i.1.", "hap.div_i.2.", "nuc.div_i.1.", "nuc.div_i.2."),
-         new = c("ethnic", "hap.div", "hap.div.var", "nuc.div", "nuc.div.var"))
+         old = c("df_i.Ethnicity", "df_i.Language", "df_i.Country", "n_i", "n_hi", "hap.div_i.1.", "hap.div_i.2.", "nuc.div_i.1.", "nuc.div_i.2.", "mpd_i"),
+         new = c("Ethnic", "Language", "Country", "Sample size", "Number of haplotypes", "Haplotype diversity (H)", "H variance", "Nucleotide diveristy (pi)", "pi SE", "MPD"))
 
-df <- dat_e %>% na.omit() %>% select(1,2,4)
+# df <- dat_e %>% na.omit() %>% dplyr::select(1,4,6,8)
+df <- dat_e %>% na.omit() %>% dplyr::select(1,2,3,4,6,8,10) %>% setDF()
+df <- df %>% filter(`Sample size`>2 & !`Ethnic` %in% c("Unknown", "Khmer, Cham, Chinese-Cambodian, Vietnamese", "Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung", "Lao, Akha, Hmong, Khmu, Yao, Mien, Phuan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Banjar, Bantenese, Banyumasan", "Batak, Minangkabau, Acehnese, Lampung", "Banjar, Dayak, Javanese"))
 # dist_matrix <- dist(dat_e[,-1])
 # mds_result <- cmdscale(dist_matrix)
 # plot(mds_result, col = dat_e$ethnic, pch = 19, xlab = "MDS1", ylab = "MDS2")
 
 # Compute MDS
-mds <- df %>% na.omit() %>% select(-1) %>%
+mds <- df %>% na.omit() %>% dplyr::select(-c(1,2,3,4)) %>%
   dist() %>%          
   cmdscale() %>%
   as_tibble()
@@ -322,7 +332,7 @@ colnames(mds) <- c("Dim.1", "Dim.2")
 
 # Plot MDS
 ggscatter(mds, x = "Dim.1", y = "Dim.2", 
-          label = df$ethnic,
+          label = df$Ethnic,
           size = 1,
           repel = TRUE)
 
@@ -333,7 +343,7 @@ mds <- mds %>%
   mutate(groups = clust)
 # Plot and color by groups
 ggscatter(mds, x = "Dim.1", y = "Dim.2", 
-          label = df$ethnic,
+          label = df$Ethnic,
           color = "groups",
           palette = "jco",
           size = 1, 
@@ -349,7 +359,7 @@ mds <- mds %>%
   mutate(groups = clust)
 # Plot and color by groups
 ggscatter(mds, x = "Dim.1", y = "Dim.2", 
-          label = df$ethnic,
+          label = df$Ethnic,
           color = "groups",
           palette = "jco",
           size = 1, 
@@ -361,7 +371,7 @@ ggsave(filename = file.path("figures", "ethnic_K6.png"), width = 15, height = 10
 library(cluster)    # clustering algorithms
 library(factoextra) # clustering algorithms & visualization
 set.seed(123)
-df2 <- tibble::column_to_rownames(df, var = "ethnic") %>% as.data.frame()
+df2 <- tibble::column_to_rownames(df, var = "Ethnic") %>% dplyr::select(-c("Language", "Country", "Sample size")) %>% as.data.frame()
 distance <- get_dist(df2)
 
 fviz_dist(distance, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
@@ -371,8 +381,8 @@ fviz_cluster(k2, data = df2)
 df2 %>%
   as_tibble() %>%
   mutate(cluster = k2$cluster,
-         ethnic = dat_e$ethnic) %>%
-  ggplot(aes(hap.div, nuc.div, color = factor(cluster), label = ethnic)) +
+         ethnic = df$Ethnic) %>%
+  ggplot(aes(`Haplotype diversity (H)`, `Nucleotide diveristy (pi)`, color = factor(cluster), label = ethnic)) +
   geom_text()
 
 k3 <- kmeans(df2, centers = 3, nstart = 25)
@@ -410,8 +420,8 @@ ggsave(filename = file.path("figures", "ethnic_K5.png"), width = 15, height = 10
 df2 %>%
   as_tibble() %>%
   mutate(cluster = k5$cluster,
-         ethnic = dat_e$ethnic) %>%
-  ggplot(aes(hap.div, nuc.div, color = factor(cluster), label = ethnic)) +
+         ethnic = df$Ethnic) %>%
+  ggplot(aes(`Haplotype diversity (H)`, `Nucleotide diveristy (pi)`, color = factor(cluster), label = ethnic)) +
   geom_text()
 
 fviz_nbclust(df2, kmeans, method = "wss")
@@ -434,6 +444,8 @@ dnbin_Cham <- dist.dna(nbin_Cham, model = "K80") #computing distance by ape pack
 hap.div(nbin_Cham, variance = TRUE)
 nuc.div(nbin_Cham, variance = TRUE, pairwise.deletion = FALSE)
 x_Cham <- as.matrix.DNAbin(nbin_Cham)  #converting DNAbin to matrix
+
+disgene_Cham <- dist.gene(x_Cham, method = "pairwise", pairwise.deletion = FALSE, variance = TRUE)
 
 h_Cham <- pegas::haplotype(nbin_Cham)
 d_Cham <- dist.dna(h_Cham, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
@@ -468,52 +480,49 @@ ggt_Cham
 
 library(reshape2)
 ehap <- ethnic_hap3 %>%
-  dplyr::rename(ID=Ethnicity) %>%
+  dplyr::rename(ethnic=Ethnicity) %>%
   group_by(haplogroup3) %>%
-  mutate(Ethnicity=order(ID)) %>%
+  mutate(ID=order(ethnic)) %>%
   ungroup() %>%
   dplyr::rename(key=haplogroup3, value=N) %>%
   dplyr::select(-percent) %>%
   arrange(key)
 
 dt_e <- spread(ehap, key = key, value = value) %>% replace(is.na(.), 0)
-DT <- dt_e %>% dplyr::select(-c(ID, Ethnicity))
+DT <- dt_e %>% dplyr::select(-c(ethnic, ID))
 m<-as.matrix(DT)
+ethnic <- dt_e$ethnic
 ID <- dt_e$ID
-Ethnicity <- dt_e$Ethnicity
-dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+dt <- aggregate(m, data.frame(ethnic),sum) %>% setDT()
 # cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
 library(janitor)
 ethnic_hap_all <- dt %>% 
   adorn_percentages() %>% 
-  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
-  mutate(Ethnicity=order(ID))
+  dplyr::mutate_if(is.numeric, funs(. * 100))
 
 library(MASS)
 library(magrittr)
 library(dplyr)
 library(ggpubr)
 
-dist_matrix <- dist(ethnic_hap_all[,-c("ID", "Ethnicity")])
+dist_matrix <- dist(ethnic_hap_all[,-c("ethnic")])
 mds_result <- cmdscale(dist_matrix)
 
 # Compute MDS
-mds <- ethnic_hap_all %>% select(-c("ID", "Ethnicity")) %>%
+mds <- ethnic_hap_all %>% dplyr::select(-1) %>%
   dist() %>%          
   cmdscale() %>%
   as_tibble()
 colnames(mds) <- c("Dim.1", "Dim.2")
 # Plot MDS
 ggscatter(mds, x = "Dim.1", y = "Dim.2", 
-          label = ethnic_hap_all$ID,
+          label = ethnic_hap_all$ethnic,
           size = 1,
           repel = TRUE)
 
-plot(mds_result, col = ethnic_hap_all$Ethnicity, pch = 19, xlab = "MDS1", ylab = "MDS2")
-
 # Compute MDS
-df <- ethnic_hap_all %>% rename(ethnic=ID) %>% select(-Ethnicity)
-mds <- df %>% na.omit() %>% select(-1) %>%
+df <- ethnic_hap_all
+mds <- df %>% na.omit() %>% dplyr::select(-1) %>%
   dist() %>%          
   cmdscale() %>%
   as_tibble()
