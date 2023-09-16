@@ -275,7 +275,7 @@ ethnic <- read_excel("IsolateExplanation.xlsx")
 library(janitor)
 ethnic2 <- ethnic %>%
   mutate(Ethnicity=ifelse(Ethnicity=="Lao, Akha, Hmong, Khmu, Yao/Mien, Phuan", "Lao, Akha, Hmong, Khmu, Yao, Mien, Phuan", Ethnicity)) %>%
-  dplyr::select(name, Country, Language, Ethnicity, haplo, haplogroup1, haplogroup2, haplogroup3) %>% setDT()
+  dplyr::select(name, Country, `Language family`, Ethnicity, haplo, haplogroup1, haplogroup2, haplogroup3) %>% setDT()
 ethnic_rank <- ethnic2[, .N, by = .(Ethnicity)] %>% arrange(desc(N))
 
 ethnic_hap <- ethnic2[, .N, by = .(Ethnicity, haplo)]
@@ -307,17 +307,32 @@ for (i in ethnic_rank$Ethnicity) {
   mpd_i <- mean(dist.gene_i)
   hap.div_i <- hap.div(nbin_i, variance = TRUE)
   nuc.div_i <- nuc.div(nbin_i, variance = TRUE, pairwise.deletion = FALSE) # hap.div = 1 all haplotypes are unique
-  dati <- data.frame(df_i$Ethnicity, df_i$Language, df_i$Country, n_i, n_hi, hap.div_i[1], hap.div_i[2], nuc.div_i[1], nuc.div_i[2], mpd_i) %>% slice(1)
+  dati <- data.frame(df_i$Ethnicity, df_i$`Language family`, df_i$Country, n_i, n_hi, hap.div_i[1], hap.div_i[2], nuc.div_i[1], nuc.div_i[2], mpd_i) %>% slice(1)
   ## combine
   dat_e <- rbindlist(l = list(dat_e, dati)) %>% unique() %>% setDT()
 }
 ## Rename
 setnames(x = dat_e,
-         old = c("df_i.Ethnicity", "df_i.Language", "df_i.Country", "n_i", "n_hi", "hap.div_i.1.", "hap.div_i.2.", "nuc.div_i.1.", "nuc.div_i.2.", "mpd_i"),
+         old = c("df_i.Ethnicity", "df_i..Language.family.", "df_i.Country", "n_i", "n_hi", "hap.div_i.1.", "hap.div_i.2.", "nuc.div_i.1.", "nuc.div_i.2.", "mpd_i"),
          new = c("Ethnic", "Language", "Country", "Sample size", "Number of haplotypes", "Haplotype diversity (H)", "H variance", "Nucleotide diveristy (pi)", "pi SE", "MPD"))
 
 # df <- dat_e %>% na.omit() %>% dplyr::select(1,4,6,8)
-df <- dat_e %>% na.omit() %>% dplyr::select(1,2,3,4,6,8,10) %>% setDF()
+df <- dat_e %>%
+  mutate(`Language`=ifelse(Ethnic=="Mon", "Austroasiatic",
+                           ifelse(Ethnic=="Hmong", "Hmong-Mien",
+                                  ifelse(Ethnic=="Shan", "Tai-Kadai",
+                                         ifelse(Ethnic=="Jehai (or Jahai)", "Austroasiatic",
+                                                ifelse(Ethnic=="Temuan", "Austronesian",
+                                                       ifelse(Ethnic=="Maranao", "Austronesian",
+                                                              ifelse(Ethnic=="Semelai", "Austroasiatic",
+                                                                     ifelse(Ethnic=="Bru (Brao)", "Austroasiatic",
+                                                                            ifelse(Ethnic=="Jarai", "Austronesian",
+                                                                                   ifelse(Ethnic=="Kadazan-Dusun", "Austronesian",
+                                                                                          ifelse(Ethnic=="Alor", "Austronesian",
+                                                                                                 ifelse(Ethnic=="Arakanese (or Rakhine)", "Sino-Tibetan",
+                                                                                                        ifelse(Ethnic=="Timorese", "Austronesian",
+                                                                                                               ifelse(Ethnic=="Mang", "Austroasiatic", `Language`))))))))))))))) %>%
+  na.omit() %>% dplyr::select(1,2,3,4,6,8,10) %>% setDF()
 df <- df %>% filter(`Sample size`>2 & !`Ethnic` %in% c("Unknown", "Khmer, Cham, Chinese-Cambodian, Vietnamese", "Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung", "Lao, Akha, Hmong, Khmu, Yao, Mien, Phuan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Banjar, Bantenese, Banyumasan", "Batak, Minangkabau, Acehnese, Lampung", "Banjar, Dayak, Javanese"))
 # dist_matrix <- dist(dat_e[,-1])
 # mds_result <- cmdscale(dist_matrix)
@@ -351,6 +366,28 @@ ggscatter(mds, x = "Dim.1", y = "Dim.2",
           ellipse.type = "convex",
           repel = TRUE)
 ggsave(filename = file.path("figures", "ethnic_K10.png"), width = 15, height = 10)
+
+# K-means clustering (K=10) - Language
+mds <- df %>% na.omit() %>% dplyr::select(-c(1,2,3,4)) %>%
+  dist() %>%          
+  cmdscale() %>%
+  as_tibble()
+colnames(mds) <- c("Dim.1", "Dim.2")
+
+clust_lang <- kmeans(mds, 10)$cluster %>%
+  as.factor()
+mds_lang <- mds %>%
+  mutate(groups = clust, language = df$Language)
+# Plot and color by groups
+ggscatter(mds_lang, x = "Dim.1", y = "Dim.2", 
+          label = df$Ethnic,
+          color = "language",
+          palette = "jco",
+          size = 1, 
+          ellipse = TRUE,
+          ellipse.type = "convex",
+          repel = TRUE)
+ggsave(filename = file.path("figures", "ethnic_K10_language.png"), width = 15, height = 10)
 
 # K-means clustering (K=6)
 clust <- kmeans(mds, 6)$cluster %>%
