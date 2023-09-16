@@ -472,6 +472,210 @@ print(final)
 fviz_cluster(final, data = df2)
 ggsave(filename = file.path("figures", "ethnic_K5_final.png"), width = 15, height = 10)
 
+# Ethnicity - FULL
+
+ethnic <- read_excel("IsolateExplanation.xlsx")
+
+library(janitor)
+ethnic2 <- ethnic %>%
+  mutate(Ethnicity=ifelse(Ethnicity=="Lao, Akha, Hmong, Khmu, Yao/Mien, Phuan", "Lao, Akha, Hmong, Khmu, Yao, Mien, Phuan", Ethnicity)) %>%
+  dplyr::select(name, Country, `Language family`, Ethnicity, haplo, haplogroup1, haplogroup2, haplogroup3) %>% setDT()
+ethnic_rank <- ethnic2[, .N, by = .(Ethnicity)] %>% arrange(desc(N))
+
+ethnic_hap <- ethnic2[, .N, by = .(Ethnicity, haplo)]
+ethnic_hap <- ethnic_hap %>%
+  group_by(Ethnicity) %>% arrange(haplo, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+ethnic_hap3 <- ethnic2[, .N, by = .(Ethnicity, haplogroup3)]
+ethnic_hap3 <- ethnic_hap3 %>%
+  group_by(Ethnicity) %>% arrange(haplogroup3, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+library(pegas)
+library(ape)
+
+dat_e <- NULL
+for (i in ethnic_rank$Ethnicity) {
+  cat(i, "\n")
+  df_i <- ethnic2 %>% dplyr::filter(Ethnicity==i)
+  n_i <- nrow(df_i)
+  nbin_i <- nbin[labels(nbin) %in% df_i$name]
+  h_i <- pegas::haplotype(nbin_i)
+  n_hi <- length(as.list(h_i))
+  # fas_i <- file[labels(nbin) %in% df_i$name]
+  # writeXStringSet(fas_i, paste0("data/ethnic/", i, ".fasta"))
+  # dnbin_i <- dist.dna(nbin_i, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+  x_i <- as.matrix.DNAbin(nbin_i)  #converting DNAbin to matrix
+  dist.gene_i <- dist.gene(x_i, method = "pairwise", variance = TRUE, pairwise.deletion = FALSE)
+  mpd_i <- mean(dist.gene_i)
+  hap.div_i <- hap.div(nbin_i, variance = TRUE)
+  nuc.div_i <- nuc.div(nbin_i, variance = TRUE, pairwise.deletion = FALSE) # hap.div = 1 all haplotypes are unique
+  dati <- data.frame(df_i$Ethnicity, df_i$`Language family`, df_i$Country, n_i, n_hi, hap.div_i[1], hap.div_i[2], nuc.div_i[1], nuc.div_i[2], mpd_i) %>% slice(1)
+  ## combine
+  dat_e <- rbindlist(l = list(dat_e, dati)) %>% unique() %>% setDT()
+}
+## Rename
+setnames(x = dat_e,
+         old = c("df_i.Ethnicity", "df_i..Language.family.", "df_i.Country", "n_i", "n_hi", "hap.div_i.1.", "hap.div_i.2.", "nuc.div_i.1.", "nuc.div_i.2.", "mpd_i"),
+         new = c("Ethnic", "Language", "Country", "Sample size", "Number of haplotypes", "Haplotype diversity (H)", "H variance", "Nucleotide diveristy (pi)", "pi SE", "MPD"))
+
+# df <- dat_e %>% na.omit() %>% dplyr::select(1,4,6,8)
+df <- dat_e %>%
+  mutate(`Language`=ifelse(Ethnic=="Mon", "Austroasiatic",
+                           ifelse(Ethnic=="Hmong", "Hmong-Mien",
+                                  ifelse(Ethnic=="Shan", "Tai-Kadai",
+                                         ifelse(Ethnic=="Jehai (or Jahai)", "Austroasiatic",
+                                                ifelse(Ethnic=="Temuan", "Austronesian",
+                                                       ifelse(Ethnic=="Maranao", "Austronesian",
+                                                              ifelse(Ethnic=="Semelai", "Austroasiatic",
+                                                                     ifelse(Ethnic=="Bru (Brao)", "Austroasiatic",
+                                                                            ifelse(Ethnic=="Jarai", "Austronesian",
+                                                                                   ifelse(Ethnic=="Kadazan-Dusun", "Austronesian",
+                                                                                          ifelse(Ethnic=="Alor", "Austronesian",
+                                                                                                 ifelse(Ethnic=="Arakanese (or Rakhine)", "Sino-Tibetan",
+                                                                                                        ifelse(Ethnic=="Timorese", "Austronesian",
+                                                                                                               ifelse(Ethnic=="Mang", "Austroasiatic", `Language`))))))))))))))) %>%
+  na.omit() %>% dplyr::select(1,2,3,4,6,8,10) %>% setDF()
+df <- df %>% filter(`Ethnic`!="Unknown")
+# dist_matrix <- dist(dat_e[,-1])
+# mds_result <- cmdscale(dist_matrix)
+# plot(mds_result, col = dat_e$ethnic, pch = 19, xlab = "MDS1", ylab = "MDS2")
+
+# Compute MDS
+mds <- df %>% na.omit() %>% dplyr::select(-c(1,2,3,4)) %>%
+  dist() %>%          
+  cmdscale() %>%
+  as_tibble()
+colnames(mds) <- c("Dim.1", "Dim.2")
+
+# Plot MDS
+ggscatter(mds, x = "Dim.1", y = "Dim.2", 
+          label = df$Ethnic,
+          size = 1,
+          repel = TRUE)
+
+# K-means clustering (K=10)
+clust <- kmeans(mds, 10)$cluster %>%
+  as.factor()
+mds <- mds %>%
+  mutate(groups = clust)
+# Plot and color by groups
+ggscatter(mds, x = "Dim.1", y = "Dim.2", 
+          label = df$Ethnic,
+          color = "groups",
+          palette = "jco",
+          size = 1, 
+          ellipse = TRUE,
+          ellipse.type = "convex",
+          repel = TRUE)
+ggsave(filename = file.path("figures", "ethnic_K10_full.png"), width = 15, height = 10)
+
+# K-means clustering (K=10) - Language
+mds <- df %>% na.omit() %>% dplyr::select(-c(1,2,3,4)) %>%
+  dist() %>%          
+  cmdscale() %>%
+  as_tibble()
+colnames(mds) <- c("Dim.1", "Dim.2")
+
+clust_lang <- kmeans(mds, 10)$cluster %>%
+  as.factor()
+mds_lang <- mds %>%
+  mutate(groups = clust, language = df$Language)
+# Plot and color by groups
+ggscatter(mds_lang, x = "Dim.1", y = "Dim.2", 
+          label = df$Ethnic,
+          color = "language",
+          palette = "jco",
+          size = 1, 
+          ellipse = TRUE,
+          ellipse.type = "convex",
+          repel = TRUE)
+ggsave(filename = file.path("figures", "ethnic_K10_language_full.png"), width = 15, height = 10)
+
+# K-means clustering (K=6)
+clust <- kmeans(mds, 6)$cluster %>%
+  as.factor()
+mds <- mds %>%
+  mutate(groups = clust)
+# Plot and color by groups
+ggscatter(mds, x = "Dim.1", y = "Dim.2", 
+          label = df$Ethnic,
+          color = "groups",
+          palette = "jco",
+          size = 1, 
+          ellipse = TRUE,
+          ellipse.type = "convex",
+          repel = TRUE)
+ggsave(filename = file.path("figures", "ethnic_K6_full.png"), width = 15, height = 10)
+
+library(cluster)    # clustering algorithms
+library(factoextra) # clustering algorithms & visualization
+set.seed(123)
+df2 <- tibble::column_to_rownames(df, var = "Ethnic") %>% dplyr::select(-c("Language", "Country", "Sample size")) %>% as.data.frame()
+distance <- get_dist(df2)
+
+fviz_dist(distance, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
+k2 <- kmeans(df2, centers = 2, nstart = 25)
+fviz_cluster(k2, data = df2)
+
+df2 %>%
+  as_tibble() %>%
+  mutate(cluster = k2$cluster,
+         ethnic = df$Ethnic) %>%
+  ggplot(aes(`Haplotype diversity (H)`, `Nucleotide diveristy (pi)`, color = factor(cluster), label = ethnic)) +
+  geom_text()
+
+k3 <- kmeans(df2, centers = 3, nstart = 25)
+k4 <- kmeans(df2, centers = 4, nstart = 25)
+k5 <- kmeans(df2, centers = 5, nstart = 25)
+k6 <- kmeans(df2, centers = 6, nstart = 25)
+k7 <- kmeans(df2, centers = 7, nstart = 25)
+k8 <- kmeans(df2, centers = 8, nstart = 25)
+k9 <- kmeans(df2, centers = 9, nstart = 25)
+k10 <- kmeans(df2, centers = 10, nstart = 25)
+
+# plots to compare
+p1 <- fviz_cluster(k2, geom = "point", data = df2) + ggtitle("k = 2")
+p2 <- fviz_cluster(k3, geom = "point",  data = df2) + ggtitle("k = 3")
+p3 <- fviz_cluster(k4, geom = "point",  data = df2) + ggtitle("k = 4")
+p4 <- fviz_cluster(k5, geom = "point",  data = df2) + ggtitle("k = 5")
+p5 <- fviz_cluster(k5, geom = "point",  data = df2) + ggtitle("k = 6")
+p6 <- fviz_cluster(k5, geom = "point",  data = df2) + ggtitle("k = 7")
+p7 <- fviz_cluster(k5, geom = "point",  data = df2) + ggtitle("k = 8")
+p8 <- fviz_cluster(k5, geom = "point",  data = df2) + ggtitle("k = 9")
+p9 <- fviz_cluster(k5, geom = "point",  data = df2) + ggtitle("k = 10")
+
+library(gridExtra)
+png(filename = file.path("figures", "ethnic_K2-5_full.png"), width = 1200, height = 800)
+grid.arrange(p1, p2, p3, p4, nrow = 2)
+dev.off()
+
+png(filename = file.path("figures", "ethnic_K6-10_full.png"), width = 1200, height = 800)
+grid.arrange(p5, p6, p7, p8, p9, nrow = 2)
+dev.off()
+
+fviz_cluster(k5, data = df2)
+ggsave(filename = file.path("figures", "ethnic_K5_full.png"), width = 15, height = 10)
+
+df2 %>%
+  as_tibble() %>%
+  mutate(cluster = k5$cluster,
+         ethnic = df$Ethnic) %>%
+  ggplot(aes(`Haplotype diversity (H)`, `Nucleotide diveristy (pi)`, color = factor(cluster), label = ethnic)) +
+  geom_text()
+
+fviz_nbclust(df2, kmeans, method = "wss")
+fviz_nbclust(df2, kmeans, method = "silhouette")
+
+# Compute k-means clustering with k = 5
+set.seed(123)
+final <- kmeans(df2, 5, nstart = 25)
+print(final)
+
+fviz_cluster(final, data = df2)
+ggsave(filename = file.path("figures", "ethnic_K5_final_full.png"), width = 15, height = 10)
+
 ## Cham
 
 Cham <- VN %>% filter(ethnic=="Cham")
@@ -632,16 +836,16 @@ p8 <- fviz_cluster(k5, geom = "point",  data = df2) + ggtitle("k = 9")
 p9 <- fviz_cluster(k5, geom = "point",  data = df2) + ggtitle("k = 10")
 
 library(gridExtra)
-png(filename = file.path("figures", "ethnic_K2-5.png"), width = 1200, height = 800)
+png(filename = file.path("figures", "ethnic_K2-5_pro.png"), width = 1200, height = 800)
 grid.arrange(p1, p2, p3, p4, nrow = 2)
 dev.off()
 
-png(filename = file.path("figures", "ethnic_K6-10.png"), width = 1200, height = 800)
+png(filename = file.path("figures", "ethnic_K6-10_pro.png"), width = 1200, height = 800)
 grid.arrange(p5, p6, p7, p8, p9, nrow = 2)
 dev.off()
 
 fviz_cluster(k5, data = df2)
-ggsave(filename = file.path("figures", "ethnic_K5.png"), width = 15, height = 10)
+ggsave(filename = file.path("figures", "ethnic_K5_pro.png"), width = 15, height = 10)
 
 fviz_nbclust(df2, kmeans, method = "wss")
 fviz_nbclust(df2, kmeans, method = "silhouette")
