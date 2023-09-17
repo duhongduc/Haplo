@@ -2035,7 +2035,7 @@ load("data/SEA1_sf.RData")
 SEA1_sf <- SEA1_sf %>% dplyr::rename(country=NAME_0, location=NAME_1, type=ENGTYPE_1)
 SEA1_sf$location <- stri_trans_general(SEA1_sf$location, "Latin-ASCII")
 SEA1_sf$location <- trimws(gsub("\\s+", " ", SEA1_sf$location))
-SEA1_sf <- SEA1_sf %>% select(country, location, type, geometry)
+SEA1_sf <- SEA1_sf %>% dplyr::select(country, location, type, geometry)
 
 library(readxl)
 SEA <- read_excel("Changed_SEA_haplogroups.xlsx")
@@ -2043,7 +2043,7 @@ ethnic_SEA <- SEA[,-c(1,3,4,6,7,8)] %>% dplyr::rename(country=Country, ethnicity
 ethnic_SEA <- ethnic_SEA %>% 
   mutate(across(where(is.character), ~na_if(., "-"))) %>%
   mutate_at(c(5:612), as.numeric) %>%
-  mutate(across(where(is.numeric), ~replace_na(., 0))) %>% select(-sum) %>% setDT()
+  mutate(across(where(is.numeric), ~replace_na(., 0))) %>% dplyr::select(-sum) %>% setDT()
 
 ethnic_SEA <- gather(ethnic_SEA, haplo, N, -country, -ethnicity, -location, factor_key=TRUE) %>% setDT()
 
@@ -2172,7 +2172,7 @@ pre_ethnic_SEA <- dat_ethnic_SEA %>%
   group_by(ethnicity, haplo1) %>% 
   mutate(N1=sum(N)) %>% ungroup() %>%
   arrange(desc(N1), .by_group = TRUE) %>%
-  select(ethnicity, haplo1, N1) %>%
+  dplyr::select(ethnicity, haplo1, N1) %>%
   group_by(ethnicity, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
   group_by(ethnicity) %>% arrange(haplo1, .by_group = TRUE) %>% 
   mutate(percent=(N1*100)/sum(N1)) %>% ungroup()
@@ -2220,13 +2220,13 @@ ethnicity_SEA <- dat_ethnic_SEA %>%
          haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1)) %>%
   group_by(country, ethnicity, location, haplo1) %>%  mutate(N1=sum(N)) %>% ungroup() %>%
   arrange(desc(N1), .by_group = TRUE) %>%
-  select(country, ethnicity, location, haplo1, N1) %>%
+  dplyr::select(country, ethnicity, location, haplo1, N1) %>%
   group_by(country, ethnicity, location, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
   group_by(country, ethnicity, location) %>% arrange(haplo1, .by_group = TRUE) %>% 
   mutate(percent=(N1*100)/sum(N1)) %>% ungroup() %>%
   group_by(country, ethnicity, location, haplo1) %>%  mutate(sum=sum(N1), max=max(sum)) %>%
   group_by(country, ethnicity, location) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo1_max=haplo1[order==1]) %>% ungroup %>%
-  select(-country)
+  dplyr::select(-country)
 
 ethnicity_SEA_sf <- merge(ethnicity_SEA, SEA1_sf, by=c("location"))
 ethnicity_SEA_plot <- ethnicity_SEA_sf %>% st_as_sf(crs = 4326)
@@ -2245,8 +2245,15 @@ res <- ethnicity_SEA %>%
 
 res <- res %>% left_join(locations_coords) %>% filter(!is.na(ID))
 
-dt_res <- spread(res, key = key, value = value) %>% replace(is.na(.), 0)
-DT <- dt_res %>% select(-c(1:9))
+# dt_res <- spread(res, key = key, value = value) %>% replace(is.na(.), 0)
+
+dt_res <- res %>% 
+  group_by(ethnicity, ID) %>% 
+  mutate(Var = paste0("Val", row_number())) %>% 
+  spread(key, value) %>% replace(is.na(.), 0) %>%
+  ungroup()
+
+DT <- dt_res %>% dplyr::select(-c(1:10))
 m<-as.matrix(DT)
 ID <- dt_res$ID
 location <- dt_res$ID
@@ -2257,23 +2264,23 @@ dt <- dt %>%
   adorn_percentages() %>% 
   dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
   mutate(location=order(ID)) %>% left_join(locations_coords) %>% dplyr::rename(x=X, y=Y)
-dt_x <- dt %>% select(-c(location, ID))
+dt_x <- dt %>% dplyr::select(-c(location, ID))
 
 ggplot() + geom_sf(data=SEA1_sf, aes(fill="white"), alpha=0.1) + 
   geom_sf(data=ethnicity_SEA_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
   geom_sf_text(data=ethnicity_SEA_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", position = "identity", check_overlap = T) +
   geom_scatterpie(aes(x=x, y=y, r=0.6), data=dt_x, cols = colnames(dt_x)[1:219], color=NA, alpha=0.8) +
-  guides(fill=guide_legend(nrow=4, byrow=TRUE)) +
+  guides(fill=guide_legend(nrow=10, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
   theme(text = element_text(size=36), 
         axis.text.x = element_text(size=30), 
         axis.text.y = element_text(size=30), 
         legend.text=element_text(size=25), 
-        legend.key.size = unit(1.5, "cm"),
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Geographic distribution of Present Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia")
-ggsave(filename = file.path("figures", "Ethnicity_SEA.png"), width = 49, height = 33)
+ggsave(filename = file.path("figures", "Ethnicity_SEA_edit2.png"), width = 49, height = 33)
 
 
 ################ SUBCLADES #######################
