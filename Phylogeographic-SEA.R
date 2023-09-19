@@ -141,8 +141,8 @@ names <- dat$names
 # M7b <- file[hap_M7b$name]
 # writeXStringSet(M7b, "data/M7b.fasta")
 # 
-# hap_M7b1a1 <- dat %>% 
-#   mutate(haplogroup4 = ifelse(haplogroup3=="M7", str_extract(haplo, "^([A-Z])\\d\\w\\d\\w\\d"), haplogroup3)) %>%
+# hap_M7b1a1 <- dat %>%
+#   mutate(haplogroup4 = ifelse(haplogroup2=="M7", str_extract(haplo, "^([A-Z])\\d+\\w\\d\\w\\d"), haplogroup3)) %>%
 #   filter(haplogroup4 == "M7b1a1")
 # 
 # M7b1a1 <- file[hap_M7b1a1$name]
