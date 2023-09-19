@@ -36,6 +36,10 @@ if (InstallPackages) {
   install.packages("treeio")
 }
 
+# install.packages("strap", dependencies=TRUE)
+# install.packages("phytools", dependencies=TRUE)
+# remotes::install_github("fmichonneau/phyloch")
+
 library(adegenet)
 library(ape)
 library(BiocManager)
@@ -48,6 +52,7 @@ library(ips)
 library(msa)
 library(stringi)
 library(stringr)
+library(strap)
 
 # Load multiple DNA sequences
 fname = "countriesAlign.fasta"
@@ -112,6 +117,23 @@ names <- dat$names
 
 # Write separate subclade sequences
 
+# Haplogroup F1
+hap_F1 <- dat %>% filter(haplogroup2 == "F1")
+nbin_F1 <- nbin[labels(nbin) %in% hap_F1$name]
+
+F1 <- file[hap_F1$name]
+writeXStringSet(F1, "data/F1.fasta")
+
+# Haplogroup F1(xF1a)
+
+hap_F1xF1a <- dat %>% 
+  mutate(haplogroup4 = ifelse(haplogroup3=="F1", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  filter(haplogroup2 == "F1" & haplogroup4 != "F1a")
+nbin_F1xF1a <- nbin[labels(nbin) %in% hap_F1xF1a$name]
+
+F1xF1a <- file[hap_F1xF1a$name]
+writeXStringSet(F1xF1a, "data/F1xF1a.fasta")
+
 # # Haplogroup F1a
 # hap_F1a <- dat %>% 
 #   mutate(haplogroup4 = ifelse(haplogroup3=="F1", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
@@ -124,6 +146,28 @@ names <- dat$names
 # # cat(file="data/F1a.fasta", paste(paste0(">",names(nbin_F1a)),
 # #                                  sapply(nbin_F1a, paste, collapse=""), sep="\n"), sep="\n")
 # 
+
+# Haplogroup F2
+hap_F2 <- dat %>% filter(haplogroup2 == "F2")
+nbin_F2 <- nbin[labels(nbin) %in% hap_F2$name]
+
+F2 <- file[hap_F2$name]
+writeXStringSet(F2, "data/F2.fasta")
+
+# Haplogroup F3
+hap_F3 <- dat %>% filter(haplogroup2 == "F3")
+nbin_F3 <- nbin[labels(nbin) %in% hap_F3$name]
+
+F3 <- file[hap_F3$name]
+writeXStringSet(F3, "data/F3.fasta")
+
+# Haplogroup B5
+hap_B5 <- dat %>% filter(haplogroup2 == "B5")
+nbin_B5 <- nbin[labels(nbin) %in% hap_B5$name]
+
+B5 <- file[hap_B5$name]
+writeXStringSet(B5, "data/B5.fasta")
+
 # # Haplogroup B5a
 # 
 # hap_B5a <- dat %>% 
@@ -133,6 +177,14 @@ names <- dat$names
 # B5a <- file[hap_B5a$name]
 # writeXStringSet(B5a, "data/B5a.fasta")
 # 
+
+# Haplogroup M7
+hap_M7 <- dat %>% filter(haplogroup2 == "M7")
+nbin_M7 <- nbin[labels(nbin) %in% hap_M7$name]
+
+M7 <- file[hap_M7$name]
+writeXStringSet(M7, "data/M7.fasta")
+
 # # Haplogroup M7b
 # hap_M7b <- dat %>% 
 #   mutate(haplogroup4 = ifelse(haplogroup3=="M7", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
@@ -148,6 +200,14 @@ names <- dat$names
 # M7b1a1 <- file[hap_M7b1a1$name]
 # writeXStringSet(M7b1a1, "data/M7b1a1.fasta")
 # 
+
+# Haplogroup B4
+hap_B4 <- dat %>% filter(haplogroup2 == "B4")
+nbin_B4 <- nbin[labels(nbin) %in% hap_B4$name]
+
+B4 <- file[hap_B4$name]
+writeXStringSet(B4, "data/B4.fasta")
+
 # # Haplogroup B4a
 # 
 # hap_B4a <- dat %>% 
@@ -182,6 +242,14 @@ names <- dat$names
 # F1f <- file[hap_F1f$name]
 # writeXStringSet(F1f, "data/F1f.fasta")
 # 
+
+# Haplogroup N9
+hap_N9 <- dat %>% filter(haplogroup2 == "N9")
+nbin_N9 <- nbin[labels(nbin) %in% hap_N9$name]
+
+N9 <- file[hap_N9$name]
+writeXStringSet(N9, "data/N9.fasta")
+
 # # Haplogroup N9a
 # hap_N9a <- dat %>% 
 #   mutate(haplogroup4 = ifelse(haplogroup3=="N9", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
@@ -190,6 +258,14 @@ names <- dat$names
 # N9a <- file[hap_N9a$name]
 # writeXStringSet(N9a, "data/N9a.fasta")
 # 
+
+# Haplogroup R9
+hap_R9 <- dat %>% filter(haplogroup2 == "R9")
+nbin_R9 <- nbin[labels(nbin) %in% hap_R9$name]
+
+R9 <- file[hap_R9$name]
+writeXStringSet(R9, "data/R9.fasta")
+
 # # Haplogroup R9b
 # hap_R9b <- dat %>% 
 #   mutate(haplogroup4 = ifelse(haplogroup3=="R9", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
@@ -198,12 +274,20 @@ names <- dat$names
 # R9b <- file[hap_R9b$name]
 # writeXStringSet(R9b, "data/R9b.fasta")
 # 
+
 # # Haplogroup M74
 # hap_M74 <- dat %>%filter(haplogroup3 == "M74")
 # 
 # M74 <- file[hap_M74$name]
 # writeXStringSet(M74, "data/M74.fasta")
 # 
+# Haplogroup C7
+hap_C7 <- dat %>% filter(haplogroup2 == "C7")
+nbin_C7 <- nbin[labels(nbin) %in% hap_C7$name]
+
+C7 <- file[hap_C7$name]
+writeXStringSet(C7, "data/C7.fasta")
+
 # # Haplogroup C7a
 # hap_C7a <- dat %>% 
 #   mutate(haplogroup4 = ifelse(haplogroup3=="C7", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
