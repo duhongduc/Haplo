@@ -229,6 +229,36 @@ write_xlsx(dat_hap, "SEA_haplogroups.xlsx")
 
 # Write separate subclade sequences
 
+# Haplogroup G
+hap_G <- dat %>% filter(haplogroup1 == "G")
+nbin_G <- nbin[labels(nbin) %in% hap_G$name]
+G <- file[hap_G$name]
+writeXStringSet(G, "data/G.fasta")
+
+# Haplogroup M
+hap_M <- dat %>% filter(haplogroup1 == "M")
+nbin_M <- nbin[labels(nbin) %in% hap_M$name]
+M <- file[hap_M$name]
+writeXStringSet(M, "data/M.fasta")
+
+# Haplogroup N
+hap_N <- dat %>% filter(haplogroup1 == "N")
+nbin_N <- nbin[labels(nbin) %in% hap_N$name]
+N <- file[hap_N$name]
+writeXStringSet(N, "data/N.fasta")
+
+# Haplogroup P
+hap_P <- dat %>% filter(haplogroup1 == "P")
+nbin_P <- nbin[labels(nbin) %in% hap_P$name]
+P <- file[hap_P$name]
+writeXStringSet(P, "data/P.fasta")
+
+# Haplogroup R
+hap_R <- dat %>% filter(haplogroup1 == "R")
+nbin_R <- nbin[labels(nbin) %in% hap_R$name]
+R <- file[hap_R$name]
+writeXStringSet(R, "data/R.fasta")
+
 # Haplogroup F1
 hap_F1 <- dat %>% filter(haplogroup2 == "F1")
 nbin_F1 <- nbin[labels(nbin) %in% hap_F1$name]
