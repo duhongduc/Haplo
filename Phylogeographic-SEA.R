@@ -39,6 +39,13 @@ if (InstallPackages) {
 # install.packages("strap", dependencies=TRUE)
 # install.packages("phytools", dependencies=TRUE)
 # remotes::install_github("fmichonneau/phyloch")
+# install.packages("admixr")
+# devtools::install_github("uqrmaie1/admixtools")
+# devtools::install_github("uqrmaie1/admixtools", dependencies = TRUE, force = TRUE)
+# install.packages("Rcpp")
+# install.packages("tidyverse")
+# install.packages("igraph")
+# install.packages("plotly")
 
 library(adegenet)
 library(ape)
@@ -55,11 +62,11 @@ library(stringr)
 library(strap)
 
 # Load multiple DNA sequences
-fname = "countriesAlign.fasta"
 fname = "countries.fasta"
+fname2 = "countriesAlign.fasta"
 file <- Biostrings::readDNAStringSet(fname)#for reading multiple DNA sequences from msa package
-file
-cb<-file
+file2 <- Biostrings::readDNAStringSet(fname2)#for reading multiple DNA sequences from msa package
+cb<-file2
 nbin<-as.DNAbin(cb) #read aligned data from cb above
 
 an<-as.alignment(nbin)  #converting DNAbin to alignment format
@@ -112,6 +119,111 @@ library(readxl)
 dat <- read_excel("IsolateExplanation.xlsx")
 dat <- as.data.frame(dat)
 names <- dat$names
+
+library(janitor)
+dat2 <- dat %>%
+  mutate(Ethnicity=ifelse(Ethnicity=="Lao, Akha, Hmong, Khmu, Yao/Mien, Phuan", "Lao, Akha, Hmong, Khmu, Dao, Mien, Phuan",
+                          ifelse(Ethnicity=="Yao", "Dao", Ethnicity))) %>%
+  dplyr::select(name, Country, `Language family`, Ethnicity, haplo, haplogroup1, haplogroup2, haplogroup3) %>% setDT()
+hap_rank <- dat2[, .N, by = .(haplogroup1)] %>% arrange(desc(N))
+hap2_rank <- dat2[, .N, by = .(haplogroup2)] %>% arrange(desc(N))
+hap3_rank <- dat2[, .N, by = .(haplogroup3)] %>% arrange(desc(N))
+
+hap <- dat2[, .N, by = .(haplogroup1)] %>% arrange(desc(N)) %>% mutate(percent=(N*100)/sum(N)) %>% ungroup()
+hap2 <- dat2[, .N, by = .(haplogroup2)] %>% arrange(desc(N)) %>% mutate(percent=(N*100)/sum(N)) %>% ungroup()
+hap3 <- dat2[, .N, by = .(haplogroup3)] %>% arrange(desc(N)) %>% mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+library(pegas)
+library(ape)
+
+dat_hap <- NULL
+for (i in hap_rank$haplogroup1) {
+  cat(i, "\n")
+  df_i <- dat2 %>% dplyr::filter(haplogroup1==i)
+  n_i <- nrow(df_i)
+  nbin_i <- nbin[labels(nbin) %in% df_i$name]
+  h_i <- pegas::haplotype(nbin_i)
+  n_hi <- length(as.list(h_i))
+  fas_i <- file[labels(nbin) %in% df_i$name]
+  writeXStringSet(fas_i, paste0("data/haplo/", i, ".fasta"))
+  # dnbin_i <- dist.dna(nbin_i, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+  x_i <- as.matrix.DNAbin(nbin_i)  #converting DNAbin to matrix
+  dist.gene_i <- dist.gene(x_i, method = "pairwise", variance = TRUE, pairwise.deletion = FALSE)
+  mpd_i <- mean(dist.gene_i)
+  hap.div_i <- hap.div(nbin_i, variance = TRUE)
+  nuc.div_i <- nuc.div(nbin_i, variance = TRUE, pairwise.deletion = FALSE) # hap.div = 1 all haplotypes are unique
+  dati <- data.frame(df_i$haplogroup1, n_i, n_hi, hap.div_i[1], hap.div_i[2], nuc.div_i[1], nuc.div_i[2], mpd_i) %>% slice(1)
+  ## combine
+  dat_hap <- rbindlist(l = list(dat_hap, dati)) %>% unique() %>% setDT()
+}
+
+## Rename
+setnames(x = dat_hap,
+         old = c("df_i.haplogroup1", "n_i", "n_hi", "hap.div_i.1.", "hap.div_i.2.", "nuc.div_i.1.", "nuc.div_i.2.", "mpd_i"),
+         new = c("Haplogroup", "Sample size", "Number of haplotypes", "Haplotype diversity (H)", "H variance", "Nucleotide diveristy (pi)", "pi SE", "MPD"))
+
+dat_hap2 <- NULL
+for (i in hap2_rank$haplogroup2) {
+  cat(i, "\n")
+  df_i <- dat2 %>% dplyr::filter(haplogroup2==i)
+  n_i <- nrow(df_i)
+  nbin_i <- nbin[labels(nbin) %in% df_i$name]
+  h_i <- pegas::haplotype(nbin_i)
+  n_hi <- length(as.list(h_i))
+  fas_i <- file[labels(nbin) %in% df_i$name]
+  writeXStringSet(fas_i, paste0("data/haplo/", i, ".fasta"))
+  # dnbin_i <- dist.dna(nbin_i, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+  x_i <- as.matrix.DNAbin(nbin_i)  #converting DNAbin to matrix
+  dist.gene_i <- dist.gene(x_i, method = "pairwise", variance = TRUE, pairwise.deletion = FALSE)
+  mpd_i <- mean(dist.gene_i)
+  hap.div_i <- hap.div(nbin_i, variance = TRUE)
+  nuc.div_i <- nuc.div(nbin_i, variance = TRUE, pairwise.deletion = FALSE) # hap.div = 1 all haplotypes are unique
+  dati <- data.frame(df_i$haplogroup2, n_i, n_hi, hap.div_i[1], hap.div_i[2], nuc.div_i[1], nuc.div_i[2], mpd_i) %>% slice(1)
+  ## combine
+  dat_hap2 <- rbindlist(l = list(dat_hap2, dati)) %>% unique() %>% setDT()
+}
+
+## Rename
+setnames(x = dat_hap2,
+         old = c("df_i.haplogroup2", "n_i", "n_hi", "hap.div_i.1.", "hap.div_i.2.", "nuc.div_i.1.", "nuc.div_i.2.", "mpd_i"),
+         new = c("Haplogroup", "Sample size", "Number of haplotypes", "Haplotype diversity (H)", "H variance", "Nucleotide diveristy (pi)", "pi SE", "MPD"))
+
+dat_hap3 <- NULL
+for (i in hap3_rank$haplogroup3) {
+  cat(i, "\n")
+  df_i <- dat2 %>% dplyr::filter(haplogroup3==i)
+  n_i <- nrow(df_i)
+  nbin_i <- nbin[labels(nbin) %in% df_i$name]
+  h_i <- pegas::haplotype(nbin_i)
+  n_hi <- length(as.list(h_i))
+  fas_i <- file[labels(nbin) %in% df_i$name]
+  writeXStringSet(fas_i, paste0("data/haplo/", i, ".fasta"))
+  # dnbin_i <- dist.dna(nbin_i, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+  x_i <- as.matrix.DNAbin(nbin_i)  #converting DNAbin to matrix
+  dist.gene_i <- dist.gene(x_i, method = "pairwise", variance = TRUE, pairwise.deletion = FALSE)
+  mpd_i <- mean(dist.gene_i)
+  hap.div_i <- hap.div(nbin_i, variance = TRUE)
+  nuc.div_i <- nuc.div(nbin_i, variance = TRUE, pairwise.deletion = FALSE) # hap.div = 1 all haplotypes are unique
+  dati <- data.frame(df_i$haplogroup3, n_i, n_hi, hap.div_i[1], hap.div_i[2], nuc.div_i[1], nuc.div_i[2], mpd_i) %>% slice(1)
+  ## combine
+  dat_hap3 <- rbindlist(l = list(dat_hap3, dati)) %>% unique() %>% setDT()
+}
+
+## Rename
+setnames(x = dat_hap3,
+         old = c("df_i.haplogroup3", "n_i", "n_hi", "hap.div_i.1.", "hap.div_i.2.", "nuc.div_i.1.", "nuc.div_i.2.", "mpd_i"),
+         new = c("Haplogroup", "Sample size", "Number of haplotypes", "Haplotype diversity (H)", "H variance", "Nucleotide diveristy (pi)", "pi SE", "MPD"))
+
+## Combine
+dat_hap <- rbindlist(l = list(dat_hap, dat_hap2, dat_hap3)) %>% unique() %>% setDT()
+
+## Rename
+setnames(x = dat_hap,
+         old = c("df_i.haplogroup1", "n_i", "n_hi", "hap.div_i.1.", "hap.div_i.2.", "nuc.div_i.1.", "nuc.div_i.2.", "mpd_i"),
+         new = c("Haplogroup", "Sample size", "Number of haplotypes", "Haplotype diversity (H)", "H variance", "Nucleotide diveristy (pi)", "pi SE", "MPD"))
+
+library(writexl)
+write_xlsx(dat_hap, "SEA_haplogroups.xlsx")
 
 ################ SUBCLADES #######################
 
@@ -384,9 +496,9 @@ library(ape)
 #   nbin_i <- nbin[labels(nbin) %in% df_i$name]
 #   h_i <- pegas::haplotype(nbin_i)
 #   n_hi <- length(as.list(h_i))
-#   # fas_i <- file[labels(nbin) %in% df_i$name]
-#   # writeXStringSet(fas_i, paste0("data/ethnic/", i, ".fasta"))
-#   # dnbin_i <- dist.dna(nbin_i, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+#   fas_i <- file[labels(nbin) %in% df_i$name]
+#   writeXStringSet(fas_i, paste0("data/ethnic/", i, ".fasta"))
+#   dnbin_i <- dist.dna(nbin_i, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
 #   x_i <- as.matrix.DNAbin(nbin_i)  #converting DNAbin to matrix
 #   dist.gene_i <- dist.gene(x_i, method = "pairwise", variance = TRUE, pairwise.deletion = FALSE)
 #   mpd_i <- mean(dist.gene_i)
@@ -396,7 +508,7 @@ library(ape)
 #   ## combine
 #   dat_e <- rbindlist(l = list(dat_e, dati)) %>% unique() %>% setDT()
 # }
-# ## Rename
+## Rename
 # setnames(x = dat_e,
 #          old = c("df_i.Ethnicity", "df_i..Language.family.", "df_i.Country", "n_i", "n_hi", "hap.div_i.1.", "hap.div_i.2.", "nuc.div_i.1.", "nuc.div_i.2.", "mpd_i"),
 #          new = c("Ethnic", "Language", "Country", "Sample size", "Number of haplotypes", "Haplotype diversity (H)", "H variance", "Nucleotide diveristy (pi)", "pi SE", "MPD"))
@@ -3605,3 +3717,42 @@ boothap
 pdf("boothap.pdf", width = 11, height = 5)
 boothap
 dev.off()
+
+library("admixtools")
+
+genotype_data = "/my/geno/prefix"
+fit = qpgraph(genotype_data, example_graph)
+fit$score
+
+f2_blocks = f2_from_geno(genotype_data)
+fit = qpgraph(f2_blocks, example_graph)
+
+prefix = '/path/to/geno'
+my_f2_dir = '/store/f2data/here/'
+
+extract_f2(prefix, my_f2_dir)
+
+admixtools::run_shiny_admixtools()
+
+library(admixr)
+
+snp_data <- eigenstrat(download_data())
+
+result <- d(
+  W = c("French", "Sardinian"), X = "Yoruba", Y = "Vindija", Z = "Chimp",
+  data = snp_data
+)
+
+result
+
+beast_file <- system.file("examples/MCC_FluA_H3.tree", 
+                          package="ggtree")
+beast_tree <- read.beast(beast_file)
+ggtree(beast_tree, mrsd="2013-01-01") + theme_tree2()
+
+samplelist <- read_tsv("analysis/samplelist.txt",
+                       col_names = "sample")
+
+read_delim("analysis/full_genome.filtered.numericChr.2.Q",
+           col_names = paste0("Q",seq(1:2)),
+           delim=" ")
