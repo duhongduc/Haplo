@@ -438,6 +438,13 @@ writeXStringSet(C7, "data/C7.fasta")
 # C7a <- file[hap_C7a$name]
 # writeXStringSet(C7a, "data/C7a.fasta")
 
+# Haplogroup D4
+hap_D4 <- dat %>% filter(haplogroup2 == "D4")
+nbin_D4 <- nbin[labels(nbin) %in% hap_D4$name]
+
+D4 <- file[hap_D4$name]
+writeXStringSet(D4, "data/D4.fasta")
+
 ###########################################
 
 names <- as.data.frame(nbinmat)
