@@ -240,7 +240,7 @@ p <- ggtree(tr=tree, layout="fan", open.angle=15, size=0.2, aes(colour=Clade)) +
     guide=guide_legend(keywidth=1.5,
                        keyheight=1.25,
                        order=1,
-                       override.aes=list(linetype=1, size=2, alpha=1))) +
+                       override.aes=list(linetype=1, size=6,alpha=1))) +
   theme(legend.position="right",
         legend.background=element_rect(fill=NA),
         legend.title=element_text(size=20),
@@ -263,7 +263,7 @@ p1 <- p %<+% dat1 +
     guide=guide_legend(keywidth=1.5,
                        keyheight=1.25,
                        order=2,
-                       override.aes=list(size=2,alpha=1))) +
+                       override.aes=list(size=5,alpha=1))) +
   theme(legend.position="right",
         legend.background=element_rect(fill=NA),
         legend.title=element_text(size=20),
@@ -286,7 +286,7 @@ p3 <- p1 +
     guide=guide_legend(keywidth=1.5, 
                        keyheight=1.25, 
                        order=4,
-                       override.aes=list(size=2)),
+                       override.aes=list(size=5)),
     na.translate=FALSE) +
   scale_starshape_discrete(guide="none") +
   theme(legend.background=element_rect(fill=NA),
