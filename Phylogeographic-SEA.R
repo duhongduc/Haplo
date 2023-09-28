@@ -22,6 +22,7 @@ if (InstallPackages) {
   if (!requireNamespace("BiocManager", quietly=TRUE)) 
     install.packages("BiocManager")
   BiocManager::install("msa")
+  BiocManager::install("ggtreeExtra")
   
   install.packages("adegenet")
   install.packages("ape")
@@ -46,6 +47,7 @@ if (InstallPackages) {
 # install.packages("tidyverse")
 # install.packages("igraph")
 # install.packages("plotly")
+# install.packages("coalescentMCMC")
 
 library(adegenet)
 library(ape)
@@ -60,6 +62,7 @@ library(msa)
 library(stringi)
 library(stringr)
 library(strap)
+library(coalescentMCMC)
 
 # Load multiple DNA sequences
 fname = "countries.fasta"
@@ -109,6 +112,191 @@ ggtree(tre, cex = 0.8, aes(color=branch.length))+
 # njmsaplot
 # dev.off()
 
+library(ggtree)
+library(ggtreeExtra)
+library(ggnewscale)
+library(reshape2)
+library(tidytree)
+library(ggstar)
+library(TDbook)
+library(phytools)
+library(ape)
+
+tree2 <- ape::read.tree("Treefull_root.newick")
+
+tree <- phytools::read.newick("Treefull.newick")
+tree$tip.label <- gsub("'", "", tree$tip.label)
+tree$tip.label <- gsub("_", "", tree$tip.label)
+tree$tip.label <- gsub("-", "", tree$tip.label)
+tree$tip.label <- gsub(" ", "", tree$tip.label)
+tree$tip.label <- gsub(",", "", tree$tip.label)
+tree$tip.label <- trimws(gsub("\\s+", " ", tree$tip.label))
+
+options(max.print=1000000)
+
+ggt<-ggtree::ggtree(tree, cex = 0.8, aes(color=branch.length))+
+  scale_color_continuous(high='lightskyblue1',low='coral4')+
+  geom_tiplab(align=TRUE, size=2)+
+  geom_treescale(y = - 5, color = "coral4", fontsize = 4)
+ggt
+
+library(tidyr)
+library(dplyr)
+library(data.table)
+library(readxl)
+library(scales)
+
+pal<-rgb(0,1,0)
+show_col(pal)
+show_col(hue_pal()(9))
+show_col(hue_pal()(16), borders = NA)
+
+show_col(viridis_pal()(16))
+show_col(viridis_pal()(16), labels = FALSE)
+show_col(viridis_pal()(141))
+viridis_pal()(141)
+
+show_col(c("#0099ff", "#163566", "#336699", "#339900", "#660000", "#66ccff", "#9900ff", "#990f80", "#996666", "#99ff99", "#cc0000", "#cc66ff", "#cccc33", "#fa0f0c", "#ff6633", "#ff9999", "#ffcc33", "#ffcc99", "#ffff00"))
+
+dat <- read_excel("IsolateExplanation.xlsx")
+dat$name <- gsub("\\+", "", dat$name)
+dat$name <- gsub("\\'", "", dat$name)
+dat$name <- gsub("\\(", "", dat$name)
+dat$name <- gsub("\\)", "", dat$name)
+dat$name <- gsub("\\_", "", dat$name)
+dat$name <- gsub("\\-", "", dat$name)
+dat$name <- gsub(" ", "", dat$name)
+dat$name <- gsub("\\*", "", dat$name)
+dat$name <- gsub("\\@", "", dat$name)
+dat$name <- gsub("\\!", "", dat$name)
+dat$name <- gsub("\\,", "", dat$name)
+dat$name <- gsub("\\,", "", dat$name)
+dat2 <- dat %>% filter(!name %in% tree$tip.label)
+dat$name <- trimws(gsub("\\s+", " ", dat$name))
+table(tree$tip.label %in% dat$name)
+table(dat$name %in% tree$tip.label)
+dat <- as.data.frame(dat)
+
+dat <- dat %>%
+  mutate(haplogroup2=ifelse(haplogroup2=="A+152"|haplogroup2=="A+152+16362"|haplogroup2=="A+152+16362+200", "A+",
+                            ifelse(haplogroup2=="R+16189", "R+", haplogroup2)),
+         Country_color=NA,
+         Country_color=ifelse(Country=="Brunei", "#ff6633",
+                              ifelse(Country=="Cambodia", "#ffff00",
+                                     ifelse(Country=="Indonesia", "#9900ff",
+                                            ifelse(Country=="Laos", "#0099ff",
+                                                   ifelse(Country=="Malaysia", "#990f80",
+                                                          ifelse(Country=="Myanmar", "#99ff99",
+                                                                 ifelse(Country=="Philippines", "#cc66ff",
+                                                                        ifelse(Country=="Singapore", "#ff9999",
+                                                                               ifelse(Country=="Thailand", "#339900",
+                                                                                      ifelse(Country=="Timor-Leste", "#66ccff",
+                                                                                             ifelse(Country=="Vietnam", "#fa0f0c",
+                                                                                                    ifelse(Country=="Africa", "black",
+                                                                                                           ifelse(Country=="Europe", "orange", Country_color))))))))))))),
+         `Language family`=ifelse(`Language family`=="Austronesian, Austroasiatic", "Austroasiatic, Austronesian",
+                                  ifelse(`Language family`=="Austronesian, Spanish" | `Language family`=="Austronesian, Trans-New Guinea" | `Language family`=="Papuan, Austronesian, English", "Austronesian + (xAustroasiatic)",
+                                         ifelse(`Language family`=="Hmong-Mien" | `Language family`=="Hmong-Mien, Mongolic", "Hmong-Mien +",
+                                                ifelse(`Language family`=="Indo-European, Sino-Tibetan" | `Language family`=="Sino-Tibetan, Austroasiatic, Tai-Kadai" | `Language family`=="Sino-Tibetan, Tai-Kada" | `Language family`=="Tai-Kadai, Sino-Tibetan", "Sino-Tibetan +",
+                                                       ifelse(`Language family`=="Trans-New Guinea" | `Language family`=="Trans–New Guinea (Alor-Pantar, Papuan)", "Trans-New Guinea +",
+                                                              ifelse(`Language family`=="Austronesian, Austroasiatic, Indo-European", "Austroasiatic, Austronesian + (xSino-Tibetan)",
+                                                                     ifelse(`Language family`=="Austroasiatic, Tai-Kadai" | `Language family`=="Austroasiatic, Tai-Kadai, Hmong-Mien, Sino-Tibetan" | `Language family`=="Tai-Kadai, Hmong-Mien, Austroasiatic", "Austroasiatic, Tai-Kadai +", `Language family`))))))))
+
+# df <- df_Candidaauris_data
+# tr <- tree_Candidaauris
+library(writexl)
+write_xlsx(dat, "SEA_megadata.xlsx")
+
+dat <- read_excel("SEA_megadata.xlsx")
+countries <- c("Africa", "Brunei", "Cambodia", "Europe", "Indonesia", "Laos", "Malaysia", "Myanmar", "Philippines", "Singapore", "Thailand", "Timor-Leste", "Vietnam")
+
+# For the tip points
+dat1 <- dat %>% select(c("name", "Country", "Country_color", "haplogroup2"))
+dat1$Country <- factor(dat1$Country, levels=countries)
+Countrycolors <- dat1[match(countries,dat$Country),"Country_color"]
+
+# For the haplogroup layer
+dat3 <- dat %>% select(c("name", "haplogroup2")) %>%
+  melt(id="name", variable.name="haplo", value.name="haplogroup")
+
+# For the clade group
+dat4 <- dat %>% select(c("name", "Language family"))
+dat4 <- aggregate(.~`Language family`, dat4, FUN=paste, collapse=",")
+clades <- lapply(dat4$name, function(x){unlist(strsplit(x,split=","))})
+names(clades) <- dat4$`Language family`
+
+ggt<-ggtree::ggtree(tree, cex = 0.8, aes(color=branch.length))+
+  geom_tiplab(align=TRUE, size=2)+
+  geom_treescale(y = - 5, color = "coral4", fontsize = 4)
+ggt
+
+tree <- groupOTU(tree, clades, "Clade")
+Clade <- NULL
+p <- ggtree(tr=tree, layout="fan", open.angle=15, size=0.2, aes(colour=Clade)) +
+  scale_colour_manual(
+    name="Language",
+    values=c("black", "#fa0f0c", "#FF61CC", "#ED68ED", "#F8766D", "#ABA300", "#C77CFF", "#8494FF", "#E68613", "#0099ff", "#660000", "#163566", "#336699", "#339900", "#66ccff", "lightgrey"),
+    labels=c("Africa", "Austroasiatic", "Austroasiatic, Austronesian", "Austroasiatic, Austronesian + (xSino-Tibetan)", "Austroasiatic, Austronesian, Sino-Tibetan", "Austroasiatic, Tai-Kadai +", "Austronesian", "Austronesian + (xAustroasiatic)", "Europe", "Hmong-Mien +", "Mayan", "Sino-Tibetan", "Sino-Tibetan +", "Tai-Kadai", "Trans-New Guinea +", "Unknown"),
+    guide=guide_legend(keywidth=1.5,
+                       keyheight=1.25,
+                       order=1,
+                       override.aes=list(linetype=1, size=2, alpha=1))) +
+  theme(legend.position="right",
+        legend.background=element_rect(fill=NA),
+        legend.title=element_text(size=20),
+        legend.text=element_text(size=15),
+        legend.key.size = unit(40, "cm"),
+        legend.spacing.y = unit(2, "cm")) + 
+  new_scale_colour()
+
+p1 <- p %<+% dat1 +
+  geom_tippoint(aes(colour=Country), alpha=0) +
+  geom_tiplab(aes(colour=Country),
+              align=TRUE,
+              linetype=3,
+              size=1,
+              linesize=0.2,
+              show.legend=FALSE) +
+  scale_colour_manual(
+    name="Country",
+    values=Countrycolors, 
+    guide=guide_legend(keywidth=1.5,
+                       keyheight=1.25,
+                       order=2,
+                       override.aes=list(size=2,alpha=1))) +
+  theme(legend.position="right",
+        legend.background=element_rect(fill=NA),
+        legend.title=element_text(size=20),
+        legend.text=element_text(size=15),
+        legend.key.size = unit(30, "cm"),
+        legend.spacing.y = unit(2, "cm")) + 
+  new_scale_colour()
+
+p3 <- p1 +
+  geom_fruit(data=dat3,
+             geom=geom_star,
+             mapping=aes(x=haplogroup, y=name, fill=haplogroup, starshape=haplo),
+             size=3,
+             starstroke=0,
+             pwidth=0.1,
+             inherit.aes = FALSE,
+             grid.params=list(linetype=3, size=0.2)) +
+  scale_fill_discrete(
+    name="Haplogroup",
+    guide=guide_legend(keywidth=1.5, 
+                       keyheight=1.25, 
+                       order=4,
+                       override.aes=list(size=2)),
+    na.translate=FALSE) +
+  scale_starshape_discrete(guide="none") +
+  theme(legend.background=element_rect(fill=NA),
+        legend.title=element_text(size=20), 
+        legend.text=element_text(size=15),
+        legend.key.size = unit(30, "cm"),
+        legend.spacing.y = unit(2, "cm"))
+p3
+ggsave(filename = file.path("figures", "Treefull.png"), width = 30, height = 20)
+  
 # Create dataset of sequences
 
 library(tidyr)
@@ -3793,3 +3981,60 @@ samplelist <- read_tsv("analysis/samplelist.txt",
 read_delim("analysis/full_genome.filtered.numericChr.2.Q",
            col_names = paste0("Q",seq(1:2)),
            delim=" ")
+
+### Coalescent MCMC
+
+# Haplogroup F1
+hap_F1 <- dat %>% filter(haplogroup2 == "F1")
+nbin_F1 <- nbin[labels(nbin) %in% hap_F1$name]
+
+data(woodmouse)
+out <- coalescentMCMC(woodmouse)
+
+#adjust plot margins
+par(mar = c(1, 1, 1, 1))
+plot(out)
+getMCMCtrees()
+
+res <- coalescentMCMC(woodmouse, 1e6, moves = c(1, 3)) # ~ 1 hr
+plot(res) # surely hard to read
+plot(subset(res, end = 1e3)) # plot only the first 1000 generations
+acfplot(res)
+acfplot(subset(res, 1e4, 100))
+
+library(ape)
+it = read.tree("example_newick.txt")  # autogenerated filename from the website.
+getMRCA(it, c("Homo_sapiens", "Drosophila_melanogaster"))  # drosophila is one of only 2 arthropods in this tree, but arthropods all have an arthropod common ancestor
+# prints "200", the node index of the MRCA.
+
+library(phytools)
+F1a_it = read.newick("F1a_newick.txt")
+mrca(F1a_it, full = TRUE)
+getMRCA(F1a_it, F1a_it$tip.label)
+
+findMRCA(F1a_it, tips=NULL, type=c("node","height"))
+anc<-findMRCA(F1a_it, F1a_it$tip.label)
+plotTree(F1a_it,type="fan",fsize=0.7,lwd=1)
+nodelabels(node=anc,frame="circle",pch=21,cex=1.5,
+           bg="blue")
+legend("topleft","most recent common ancestor\nof Puerto Rican TG anoles",
+       pch=21,pt.cex=1.5,pt.bg="blue",cex=0.7,bty="n")
+par(mar=c(5.1,4.1,4.1,2.1)) ## reset margin to default
+
+library(devtools)
+install_github("jhavsmith/startmrca")
+library(startmrca)
+help(run.startmrca)
+run.startmrca(vcf.file = "examples/FIN_chr2_pos136608646.vcf.gz",
+rec.file      = "examples/decode_recmap_sexaveraged.txt", 
+sample.ids    = "examples/sample_ids.txt", 
+refsample.ids = "examples/sample_ids.txt",
+mut.rate      = 1.6e-8, 
+nsel          = 50,
+nanc          = 20,
+chain.length  = 20,
+nanc.post     = 10,
+pos           = 136608646,
+sel.allele    = 1)
+
+
