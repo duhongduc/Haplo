@@ -285,7 +285,7 @@ p3 <- p1 +
     name="Haplogroup",
     guide=guide_legend(keywidth=1.5, 
                        keyheight=1.25, 
-                       order=4,
+                       order=3,
                        override.aes=list(size=5)),
     na.translate=FALSE) +
   scale_starshape_discrete(guide="none") +
@@ -296,7 +296,171 @@ p3 <- p1 +
         legend.spacing.y = unit(2, "cm"))
 p3
 ggsave(filename = file.path("figures", "Treefull.png"), width = 30, height = 20)
-  
+
+filename <- "TREEFULL.NEXUS"
+tree2 <- ape::read.nexus(filename)
+tree2$tip.label <- gsub("'", "", tree2$tip.label)
+tree2$tip.label <- gsub("_", "", tree2$tip.label)
+tree2$tip.label <- gsub("-", "", tree2$tip.label)
+tree2$tip.label <- gsub(" ", "", tree2$tip.label)
+tree2$tip.label <- gsub(",", "", tree2$tip.label)
+tree2$tip.label <- trimws(gsub("\\s+", " ", tree2$tip.label))
+
+
+info <- dat
+cols <- Countrycolors
+
+metadata <- dat %>%
+  mutate(Language_color=NA,
+         Language_color=ifelse(`Language family`=="Africa", "black",
+                               ifelse(`Language family`=="Austroasiatic", "#fa0f0c",
+                                      ifelse(`Language family`=="Austroasiatic, Austronesian", "#ff6633",
+                                             ifelse(`Language family`=="Austroasiatic, Austronesian + (xSino-Tibetan)", "#ff9999",
+                                                    ifelse(`Language family`=="Austroasiatic, Austronesian, Sino-Tibetan", "#cccc33",
+                                                           ifelse(`Language family`=="Austroasiatic, Tai-Kadai +", "#ffcc99",
+                                                                  ifelse(`Language family`=="Austronesian", "#9900ff",
+                                                                         ifelse(`Language family`=="Austronesian + (xAustroasiatic)", "990f80",
+                                                                                ifelse(`Language family`=="Europe", "white",
+                                                                                       ifelse(`Language family`=="Hmong-Mien +", "#0099ff",
+                                                                                              ifelse(`Language family`=="Mayan", "#660000",
+                                                                                                     ifelse(`Language family`=="Sino-Tibetan", "#163566",
+                                                                                                            ifelse(`Language family`=="Sino-Tibetan +", "#336699",
+                                                                                                                   ifelse(`Language family`=="Tai-Kadai", "#339900",
+                                                                                                                          ifelse(`Language family`=="Trans-New Guinea +", "#66ccff",
+                                                                                                                                 ifelse(`Language family`=="Unknown", "lightgrey",
+                                                                                                                                        Language_color)))))))))))))))))
+
+metadata <- metadata %>%
+  left_join(dat1 %>% select(name, Country_color)) %>% 
+  select(c("name", "Country", "Country_color",
+           "Language family", "Language_color", "haplogroup1", "Ethnicity"))
+
+languages <- c("Africa", "Austroasiatic", "Austroasiatic, Austronesian", "Austroasiatic, Austronesian + (xSino-Tibetan)", "Austroasiatic, Austronesian, Sino-Tibetan", "Austroasiatic, Tai-Kadai +", "Austronesian", "Austronesian + (xAustroasiatic)", "Europe", "Hmong-Mien +", "Mayan", "Sino-Tibetan", "Sino-Tibetan +", "Tai-Kadai", "Trans-New Guinea +", "Unknown")
+Languagecolors <- metadata[match(languages, metadata$`Language family`),"Language_color"]
+
+p <- ggtree(tree2, layout='circular')
+
+p <- p %<+% metadata
+
+p1 <- p +
+  geom_tippoint(aes(color=Country),
+                size=4) + 
+  scale_color_manual(values=cols, 
+                     guide=guide_legend(keywidth=2,
+                                        keyheight=1,
+                                        order=2,
+                                        override.aes=list(size=10,alpha=1))) + 
+  theme(legend.position="right",
+                          legend.background=element_rect(fill=NA),
+                          legend.title=element_text(size=30, face="bold"),
+                          legend.text=element_text(size=20),
+                          legend.key.size = unit(30, "cm"),
+                          legend.spacing.y = unit(2, "cm")) + 
+  new_scale_colour()
+
+p2 <-p1 +
+  geom_fruit(
+    geom=geom_tile,
+    mapping=aes(fill=`Language family`),
+    width=0.01,
+    offset=0.1
+  ) +
+  scale_fill_manual(
+    name="Language",
+    values=Languagecolors,
+    guide=guide_legend(keywidth=2, 
+                       keyheight=1, 
+                       ncol=1, 
+                       order=1,
+                       override.aes=list(size=5,alpha=1))
+  ) +
+  theme(legend.background=element_rect(fill=NA),
+        legend.title=element_text(size=30, face="bold"), 
+        legend.text=element_text(size=20),
+        legend.key.size = unit(30, "cm"),
+        legend.spacing.y = unit(2, "cm")) + 
+  new_scale_colour()
+
+p3 <- p2 +
+  new_scale_fill() +
+  geom_fruit(geom=geom_star,
+             mapping=aes(fill=haplogroup1),
+             size=10,
+             starstroke=0,
+             pwidth=0.1,
+             inherit.aes = FALSE,
+             grid.params=list(linetype=3, size=0.2)) +
+  scale_fill_discrete(
+    name="Haplogroup",
+    guide=guide_legend(keywidth=2, 
+                       keyheight=1, 
+                       ncol=10,
+                       order=3,
+                       override.aes=list(size=10)),
+    na.translate=FALSE) +
+  scale_starshape_discrete(guide="none") +
+  theme(legend.background=element_rect(fill=NA),
+        legend.title=element_text(size=30, face="bold"), 
+        legend.text=element_text(size=20),
+        legend.key.size = unit(30, "cm"),
+        legend.spacing.y = unit(2, "cm")) + 
+  new_scale_colour()
+
+p3
+ggsave(filename = file.path("figures", "Treefull(2).png"), width = 30, height = 20)
+
+p4 <-p1 +
+  geom_fruit(
+    geom=geom_bar,
+    mapping=aes(fill=`Language family`),
+    pwidth=0.38, 
+    orientation="y", 
+    stat="identity"
+  ) +
+  scale_fill_manual(
+    name="Language",
+    values=Languagecolors,
+    guide=guide_legend(keywidth=2, 
+                       keyheight=1, 
+                       ncol=1, 
+                       order=1,
+                       override.aes=list(size=5,alpha=1))
+  ) +
+  theme(legend.background=element_rect(fill=NA),
+        legend.title=element_text(size=30, face="bold"), 
+        legend.text=element_text(size=20),
+        legend.key.size = unit(30, "cm"),
+        legend.spacing.y = unit(2, "cm")) + 
+  new_scale_colour()
+
+p5 <- p4 +
+  new_scale_fill() +
+  geom_fruit(geom=geom_star,
+             mapping=aes(fill=haplogroup1),
+             size=10,
+             starstroke=0,
+             pwidth=0.1,
+             inherit.aes = FALSE,
+             grid.params=list(linetype=3, size=0.2)) +
+  scale_fill_discrete(
+    name="Haplogroup",
+    guide=guide_legend(keywidth=2, 
+                       keyheight=1, 
+                       ncol=10,
+                       order=3,
+                       override.aes=list(size=10)),
+    na.translate=FALSE) +
+  scale_starshape_discrete(guide="none") +
+  theme(legend.background=element_rect(fill=NA),
+        legend.title=element_text(size=30, face="bold"), 
+        legend.text=element_text(size=20),
+        legend.key.size = unit(30, "cm"),
+        legend.spacing.y = unit(2, "cm")) + 
+  new_scale_colour()
+
+p5
+ggsave(filename = file.path("figures", "Treefull(3).png"), width = 30, height = 20)
+
 # Create dataset of sequences
 
 library(tidyr)
