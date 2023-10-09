@@ -730,22 +730,22 @@ writeXStringSet(F1xF1a, "data/F1xF1aAligned.fasta")
 hap_F2 <- dat %>% filter(haplogroup2 == "F2")
 nbin_F2 <- nbin[labels(nbin) %in% hap_F2$name]
 
-F2 <- file[hap_F2$name]
-writeXStringSet(F2, "data/F2.fasta")
+F2 <- file2[hap_F2$name]
+writeXStringSet(F2, "data/F2Aligned.fasta")
 
 # Haplogroup F3
 hap_F3 <- dat %>% filter(haplogroup2 == "F3")
 nbin_F3 <- nbin[labels(nbin) %in% hap_F3$name]
 
-F3 <- file[hap_F3$name]
-writeXStringSet(F3, "data/F3.fasta")
+F3 <- file2[hap_F3$name]
+writeXStringSet(F3, "data/F3Aligned.fasta")
 
 # Haplogroup B5
 hap_B5 <- dat %>% filter(haplogroup2 == "B5")
 nbin_B5 <- nbin[labels(nbin) %in% hap_B5$name]
 
-B5 <- file[hap_B5$name]
-writeXStringSet(B5, "data/B5.fasta")
+B5 <- file2[hap_B5$name]
+writeXStringSet(B5, "data/B5Aligned.fasta")
 
 # # Haplogroup B5a
 # 
@@ -761,8 +761,8 @@ writeXStringSet(B5, "data/B5.fasta")
 hap_M7 <- dat %>% filter(haplogroup2 == "M7")
 nbin_M7 <- nbin[labels(nbin) %in% hap_M7$name]
 
-M7 <- file[hap_M7$name]
-writeXStringSet(M7, "data/M7.fasta")
+M7 <- file2[hap_M7$name]
+writeXStringSet(M7, "data/M7Aligned.fasta")
 
 # # Haplogroup M7b
 # hap_M7b <- dat %>% 
@@ -784,8 +784,8 @@ writeXStringSet(M7, "data/M7.fasta")
 hap_B4 <- dat %>% filter(haplogroup2 == "B4")
 nbin_B4 <- nbin[labels(nbin) %in% hap_B4$name]
 
-B4 <- file[hap_B4$name]
-writeXStringSet(B4, "data/B4.fasta")
+B4 <- file2[hap_B4$name]
+writeXStringSet(B4, "data/B4Aligned.fasta")
 
 # # Haplogroup B4a
 # 
@@ -826,8 +826,8 @@ writeXStringSet(B4, "data/B4.fasta")
 hap_N9 <- dat %>% filter(haplogroup2 == "N9")
 nbin_N9 <- nbin[labels(nbin) %in% hap_N9$name]
 
-N9 <- file[hap_N9$name]
-writeXStringSet(N9, "data/N9.fasta")
+N9 <- file2[hap_N9$name]
+writeXStringSet(N9, "data/N9Aligned.fasta")
 
 # # Haplogroup N9a
 # hap_N9a <- dat %>% 
@@ -842,8 +842,8 @@ writeXStringSet(N9, "data/N9.fasta")
 hap_R9 <- dat %>% filter(haplogroup2 == "R9")
 nbin_R9 <- nbin[labels(nbin) %in% hap_R9$name]
 
-R9 <- file[hap_R9$name]
-writeXStringSet(R9, "data/R9.fasta")
+R9 <- file2[hap_R9$name]
+writeXStringSet(R9, "data/R9Aligned.fasta")
 
 # # Haplogroup R9b
 # hap_R9b <- dat %>% 
@@ -864,8 +864,8 @@ writeXStringSet(R9, "data/R9.fasta")
 hap_C7 <- dat %>% filter(haplogroup2 == "C7")
 nbin_C7 <- nbin[labels(nbin) %in% hap_C7$name]
 
-C7 <- file[hap_C7$name]
-writeXStringSet(C7, "data/C7.fasta")
+C7 <- file2[hap_C7$name]
+writeXStringSet(C7, "data/C7Aligned.fasta")
 
 # # Haplogroup C7a
 # hap_C7a <- dat %>% 
@@ -879,8 +879,8 @@ writeXStringSet(C7, "data/C7.fasta")
 hap_D4 <- dat %>% filter(haplogroup2 == "D4")
 nbin_D4 <- nbin[labels(nbin) %in% hap_D4$name]
 
-D4 <- file[hap_D4$name]
-writeXStringSet(D4, "data/D4.fasta")
+D4 <- file2[hap_D4$name]
+writeXStringSet(D4, "data/D4Aligned.fasta")
 
 ###########################################
 
