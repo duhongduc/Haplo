@@ -192,8 +192,8 @@ dat <- dat %>%
                                                                                ifelse(Country=="Thailand", "#339900",
                                                                                       ifelse(Country=="Timor-Leste", "#66ccff",
                                                                                              ifelse(Country=="Vietnam", "#fa0f0c",
-                                                                                                    ifelse(Country=="Africa", "black",
-                                                                                                           ifelse(Country=="Europe", "orange", Country_color))))))))))))),
+                                                                                                    ifelse(Country=="RSRS", "black",
+                                                                                                           ifelse(Country=="rCRS", "orange", Country_color))))))))))))),
          `Language family`=ifelse(Ethnicity=="Mon", "Austroasiatic",
                                   ifelse(Ethnicity=="Hmong", "Hmong-Mien",
                                          ifelse(Ethnicity=="Shan", "Tai-Kadai",
@@ -224,19 +224,19 @@ dat <- dat %>%
 # write_xlsx(dat, "SEA_megadata.xlsx")
 # 
 # dat <- read_excel("SEA_megadata.xlsx")
-countries <- c("Africa", "Brunei", "Cambodia", "Europe", "Indonesia", "Laos", "Malaysia", "Myanmar", "Philippines", "Singapore", "Thailand", "Timor-Leste", "Vietnam")
+countries <- c("Brunei", "Cambodia", "Indonesia", "Laos", "Malaysia", "Myanmar", "Philippines", "rCRS", "RSRS", "Singapore", "Thailand", "Timor-Leste", "Vietnam")
 
 # For the tip points
-dat1 <- dat %>% select(c("name", "Country", "Country_color", "haplogroup2"))
+dat1 <- dat %>% dplyr::select(c("name", "Country", "Country_color", "haplogroup2"))
 dat1$Country <- factor(dat1$Country, levels=countries)
 Countrycolors <- dat1[match(countries,dat$Country),"Country_color"]
 
 # For the haplogroup layer
-dat3 <- dat %>% select(c("name", "haplogroup2")) %>%
+dat3 <- dat %>% dplyr::select(c("name", "haplogroup2")) %>%
   melt(id="name", variable.name="haplo", value.name="haplogroup")
 
 # For the clade group
-dat4 <- dat %>% select(c("name", "Language family"))
+dat4 <- dat %>% dplyr::select(c("name", "Language family"))
 dat4 <- aggregate(.~`Language family`, dat4, FUN=paste, collapse=",")
 clades <- lapply(dat4$name, function(x){unlist(strsplit(x,split=","))})
 names(clades) <- dat4$`Language family`
@@ -252,7 +252,7 @@ p <- ggtree(tr=tree, layout="fan", open.angle=15, size=0.2, aes(colour=Clade)) +
   scale_colour_manual(
     name="Language",
     values=c("black", "#fa0f0c", "#FF61CC", "#ED68ED", "#F8766D", "#ABA300", "#C77CFF", "#8494FF", "#E68613", "#0099ff", "#660000", "#163566", "#336699", "#339900", "#66ccff", "lightgrey"),
-    labels=c("Africa", "Austroasiatic", "Austroasiatic, Austronesian", "Austroasiatic, Austronesian + (xSino-Tibetan)", "Austroasiatic, Austronesian, Sino-Tibetan", "Austroasiatic, Tai-Kadai +", "Austronesian", "Austronesian + (xAustroasiatic)", "Europe", "Hmong-Mien +", "Mayan", "Sino-Tibetan", "Sino-Tibetan +", "Tai-Kadai", "Trans-New Guinea +", "Unknown"),
+    labels=c("RSRS", "Austroasiatic", "Austroasiatic, Austronesian", "Austroasiatic, Austronesian + (xSino-Tibetan)", "Austroasiatic, Austronesian, Sino-Tibetan", "Austroasiatic, Tai-Kadai +", "Austronesian", "Austronesian + (xAustroasiatic)", "rCRS", "Hmong-Mien +", "Mayan", "Sino-Tibetan", "Sino-Tibetan +", "Tai-Kadai", "Trans-New Guinea +", "Unknown"),
     guide=guide_legend(keywidth=1.5,
                        keyheight=1.25,
                        order=1,
@@ -327,12 +327,12 @@ cols <- Countrycolors
 
 metadata <- dat %>%
   mutate(Language_color=NA,
-         Language_color=ifelse(`Language family`=="Africa", "black",
+         Language_color=ifelse(`Language family`=="RSRS", "black",
                                ifelse(`Language family`=="Austroasiatic", "#fa0f0c",
                                       ifelse(`Language family`=="Austroasiatic, Austronesian, Sino-Tibetan", "#cccc33",
                                              ifelse(`Language family`=="Austroasiatic, Tai-Kadai +", "#ffcc99",
                                                     ifelse(`Language family`=="Austronesian", "#9900ff",
-                                                           ifelse(`Language family`=="Europe", "white",
+                                                           ifelse(`Language family`=="rCRS", "white",
                                                                   ifelse(`Language family`=="Hmong-Mien +", "#0099ff",
                                                                          ifelse(`Language family`=="Mayan", "#660000",
                                                                                 ifelse(`Language family`=="Sino-Tibetan +", "#336699",
@@ -346,28 +346,28 @@ metadata <- dat %>%
          Ethnicity_color=NA,
          Ethnicity_color=ifelse(Ethnicity %in% c("Abaknon", "Alor", "Ambelau, Ambonese", "Ambonese", "Balantak, Bali Aga, Balinese", "Bali Aga, Balinese", "Banjar", "Banjar, Bantenese, Banyumasan", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Bicolano", "Bidayuh", "Bruneian Malay", "Bugis", "Bugis, Malay", "Bugkalot (or Ilongot)", "Cebuano", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Filipino", "Filipino (or Tagalog)", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Ivatan", "Jarai", "Javanese", "Javanese, Malay", "Javanese, Palembang, Batak, Minangkabau, Komering", "Kadazan-Dusun", "Kankanaey", "Makassarese", "Malay", "Malay, Achehnese", "Malay, Banjar Malay", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Palembangese", "Papuan", "Seletar (or Orang Seletar)", "Semende", "SiLa", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Temuan", "Tetum", "The Kalanguya (or Ikalahan)", "Timorese", "Toraja", "UrakLawoi", "Zambal"), "#9900ff",
                                 ifelse(Ethnicity %in% c("Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chinese", "Dai", "Deang", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "LaHu", "Naga"), "#336699",
-                                       ifelse(Ethnicity=="Africa", "black",
+                                       ifelse(Ethnicity=="RSRS", "black",
                                               ifelse(Ethnicity %in% c("Akar", "Akar Jambat", "Bru (Brao)", "Ede", "Giarai", "Jehai (or Jahai)", "Khmer", "Khuen", "Kinh", "Kintaq", "Kreung", "Mang", "Mon", "PaThen", "Phnong", "PhuLa", "Semelai", "Stieng", "Tompoun"), "#fa0f0c",
                                                      ifelse(Ethnicity %in% c("Batek", "Jahai, Semang", "Kensiu", "Khmer, Cham, Chinese-Cambodian, Vietnamese", "Lisu", "LoLo", "Orang Asli"), "#cccc33",
                                                             ifelse(Ethnicity %in% c("Bunak", "Fataluku", "Kemak", "Makasae", "Makassai", "Mambai"), "#66ccff",
                                                                    ifelse(Ethnicity %in% c("CoLao", "Isan (or Lao)", "LaChi", "Lao", "Lao Islan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Nung", "Phutai", "Shan", "Tay", "Tay Nung", "Thai"), "#339900",
                                                                           ifelse(Ethnicity %in% c("Dao", "Hmong", "IuMien"), "#0099ff",
-                                                                                 ifelse(Ethnicity %in% c("Europe"), "white",
+                                                                                 ifelse(Ethnicity %in% c("rCRS"), "white",
                                                                                         ifelse(Ethnicity %in% c("Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung", "Lao, Akha, Hmong, Khmu, Dao, Mien, Phuan"), "#ffcc99",
                                                                                                ifelse(Ethnicity %in% c("Mam"), "#660000",
                                                                                                       ifelse(Ethnicity %in% c("Unknown"), "lightgrey", Ethnicity))))))))))))) %>%
   droplevels()
 
 metadata <- metadata %>%
-  left_join(dat1 %>% select(name, Country_color)) %>% 
-  select(c("name", "Country", "Country_color",
+  left_join(dat1 %>% dplyr::select(name, Country_color)) %>% 
+  dplyr::select(c("name", "Country", "Country_color",
            "Language family", "Language_color", "haplogroup1", "Ethnicity", "Ethnicity_color")) %>%
   droplevels()
 
-languages <- c("Africa", "Austroasiatic", "Austroasiatic, Austronesian, Sino-Tibetan", "Austroasiatic, Tai-Kadai +", "Austronesian", "Europe", "Hmong-Mien +", "Mayan", "Sino-Tibetan +", "Tai-Kadai", "Trans-New Guinea +", "Unknown")
+languages <- c("Austroasiatic", "Austroasiatic, Austronesian, Sino-Tibetan", "Austroasiatic, Tai-Kadai +", "Austronesian", "Hmong-Mien +", "Mayan", "rCRS", "RSRS", "Sino-Tibetan +", "Tai-Kadai", "Trans-New Guinea +", "Unknown")
 Languagecolors <- metadata[match(languages, metadata$`Language family`),"Language_color"]
 
-ethnics <- c("Abaknon", "Achang", "Africa", "Aini", "Akar", "Akar Jambat", "Alor", "Ambelau, Ambonese", "Ambonese", "Arakanese (or Rakhine)", "Balantak, Bali Aga, Balinese", "Bali Aga, Balinese", "Bamar (or Burman)", "Banjar", "Banjar, Bantenese, Banyumasan", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Batek", "Bicolano", "Bidayuh", "Bru (Brao)", "Bruneian Malay", "Bugis", "Bugis, Malay", "Bugkalot (or Ilongot)", "Bunak", "Cebuano", "Cebuano - Filipino", "Cham", "Chinese", "CoLao", "Cuyunin (or Cuyonon)", "Dai", "Dao", "Dayak", "Deang", "Ede", "Europe", "Fataluku", "Filipino", "Filipino (or Tagalog)", "Giarai", "HaNhi", "Hmong", "Hui", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Isan (or Lao)", "IuMien", "Ivatan", "Jahai, Semang", "Jarai", "Javanese", "Javanese, Malay", "Javanese, Palembang, Batak, Minangkabau, Komering", "Jehai (or Jahai)", "Jingpo", "Kadazan-Dusun", "Kankanaey", "Karen", "Kemak", "Kensiu", "Khmer", "Khmer, Cham, Chinese-Cambodian, Vietnamese", "Khuen", "Kinh", "Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung", "Kintaq", "Kreung", "LaChi", "Lahu", "LaHu", "Lao", "Lao Islan", "Lao, Akha, Hmong, Khmu, Dao, Mien, Phuan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Lisu", "LoLo", "Makasae", "Makassai", "Makassarese", "Malay", "Malay, Achehnese", "Malay, Banjar Malay", "Mam", "Mambai", "Mang", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Mon", "Naga", "Nung", "Orang Asli", "Palembangese", "Papuan", "PaThen", "Phnong", "PhuLa", "Phutai", "Seletar (or Orang Seletar)", "Semelai", "Semende", "Shan", "SiLa", "Stieng", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Tay", "Tay Nung", "Temuan", "Tetum", "Thai", "The Kalanguya (or Ikalahan)", "Timorese", "Tompoun", "Toraja", "Unknown", "UrakLawoi", "Zambal")
+ethnics <- c("Abaknon", "Achang", "RSRS", "Aini", "Akar", "Akar Jambat", "Alor", "Ambelau, Ambonese", "Ambonese", "Arakanese (or Rakhine)", "Balantak, Bali Aga, Balinese", "Bali Aga, Balinese", "Bamar (or Burman)", "Banjar", "Banjar, Bantenese, Banyumasan", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Batek", "Bicolano", "Bidayuh", "Bru (Brao)", "Bruneian Malay", "Bugis", "Bugis, Malay", "Bugkalot (or Ilongot)", "Bunak", "Cebuano", "Cebuano - Filipino", "Cham", "Chinese", "CoLao", "Cuyunin (or Cuyonon)", "Dai", "Dao", "Dayak", "Deang", "Ede", "rCRS", "Fataluku", "Filipino", "Filipino (or Tagalog)", "Giarai", "HaNhi", "Hmong", "Hui", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Isan (or Lao)", "IuMien", "Ivatan", "Jahai, Semang", "Jarai", "Javanese", "Javanese, Malay", "Javanese, Palembang, Batak, Minangkabau, Komering", "Jehai (or Jahai)", "Jingpo", "Kadazan-Dusun", "Kankanaey", "Karen", "Kemak", "Kensiu", "Khmer", "Khmer, Cham, Chinese-Cambodian, Vietnamese", "Khuen", "Kinh", "Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung", "Kintaq", "Kreung", "LaChi", "Lahu", "LaHu", "Lao", "Lao Islan", "Lao, Akha, Hmong, Khmu, Dao, Mien, Phuan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Lisu", "LoLo", "Makasae", "Makassai", "Makassarese", "Malay", "Malay, Achehnese", "Malay, Banjar Malay", "Mam", "Mambai", "Mang", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Mon", "Naga", "Nung", "Orang Asli", "Palembangese", "Papuan", "PaThen", "Phnong", "PhuLa", "Phutai", "Seletar (or Orang Seletar)", "Semelai", "Semende", "Shan", "SiLa", "Stieng", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Tay", "Tay Nung", "Temuan", "Tetum", "Thai", "The Kalanguya (or Ikalahan)", "Timorese", "Tompoun", "Toraja", "Unknown", "UrakLawoi", "Zambal")
 Ethniccolors <- metadata[match(ethnics, metadata$Ethnicity), "Ethnicity_color"]
 
 p <- ggtree(tree2, layout='circular')
@@ -970,7 +970,7 @@ library(ape)
 #   nbin_i <- nbin[labels(nbin) %in% df_i$name]
 #   h_i <- pegas::haplotype(nbin_i)
 #   n_hi <- length(as.list(h_i))
-#   fas_i <- file[labels(nbin) %in% df_i$name]
+#   fas_i <- file2[labels(nbin) %in% df_i$name]
 #   writeXStringSet(fas_i, paste0("data/ethnic/", i, ".fasta"))
 #   dnbin_i <- dist.dna(nbin_i, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
 #   x_i <- as.matrix.DNAbin(nbin_i)  #converting DNAbin to matrix
@@ -982,7 +982,7 @@ library(ape)
 #   ## combine
 #   dat_e <- rbindlist(l = list(dat_e, dati)) %>% unique() %>% setDT()
 # }
-## Rename
+# # Rename
 # setnames(x = dat_e,
 #          old = c("df_i.Ethnicity", "df_i..Language.family.", "df_i.Country", "n_i", "n_hi", "hap.div_i.1.", "hap.div_i.2.", "nuc.div_i.1.", "nuc.div_i.2.", "mpd_i"),
 #          new = c("Ethnic", "Language", "Country", "Sample size", "Number of haplotypes", "Haplotype diversity (H)", "H variance", "Nucleotide diveristy (pi)", "pi SE", "MPD"))
@@ -994,8 +994,16 @@ dat_e <- read_excel("SEA_ethnicity.xlsx")
 
 # df <- dat_e %>% na.omit() %>% dplyr::select(1,4,6,8)
 df <- dat_e %>%
-  mutate(`Language`=ifelse(Ethnic=="Mon", "Austroasiatic",
-                           ifelse(Ethnic=="Hmong", "Hmong-Mien",
+  mutate(`Language`=ifelse(`Language`=="Austronesian, Austroasiatic" | `Language`=="Austroasiatic, Austronesian", "Austroasiatic, Austronesian, Sino-Tibetan",
+                                  ifelse(`Language`=="Austronesian, Spanish" | `Language`=="Austronesian, Trans-New Guinea" | `Language`=="Papuan, Austronesian, English", "Austronesian",
+                                         ifelse(`Language`=="Hmong-Mien" | `Language`=="Hmong-Mien, Mongolic", "Hmong-Mien +",
+                                                ifelse(`Language`=="Indo-European, Sino-Tibetan" | `Language`=="Sino-Tibetan, Austroasiatic, Tai-Kadai" | `Language`=="Sino-Tibetan, Tai-Kada" | `Language`=="Tai-Kadai, Sino-Tibetan", "Sino-Tibetan +",
+                                                       ifelse(`Language`=="Trans-New Guinea" | `Language`=="Trans–New Guinea (Alor-Pantar, Papuan)", "Trans-New Guinea +",
+                                                              ifelse(`Language`=="Austronesian, Austroasiatic, Indo-European", "Austroasiatic, Austronesian + (xSino-Tibetan)",
+                                                                     ifelse(`Language`=="Austroasiatic, Tai-Kadai" | `Language`=="Austroasiatic, Tai-Kadai, Hmong-Mien, Sino-Tibetan" | `Language`=="Tai-Kadai, Hmong-Mien, Austroasiatic", "Austroasiatic, Tai-Kadai +",
+                                                                            ifelse(`Language`=="Sino-Tibetan", "Sino-Tibetan +", `Language`)))))))),
+         `Language`=ifelse(Ethnic=="Mon", "Austroasiatic",
+                           ifelse(Ethnic=="Hmong", "Hmong-Mien +",
                                   ifelse(Ethnic=="Shan", "Tai-Kadai",
                                          ifelse(Ethnic=="Jehai (or Jahai)", "Austroasiatic",
                                                 ifelse(Ethnic=="Temuan", "Austronesian",
@@ -1005,7 +1013,7 @@ df <- dat_e %>%
                                                                             ifelse(Ethnic=="Jarai", "Austronesian",
                                                                                    ifelse(Ethnic=="Kadazan-Dusun", "Austronesian",
                                                                                           ifelse(Ethnic=="Alor", "Austronesian",
-                                                                                                 ifelse(Ethnic=="Arakanese (or Rakhine)", "Sino-Tibetan",
+                                                                                                 ifelse(Ethnic=="Arakanese (or Rakhine)", "Sino-Tibetan +",
                                                                                                         ifelse(Ethnic=="Timorese", "Austronesian",
                                                                                                                ifelse(Ethnic=="Mang", "Austroasiatic", `Language`))))))))))))))) %>%
   na.omit() %>% dplyr::select(1,2,3,4,6,8,10) %>% setDF()
@@ -1013,6 +1021,11 @@ df <- df %>% filter(`Sample size`>2 & !`Ethnic` %in% c("Unknown", "Khmer, Cham, 
 # dist_matrix <- dist(dat_e[,-1])
 # mds_result <- cmdscale(dist_matrix)
 # plot(mds_result, col = dat_e$ethnic, pch = 19, xlab = "MDS1", ylab = "MDS2")
+
+library(MASS)
+library(magrittr)
+library(dplyr)
+library(ggpubr)
 
 # Compute MDS
 mds <- df %>% na.omit() %>% dplyr::select(-c(1,2,3,4)) %>%
@@ -1200,8 +1213,16 @@ dat_e <- read_excel("SEA_ethnicity.xlsx")
 
 # df <- dat_e %>% na.omit() %>% dplyr::select(1,4,6,8)
 df <- dat_e %>%
-  mutate(`Language`=ifelse(Ethnic=="Mon", "Austroasiatic",
-                           ifelse(Ethnic=="Hmong", "Hmong-Mien",
+  mutate(`Language`=ifelse(`Language`=="Austronesian, Austroasiatic" | `Language`=="Austroasiatic, Austronesian", "Austroasiatic, Austronesian, Sino-Tibetan",
+                           ifelse(`Language`=="Austronesian, Spanish" | `Language`=="Austronesian, Trans-New Guinea" | `Language`=="Papuan, Austronesian, English", "Austronesian",
+                                  ifelse(`Language`=="Hmong-Mien" | `Language`=="Hmong-Mien, Mongolic", "Hmong-Mien +",
+                                         ifelse(`Language`=="Indo-European, Sino-Tibetan" | `Language`=="Sino-Tibetan, Austroasiatic, Tai-Kadai" | `Language`=="Sino-Tibetan, Tai-Kada" | `Language`=="Tai-Kadai, Sino-Tibetan", "Sino-Tibetan +",
+                                                ifelse(`Language`=="Trans-New Guinea" | `Language`=="Trans–New Guinea (Alor-Pantar, Papuan)", "Trans-New Guinea +",
+                                                       ifelse(`Language`=="Austronesian, Austroasiatic, Indo-European", "Austroasiatic, Austronesian + (xSino-Tibetan)",
+                                                              ifelse(`Language`=="Austroasiatic, Tai-Kadai" | `Language`=="Austroasiatic, Tai-Kadai, Hmong-Mien, Sino-Tibetan" | `Language`=="Tai-Kadai, Hmong-Mien, Austroasiatic", "Austroasiatic, Tai-Kadai +",
+                                                                     ifelse(`Language`=="Sino-Tibetan", "Sino-Tibetan +", `Language`)))))))),
+         `Language`=ifelse(Ethnic=="Mon", "Austroasiatic",
+                           ifelse(Ethnic=="Hmong", "Hmong-Mien +",
                                   ifelse(Ethnic=="Shan", "Tai-Kadai",
                                          ifelse(Ethnic=="Jehai (or Jahai)", "Austroasiatic",
                                                 ifelse(Ethnic=="Temuan", "Austronesian",
@@ -1211,7 +1232,7 @@ df <- dat_e %>%
                                                                             ifelse(Ethnic=="Jarai", "Austronesian",
                                                                                    ifelse(Ethnic=="Kadazan-Dusun", "Austronesian",
                                                                                           ifelse(Ethnic=="Alor", "Austronesian",
-                                                                                                 ifelse(Ethnic=="Arakanese (or Rakhine)", "Sino-Tibetan",
+                                                                                                 ifelse(Ethnic=="Arakanese (or Rakhine)", "Sino-Tibetan +",
                                                                                                         ifelse(Ethnic=="Timorese", "Austronesian",
                                                                                                                ifelse(Ethnic=="Mang", "Austroasiatic", `Language`))))))))))))))) %>%
   na.omit() %>% dplyr::select(1,2,3,4,6,8,10) %>% setDF()
