@@ -367,7 +367,7 @@ metadata <- metadata %>%
 languages <- c("Austroasiatic", "Austroasiatic, Austronesian, Sino-Tibetan", "Austroasiatic, Tai-Kadai +", "Austronesian", "Hmong-Mien +", "Mayan", "rCRS", "RSRS", "Sino-Tibetan +", "Tai-Kadai", "Trans-New Guinea +", "Unknown")
 Languagecolors <- metadata[match(languages, metadata$`Language family`),"Language_color"]
 
-ethnics <- c("Abaknon", "Achang", "RSRS", "Aini", "Akar", "Akar Jambat", "Alor", "Ambelau, Ambonese", "Ambonese", "Arakanese (or Rakhine)", "Balantak, Bali Aga, Balinese", "Bali Aga, Balinese", "Bamar (or Burman)", "Banjar", "Banjar, Bantenese, Banyumasan", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Batek", "Bicolano", "Bidayuh", "Bru (Brao)", "Bruneian Malay", "Bugis", "Bugis, Malay", "Bugkalot (or Ilongot)", "Bunak", "Cebuano", "Cebuano - Filipino", "Cham", "Chinese", "CoLao", "Cuyunin (or Cuyonon)", "Dai", "Dao", "Dayak", "Deang", "Ede", "rCRS", "Fataluku", "Filipino", "Filipino (or Tagalog)", "Giarai", "HaNhi", "Hmong", "Hui", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Isan (or Lao)", "IuMien", "Ivatan", "Jahai, Semang", "Jarai", "Javanese", "Javanese, Malay", "Javanese, Palembang, Batak, Minangkabau, Komering", "Jehai (or Jahai)", "Jingpo", "Kadazan-Dusun", "Kankanaey", "Karen", "Kemak", "Kensiu", "Khmer", "Khmer, Cham, Chinese-Cambodian, Vietnamese", "Khuen", "Kinh", "Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung", "Kintaq", "Kreung", "LaChi", "Lahu", "LaHu", "Lao", "Lao Islan", "Lao, Akha, Hmong, Khmu, Dao, Mien, Phuan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Lisu", "LoLo", "Makasae", "Makassai", "Makassarese", "Malay", "Malay, Achehnese", "Malay, Banjar Malay", "Mam", "Mambai", "Mang", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Mon", "Naga", "Nung", "Orang Asli", "Palembangese", "Papuan", "PaThen", "Phnong", "PhuLa", "Phutai", "Seletar (or Orang Seletar)", "Semelai", "Semende", "Shan", "SiLa", "Stieng", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Tay", "Tay Nung", "Temuan", "Tetum", "Thai", "The Kalanguya (or Ikalahan)", "Timorese", "Tompoun", "Toraja", "Unknown", "UrakLawoi", "Zambal")
+ethnics <- c("Abaknon", "Achang", "Aini", "Akar", "Akar Jambat", "Alor", "Ambelau, Ambonese", "Ambonese", "Arakanese (or Rakhine)", "Balantak, Bali Aga, Balinese", "Bali Aga, Balinese", "Bamar (or Burman)", "Banjar", "Banjar, Bantenese, Banyumasan", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Batek", "Bicolano", "Bidayuh", "Bru (Brao)", "Bruneian Malay", "Bugis", "Bugis, Malay", "Bugkalot (or Ilongot)", "Bunak", "Cebuano", "Cebuano - Filipino", "Cham", "Chinese", "CoLao", "Cuyunin (or Cuyonon)", "Dai", "Dao", "Dayak", "Deang", "Ede", "Fataluku", "Filipino", "Filipino (or Tagalog)", "Giarai", "HaNhi", "Hmong", "Hui", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Isan (or Lao)", "IuMien", "Ivatan", "Jahai, Semang", "Jarai", "Javanese", "Javanese, Malay", "Javanese, Palembang, Batak, Minangkabau, Komering", "Jehai (or Jahai)", "Jingpo", "Kadazan-Dusun", "Kankanaey", "Karen", "Kemak", "Kensiu", "Khmer", "Khmer, Cham, Chinese-Cambodian, Vietnamese", "Khuen", "Kinh", "Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung", "Kintaq", "Kreung", "LaChi", "Lahu", "LaHu", "Lao", "Lao Islan", "Lao, Akha, Hmong, Khmu, Dao, Mien, Phuan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Lisu", "LoLo", "Makasae", "Makassai", "Makassarese", "Malay", "Malay, Achehnese", "Malay, Banjar Malay", "Mam", "Mambai", "Mang", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Mon", "Naga", "Nung", "Orang Asli", "Palembangese", "Papuan", "PaThen", "Phnong", "PhuLa", "Phutai", "rCRS", "RSRS", "Seletar (or Orang Seletar)", "Semelai", "Semende", "Shan", "SiLa", "Stieng", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Tay", "Tay Nung", "Temuan", "Tetum", "Thai", "The Kalanguya (or Ikalahan)", "Timorese", "Tompoun", "Toraja", "Unknown", "UrakLawoi", "Zambal")
 Ethniccolors <- metadata[match(ethnics, metadata$Ethnicity), "Ethnicity_color"]
 
 p <- ggtree(tree2, layout='circular')
@@ -492,6 +492,46 @@ p5 <- p4 +
 p5
 ggsave(filename = file.path("figures", "Treefull(3).png"), width = 30, height = 20)
 
+p1 <- p +
+  geom_tippoint(aes(color=Country),
+                size=4) + 
+  scale_color_manual(values=cols, 
+                     guide=guide_legend(keywidth=2,
+                                        keyheight=2,
+                                        order=2,
+                                        nrow = 1,
+                                        override.aes=list(size=5,alpha=1))) + 
+  theme(legend.position="right",
+        legend.background=element_rect(fill=NA),
+        legend.title=element_text(size=30, face="bold"),
+        legend.text=element_text(size=24),
+        legend.key.size = unit(30, "cm"),
+        legend.spacing.y = unit(2, "cm")) + 
+  new_scale_colour()
+
+p4 <-p1 +
+  geom_fruit(
+    geom=geom_tile,
+    mapping=aes(fill=`Language family`),
+    width=0.006,
+    offset=0.03
+  ) +
+  scale_fill_manual(
+    name="Language",
+    values=Languagecolors,
+    guide=guide_legend(keywidth=2, 
+                       keyheight=2, 
+                       nrow = 2, 
+                       order=1,
+                       override.aes=list(size=3,alpha=1))
+  ) +
+  theme(legend.background=element_rect(fill=NA),
+        legend.title=element_text(size=30, face="bold"), 
+        legend.text=element_text(size=24),
+        legend.key.size = unit(30, "cm"),
+        legend.spacing.y = unit(2, "cm")) + 
+  new_scale_colour()
+
 p6 <- p4 +
   new_scale_fill() +
   geom_fruit(
@@ -503,17 +543,17 @@ p6 <- p4 +
   scale_fill_manual(
     name="Ethnicity",
     values=Ethniccolors,
-    guide=guide_legend(keywidth=1, 
-                       keyheight=1, 
-                       ncol=3,
-                       order=3,
-                       override.aes=list(size=3,alpha=1))
+    guide=guide_legend(keywidth=2, 
+                       keyheight=2, 
+                       order=4,
+                       ncol = 4,
+                       override.aes=list(size=1,alpha=1))
   ) +
   theme(legend.background=element_rect(fill=NA),
-        legend.title=element_text(size=24, face="bold"), 
-        legend.text=element_text(size=15),
+        legend.title=element_text(size=30, face="bold"), 
+        legend.text=element_text(size=14),
         legend.key.size = unit(10, "cm"),
-        legend.spacing.y = unit(1, "cm")) + 
+        legend.spacing.y = unit(2, "cm")) + 
   new_scale_colour()
 p6
 
@@ -530,19 +570,64 @@ p7 <- p6 +
     name="Haplogroup",
     guide=guide_legend(keywidth=2, 
                        keyheight=2, 
-                       ncol=10,
                        order=3,
+                       nrow = 1,
                        override.aes=list(size=10)),
     na.translate=FALSE) +
   scale_starshape_discrete(guide="none") +
   theme(legend.background=element_rect(fill=NA),
         legend.title=element_text(size=30, face="bold"), 
-        legend.text=element_text(size=20),
+        legend.text=element_text(size=24),
         legend.key.size = unit(30, "cm"),
         legend.spacing.y = unit(2, "cm")) + 
   new_scale_colour()
 p7
-ggsave(filename = file.path("figures", "Treefull(4).png"), width = 30, height = 20)
+
+library(cowplot)   # get_legend() & plot_grid() functions
+library(patchwork) # blank plot: plot_spacer()
+
+# Get all legends
+
+leg1 <- get_legend(p1)
+leg4 <- get_legend(p4)
+leg6 <- get_legend(p6)
+leg7 <- get_legend(p7)
+
+# create a blank plot for legend alignment 
+blank_p <- plot_spacer() + theme_void()
+
+# Combine legends
+
+# combine legend 1 & 2
+leg147 <- plot_grid(leg1, leg4, leg7,
+                   blank_p,
+                   nrow = 1
+)
+
+# combine legend 3 & blank plot
+leg60 <- plot_grid(leg6, blank_p,
+                   blank_p, 
+                   nrow = 1
+)
+
+# combine all legends
+leg1467 <- plot_grid(leg147, leg60,
+                    ncol = 1
+)
+
+# Put everything together
+
+final_p <- plot_grid(p7,
+                     leg1467,
+                     nrow = 1,
+                     align = "h",
+                     axis = "t",
+                     rel_widths = c(1, 0.3)
+)
+
+print(final_p)
+
+ggsave(filename = file.path("figures", "Treefull(4).png"), width = 49, height = 33)
 
 # Create dataset of sequences
 
