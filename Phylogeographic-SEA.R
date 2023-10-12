@@ -494,34 +494,34 @@ ggsave(filename = file.path("figures", "Treefull(3).png"), width = 30, height = 
 
 p1 <- p +
   geom_tippoint(aes(color=Country),
-                size=4) + 
+                size=5) + 
   scale_color_manual(values=cols, 
                      guide=guide_legend(keywidth=2,
-                                        keyheight=2,
+                                        keyheight=3,
                                         order=2,
-                                        nrow = 1,
-                                        override.aes=list(size=5,alpha=1))) + 
+                                        override.aes=list(size=15,alpha=1))) + 
   theme(legend.position="right",
         legend.background=element_rect(fill=NA),
         legend.title=element_text(size=30, face="bold"),
         legend.text=element_text(size=24),
         legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(2, "cm")) + 
+        legend.spacing.y = unit(2, "cm"),
+        legend.box = "vertical",
+        legend.direction = "vertical") + 
   new_scale_colour()
 
 p4 <-p1 +
   geom_fruit(
     geom=geom_tile,
     mapping=aes(fill=`Language family`),
-    width=0.006,
+    width=0.005,
     offset=0.03
   ) +
   scale_fill_manual(
     name="Language",
     values=Languagecolors,
     guide=guide_legend(keywidth=2, 
-                       keyheight=2, 
-                       nrow = 2, 
+                       keyheight=3, 
                        order=1,
                        override.aes=list(size=3,alpha=1))
   ) +
@@ -529,10 +529,12 @@ p4 <-p1 +
         legend.title=element_text(size=30, face="bold"), 
         legend.text=element_text(size=24),
         legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(2, "cm")) + 
+        legend.spacing.y = unit(2, "cm"),
+        legend.box = "vertical",
+        legend.direction = "vertical") + 
   new_scale_colour()
 
-p6 <- p4 +
+p6 <- p +
   new_scale_fill() +
   geom_fruit(
     geom=geom_tile,
@@ -545,41 +547,49 @@ p6 <- p4 +
     values=Ethniccolors,
     guide=guide_legend(keywidth=2, 
                        keyheight=2, 
-                       order=4,
-                       ncol = 4,
-                       override.aes=list(size=1,alpha=1))
+                       ncol = 2,
+                       override.aes=list(size=1,alpha=1),
+                       title.position="top")
   ) +
   theme(legend.background=element_rect(fill=NA),
-        legend.title=element_text(size=30, face="bold"), 
-        legend.text=element_text(size=14),
+        legend.title=element_text(size=36, face="bold"), 
+        legend.text=element_text(size=22),
         legend.key.size = unit(10, "cm"),
-        legend.spacing.y = unit(2, "cm")) + 
+        legend.spacing.y = unit(2, "cm"),
+        legend.box = "horizontal",
+        legend.direction = "horizontal",
+        legend.position = "right", 
+        legend.box.spacing = unit(-30, "pt")) + 
   new_scale_colour()
 p6
 
-p7 <- p6 +
+p7 <- p4 +
   new_scale_fill() +
   geom_fruit(geom=geom_star,
              mapping=aes(fill=haplogroup1),
-             size=15,
+             size=18,
              starstroke=0,
              pwidth=0.2,
              inherit.aes = FALSE,
              grid.params=list(linetype=3, size=0.2)) +
   scale_fill_discrete(
     name="Haplogroup",
-    guide=guide_legend(keywidth=2, 
-                       keyheight=2, 
+    guide=guide_legend(keywidth=1, 
+                       keyheight=1, 
                        order=3,
-                       nrow = 1,
+                       nrow = 4, byrow = TRUE,
                        override.aes=list(size=10)),
     na.translate=FALSE) +
   scale_starshape_discrete(guide="none") +
   theme(legend.background=element_rect(fill=NA),
-        legend.title=element_text(size=30, face="bold"), 
-        legend.text=element_text(size=24),
+        legend.title=element_text(size=40, face="bold"), 
+        legend.text=element_text(size=30),
         legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(2, "cm")) + 
+        legend.spacing.y = unit(1, "cm"),
+        legend.box = "vertical",
+        legend.direction = "vertical",
+        legend.position = "left", 
+        legend.box.spacing = unit(-50, "pt")) + 
   new_scale_colour()
 p7
 
@@ -588,8 +598,6 @@ library(patchwork) # blank plot: plot_spacer()
 
 # Get all legends
 
-leg1 <- get_legend(p1)
-leg4 <- get_legend(p4)
 leg6 <- get_legend(p6)
 leg7 <- get_legend(p7)
 
@@ -606,7 +614,6 @@ leg147 <- plot_grid(leg1, leg4, leg7,
 
 # combine legend 3 & blank plot
 leg60 <- plot_grid(leg6, blank_p,
-                   blank_p, 
                    nrow = 1
 )
 
@@ -617,17 +624,17 @@ leg1467 <- plot_grid(leg147, leg60,
 
 # Put everything together
 
-final_p <- plot_grid(p7,
-                     leg1467,
-                     nrow = 1,
-                     align = "h",
-                     axis = "t",
-                     rel_widths = c(1, 0.3)
-)
+final_p <- plot_grid(p7, leg6, nrow = 1, align = "h", axis = "r", rel_widths = c(1.8,1)) +
+  theme(plot.background = element_rect(fill = "white", colour = NA))
 
 print(final_p)
 
-ggsave(filename = file.path("figures", "Treefull(4).png"), width = 49, height = 33)
+final_p <- (p7 + blank_p + leg6)
+
+
++ plot_layout(widths = c(2, 1))
+
+ggsave(filename = file.path("figures", "Treefull(5).png"), width = 49, height = 33)
 
 # Create dataset of sequences
 
