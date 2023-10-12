@@ -523,7 +523,7 @@ p4 <-p1 +
     guide=guide_legend(keywidth=2, 
                        keyheight=3, 
                        order=1,
-                       override.aes=list(size=3,alpha=1))
+                       override.aes=list(size=10,alpha=1))
   ) +
   theme(legend.background=element_rect(fill=NA),
         legend.title=element_text(size=30, face="bold"), 
