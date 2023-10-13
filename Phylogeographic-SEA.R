@@ -636,7 +636,7 @@ final_p <- (p7 + blank_p + leg6)
 
 ggsave(filename = file.path("figures", "Treefull(5).png"), width = 49, height = 33)
 
-# Create dataset of sequences
+# Create dataset of sequences and subclades
 
 library(tidyr)
 library(dplyr)
@@ -1029,6 +1029,58 @@ ethnic <- ethnic %>%
 library(reshape2)
 ethnic_hap <- ethnic %>% select(-Haplogroup) %>%
   melt(., id.vars="haplo")
+
+###################################################
+
+# Country
+
+dat <- read_excel("IsolateExplanation.xlsx")
+dat <- as.data.frame(dat)
+names <- dat$names
+
+country <- dat %>%
+  dplyr::select(name, Country, `Language family`, Ethnicity, haplo, haplogroup1, haplogroup2, haplogroup3) %>% setDT()
+country_rank <- country[, .N, by = .(Country)] %>% arrange(desc(N))
+
+country_hap <- country[, .N, by = .(Country, haplo)]
+country_hap <- country_hap %>%
+  group_by(Country) %>% arrange(haplo, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+country_hap3 <- country[, .N, by = .(Country, haplogroup3)]
+country_hap3 <- country_hap3 %>%
+  group_by(Country) %>% arrange(haplogroup3, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+library(janitor)
+
+dat_c <- NULL
+for (i in country_rank$Country) {
+  cat(i, "\n")
+  df_i <- country %>% dplyr::filter(Country==i)
+  n_i <- nrow(df_i)
+  nbin_i <- nbin[labels(nbin) %in% df_i$name]
+  h_i <- pegas::haplotype(nbin_i)
+  n_hi <- length(as.list(h_i))
+  fas_i <- file2[labels(nbin) %in% df_i$name]
+  writeXStringSet(fas_i, paste0("data/country/", i, "_Aligned.fasta"))
+  dnbin_i <- dist.dna(nbin_i, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+  x_i <- as.matrix.DNAbin(nbin_i)  #converting DNAbin to matrix
+  dist.gene_i <- dist.gene(x_i, method = "pairwise", variance = TRUE, pairwise.deletion = FALSE)
+  mpd_i <- mean(dist.gene_i)
+  hap.div_i <- hap.div(nbin_i, variance = TRUE)
+  nuc.div_i <- nuc.div(nbin_i, variance = TRUE, pairwise.deletion = FALSE) # hap.div = 1 all haplotypes are unique
+  dati <- data.frame(df_i$Country, n_i, n_hi, hap.div_i[1], hap.div_i[2], nuc.div_i[1], nuc.div_i[2], mpd_i) %>% slice(1)
+  ## combine
+  dat_c <- rbindlist(l = list(dat_c, dati)) %>% unique() %>% setDT()
+}
+# Rename
+setnames(x = dat_c,
+         old = c("df_i.Country", "n_i", "n_hi", "hap.div_i.1.", "hap.div_i.2.", "nuc.div_i.1.", "nuc.div_i.2.", "mpd_i"),
+         new = c("Country", "Sample size", "Number of haplotypes", "Haplotype diversity (H)", "H variance", "Nucleotide diveristy (pi)", "pi SE", "MPD"))
+
+library(writexl)
+write_xlsx(dat_c, "SEA_country.xlsx")
 
 # Ethnicity
 
