@@ -112,6 +112,8 @@ ggtree(tre, cex = 0.8, aes(color=branch.length))+
 # njmsaplot
 # dev.off()
 
+# Phylogenetic tree
+
 library(ggtree)
 library(ggtreeExtra)
 library(ggnewscale)
@@ -241,77 +243,77 @@ dat4 <- aggregate(.~`Language family`, dat4, FUN=paste, collapse=",")
 clades <- lapply(dat4$name, function(x){unlist(strsplit(x,split=","))})
 names(clades) <- dat4$`Language family`
 
-ggt<-ggtree::ggtree(tree, cex = 0.8, aes(color=branch.length))+
-  geom_tiplab(align=TRUE, size=2)+
-  geom_treescale(y = - 5, color = "coral4", fontsize = 4)
-ggt
-
-tree <- groupOTU(tree, clades, "Clade")
-Clade <- NULL
-p <- ggtree(tr=tree, layout="fan", open.angle=15, size=0.2, aes(colour=Clade)) +
-  scale_colour_manual(
-    name="Language",
-    values=c("black", "#fa0f0c", "#FF61CC", "#ED68ED", "#F8766D", "#ABA300", "#C77CFF", "#8494FF", "#E68613", "#0099ff", "#660000", "#163566", "#336699", "#339900", "#66ccff", "lightgrey"),
-    labels=c("RSRS", "Austroasiatic", "Austroasiatic, Austronesian", "Austroasiatic, Austronesian + (xSino-Tibetan)", "Austroasiatic, Austronesian, Sino-Tibetan", "Austroasiatic, Tai-Kadai +", "Austronesian", "Austronesian + (xAustroasiatic)", "rCRS", "Hmong-Mien +", "Mayan", "Sino-Tibetan", "Sino-Tibetan +", "Tai-Kadai", "Trans-New Guinea +", "Unknown"),
-    guide=guide_legend(keywidth=1.5,
-                       keyheight=1.25,
-                       order=1,
-                       override.aes=list(linetype=1, size=6,alpha=1))) +
-  theme(legend.position="right",
-        legend.background=element_rect(fill=NA),
-        legend.title=element_text(size=20),
-        legend.text=element_text(size=15),
-        legend.key.size = unit(40, "cm"),
-        legend.spacing.y = unit(2, "cm")) + 
-  new_scale_colour()
-
-p1 <- p %<+% dat1 +
-  geom_tippoint(aes(colour=Country), alpha=0) +
-  geom_tiplab(aes(colour=Country),
-              align=TRUE,
-              linetype=3,
-              size=1,
-              linesize=0.2,
-              show.legend=FALSE) +
-  scale_colour_manual(
-    name="Country",
-    values=Countrycolors, 
-    guide=guide_legend(keywidth=1.5,
-                       keyheight=1.25,
-                       order=2,
-                       override.aes=list(size=5,alpha=1))) +
-  theme(legend.position="right",
-        legend.background=element_rect(fill=NA),
-        legend.title=element_text(size=20),
-        legend.text=element_text(size=15),
-        legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(2, "cm")) + 
-  new_scale_colour()
-
-p3 <- p1 +
-  geom_fruit(data=dat3,
-             geom=geom_star,
-             mapping=aes(x=haplogroup, y=name, fill=haplogroup, starshape=haplo),
-             size=3,
-             starstroke=0,
-             pwidth=0.1,
-             inherit.aes = FALSE,
-             grid.params=list(linetype=3, size=0.2)) +
-  scale_fill_discrete(
-    name="Haplogroup",
-    guide=guide_legend(keywidth=1.5, 
-                       keyheight=1.25, 
-                       order=3,
-                       override.aes=list(size=5)),
-    na.translate=FALSE) +
-  scale_starshape_discrete(guide="none") +
-  theme(legend.background=element_rect(fill=NA),
-        legend.title=element_text(size=20), 
-        legend.text=element_text(size=15),
-        legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(2, "cm"))
-p3
-ggsave(filename = file.path("figures", "Treefull.png"), width = 30, height = 20)
+# ggt<-ggtree::ggtree(tree, cex = 0.8, aes(color=branch.length))+
+#   geom_tiplab(align=TRUE, size=2)+
+#   geom_treescale(y = - 5, color = "coral4", fontsize = 4)
+# ggt
+# 
+# tree <- groupOTU(tree, clades, "Clade")
+# Clade <- NULL
+# p <- ggtree(tr=tree, layout="fan", open.angle=15, size=0.2, aes(colour=Clade)) +
+#   scale_colour_manual(
+#     name="Language",
+#     values=c("black", "#fa0f0c", "#FF61CC", "#ED68ED", "#F8766D", "#ABA300", "#C77CFF", "#8494FF", "#E68613", "#0099ff", "#660000", "#163566", "#336699", "#339900", "#66ccff", "lightgrey"),
+#     labels=c("RSRS", "Austroasiatic", "Austroasiatic, Austronesian", "Austroasiatic, Austronesian + (xSino-Tibetan)", "Austroasiatic, Austronesian, Sino-Tibetan", "Austroasiatic, Tai-Kadai +", "Austronesian", "Austronesian + (xAustroasiatic)", "rCRS", "Hmong-Mien +", "Mayan", "Sino-Tibetan", "Sino-Tibetan +", "Tai-Kadai", "Trans-New Guinea +", "Unknown"),
+#     guide=guide_legend(keywidth=1.5,
+#                        keyheight=1.25,
+#                        order=1,
+#                        override.aes=list(linetype=1, size=6,alpha=1))) +
+#   theme(legend.position="right",
+#         legend.background=element_rect(fill=NA),
+#         legend.title=element_text(size=20),
+#         legend.text=element_text(size=15),
+#         legend.key.size = unit(40, "cm"),
+#         legend.spacing.y = unit(2, "cm")) + 
+#   new_scale_colour()
+# 
+# p1 <- p %<+% dat1 +
+#   geom_tippoint(aes(colour=Country), alpha=0) +
+#   geom_tiplab(aes(colour=Country),
+#               align=TRUE,
+#               linetype=3,
+#               size=1,
+#               linesize=0.2,
+#               show.legend=FALSE) +
+#   scale_colour_manual(
+#     name="Country",
+#     values=Countrycolors, 
+#     guide=guide_legend(keywidth=1.5,
+#                        keyheight=1.25,
+#                        order=2,
+#                        override.aes=list(size=5,alpha=1))) +
+#   theme(legend.position="right",
+#         legend.background=element_rect(fill=NA),
+#         legend.title=element_text(size=20),
+#         legend.text=element_text(size=15),
+#         legend.key.size = unit(30, "cm"),
+#         legend.spacing.y = unit(2, "cm")) + 
+#   new_scale_colour()
+# 
+# p3 <- p1 +
+#   geom_fruit(data=dat3,
+#              geom=geom_star,
+#              mapping=aes(x=haplogroup, y=name, fill=haplogroup, starshape=haplo),
+#              size=3,
+#              starstroke=0,
+#              pwidth=0.1,
+#              inherit.aes = FALSE,
+#              grid.params=list(linetype=3, size=0.2)) +
+#   scale_fill_discrete(
+#     name="Haplogroup",
+#     guide=guide_legend(keywidth=1.5, 
+#                        keyheight=1.25, 
+#                        order=3,
+#                        override.aes=list(size=5)),
+#     na.translate=FALSE) +
+#   scale_starshape_discrete(guide="none") +
+#   theme(legend.background=element_rect(fill=NA),
+#         legend.title=element_text(size=20), 
+#         legend.text=element_text(size=15),
+#         legend.key.size = unit(30, "cm"),
+#         legend.spacing.y = unit(2, "cm"))
+# p3
+# ggsave(filename = file.path("figures", "Treefull.png"), width = 30, height = 20)
 
 filename <- "TREEFULL.NEXUS"
 tree2 <- ape::read.nexus(filename)
@@ -390,56 +392,56 @@ p1 <- p +
                           legend.spacing.y = unit(2, "cm")) + 
   new_scale_colour()
 
-p2 <-p1 +
-  geom_fruit(
-    geom=geom_tile,
-    mapping=aes(fill=`Language family`),
-    width=0.01,
-    offset=0.1
-  ) +
-  scale_fill_manual(
-    name="Language",
-    values=Languagecolors,
-    guide=guide_legend(keywidth=2, 
-                       keyheight=1, 
-                       ncol=1, 
-                       order=1,
-                       override.aes=list(size=5,alpha=1))
-  ) +
-  theme(legend.background=element_rect(fill=NA),
-        legend.title=element_text(size=30, face="bold"), 
-        legend.text=element_text(size=20),
-        legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(2, "cm")) + 
-  new_scale_colour()
-
-p3 <- p2 +
-  new_scale_fill() +
-  geom_fruit(geom=geom_star,
-             mapping=aes(fill=haplogroup1),
-             size=10,
-             starstroke=0,
-             pwidth=0.1,
-             inherit.aes = FALSE,
-             grid.params=list(linetype=3, size=0.2)) +
-  scale_fill_discrete(
-    name="Haplogroup",
-    guide=guide_legend(keywidth=2, 
-                       keyheight=1, 
-                       ncol=10,
-                       order=3,
-                       override.aes=list(size=10)),
-    na.translate=FALSE) +
-  scale_starshape_discrete(guide="none") +
-  theme(legend.background=element_rect(fill=NA),
-        legend.title=element_text(size=30, face="bold"), 
-        legend.text=element_text(size=20),
-        legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(2, "cm")) + 
-  new_scale_colour()
-
-p3
-ggsave(filename = file.path("figures", "Treefull(2).png"), width = 30, height = 20)
+# p2 <-p1 +
+#   geom_fruit(
+#     geom=geom_tile,
+#     mapping=aes(fill=`Language family`),
+#     width=0.01,
+#     offset=0.1
+#   ) +
+#   scale_fill_manual(
+#     name="Language",
+#     values=Languagecolors,
+#     guide=guide_legend(keywidth=2, 
+#                        keyheight=1, 
+#                        ncol=1, 
+#                        order=1,
+#                        override.aes=list(size=5,alpha=1))
+#   ) +
+#   theme(legend.background=element_rect(fill=NA),
+#         legend.title=element_text(size=30, face="bold"), 
+#         legend.text=element_text(size=20),
+#         legend.key.size = unit(30, "cm"),
+#         legend.spacing.y = unit(2, "cm")) + 
+#   new_scale_colour()
+# 
+# p3 <- p2 +
+#   new_scale_fill() +
+#   geom_fruit(geom=geom_star,
+#              mapping=aes(fill=haplogroup1),
+#              size=10,
+#              starstroke=0,
+#              pwidth=0.1,
+#              inherit.aes = FALSE,
+#              grid.params=list(linetype=3, size=0.2)) +
+#   scale_fill_discrete(
+#     name="Haplogroup",
+#     guide=guide_legend(keywidth=2, 
+#                        keyheight=1, 
+#                        ncol=10,
+#                        order=3,
+#                        override.aes=list(size=10)),
+#     na.translate=FALSE) +
+#   scale_starshape_discrete(guide="none") +
+#   theme(legend.background=element_rect(fill=NA),
+#         legend.title=element_text(size=30, face="bold"), 
+#         legend.text=element_text(size=20),
+#         legend.key.size = unit(30, "cm"),
+#         legend.spacing.y = unit(2, "cm")) + 
+#   new_scale_colour()
+# 
+# p3
+# ggsave(filename = file.path("figures", "Treefull(2).png"), width = 30, height = 20)
 
 p4 <-p1 +
   geom_fruit(
@@ -491,6 +493,12 @@ p5 <- p4 +
 
 p5
 ggsave(filename = file.path("figures", "Treefull(3).png"), width = 30, height = 20)
+
+# Final tree
+
+p <- ggtree(tree2, layout='circular')
+
+p <- p %<+% metadata
 
 p1 <- p +
   geom_tippoint(aes(color=Country),
