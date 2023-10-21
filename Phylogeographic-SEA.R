@@ -3597,6 +3597,12 @@ F_dat <- read.csv("subclade/F_Clean.csv")
 F_clean <- file2[F_dat$name]
 writeXStringSet(F_clean, "data/F_Clean.fasta")
 
+# Haplogroup F (Clean)
+
+M_dat <- read.csv("subclade/M_Clean.csv")
+M_clean <- file2[M_dat$name]
+writeXStringSet(M_clean, "data/M_Clean.fasta")
+
 # Haplogroup G
 hap_G <- dat %>% filter(haplogroup1 == "G")
 nbin_G <- nbin[labels(nbin) %in% hap_G$name]
