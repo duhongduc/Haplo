@@ -3597,11 +3597,17 @@ F_dat <- read.csv("subclade/F_Clean.csv")
 F_clean <- file2[F_dat$name]
 writeXStringSet(F_clean, "data/F_Clean.fasta")
 
-# Haplogroup F (Clean)
+# Haplogroup M (Clean)
 
 M_dat <- read.csv("subclade/M_Clean.csv")
 M_clean <- file2[M_dat$name]
 writeXStringSet(M_clean, "data/M_Clean.fasta")
+
+# Haplogroup B (Clean)
+
+B_dat <- read.csv("subclade/B_Clean.csv")
+B_clean <- file2[B_dat$name]
+writeXStringSet(B_clean, "data/B_Clean.fasta")
 
 # Haplogroup G
 hap_G <- dat %>% filter(haplogroup1 == "G")
