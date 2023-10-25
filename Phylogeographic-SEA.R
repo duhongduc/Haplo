@@ -3609,6 +3609,12 @@ B_dat <- read.csv("subclade/B_Clean.csv")
 B_clean <- file2[B_dat$name]
 writeXStringSet(B_clean, "data/B_Clean.fasta")
 
+# Haplogroup N (Clean)
+
+N_dat <- read.csv("subclade/N_Clean.csv")
+N_clean <- file2[N_dat$name]
+writeXStringSet(N_clean, "data/N_Clean.fasta")
+
 # Haplogroup G
 hap_G <- dat %>% filter(haplogroup1 == "G")
 nbin_G <- nbin[labels(nbin) %in% hap_G$name]
@@ -5029,6 +5035,27 @@ ggplot() +
   ggtitle("Geographic distribution of Ancient Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia (+)")
 ggsave(filename = file.path("figures", "Ancient_SEA_plus_label.png"), width = 49, height = 33)
 
+### Location
+ggplot() + 
+  # geom_sf(data=SEA0p_sf, aes(fill="white"), alpha=0.1) + 
+  geom_sf(data=an_SEA_plot_max, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_point(aes(x = Longitude, y = Latitude,  colour = haplo1), data = an_SEA_plot, position=position_jitter(width=-0.5,height=0.5), size = 6) +
+  geom_label(aes(x = Longitude, y = Latitude,  colour = haplo1, label = Location), data = an_SEA_plot, size = 8, hjust=-0.1, vjust=0.5, position=position_jitter(width=-1.5,height=1.5), label.size = 0.5) +
+  geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:217], color=NA, alpha=0.8) +
+  annotate(geom = "table", x = 80, y = -10, label = list(an_SEA_max), size = 6.5) +
+  scale_fill_discrete(name="") +
+  scale_color_discrete(name="") +
+  guides(fill=guide_legend(nrow=10, byrow=TRUE)) +
+  theme_bw() +
+  theme(text = element_text(size=35), 
+        axis.text.x = element_text(size=30), 
+        axis.text.y = element_text(size=30), 
+        legend.text=element_text(size=30), 
+        legend.key.size = unit(1, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Geographic distribution of Ancient Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia (+)")
+ggsave(filename = file.path("figures", "Ancient_SEA_plus_location.png"), width = 49, height = 33)
+
 ## Ancient DNA
 
 load("data/SEA0_sf.RData")
@@ -5821,6 +5848,79 @@ ggplot() + geom_sf() + geom_sf(data=pre_SEA3_plot_max, aes(fill=haplo3_max), lwd
         legend.position = "bottom") +
   ggtitle("Geographic distribution of Present Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia")
 ggsave(filename = file.path("figures", "Present_SEA3.png"), width = 49, height = 33)
+
+### Haplo 3 (2)
+
+pre_SEA3 <- dat %>% 
+  mutate(country=Country,
+         haplo1=ifelse(!(haplogroup3 %in% c("A+152", "A+152+16362", "A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3),
+         haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), haplo, haplo1),
+         haplo2 = substr(haplo, 1, 1),
+         haplo3 = str_extract(haplo, "^([A-Z])\\d+"),
+         haplo3 = ifelse(haplogroup3 %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo3),
+         haplo3 = ifelse(haplogroup3 %in% c("R+16189"), "R+", haplo3),
+         haplo3 = ifelse(is.na(haplo3), haplogroup3, haplo3),
+         count=1) %>%
+  group_by(country, haplo) %>%  mutate(sum=sum(count), max=max(sum)) %>%
+  group_by(country) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo_max=haplo[order==1]) %>% ungroup %>%
+  group_by(country, haplo3) %>% mutate(sum3=sum(count), max3=max(sum3)) %>%
+  group_by(country) %>% arrange(desc(max3)) %>% 
+  mutate(order3=order(max3, decreasing = T), haplo3_max=haplo3[order3==1]) %>%
+  ungroup() %>% setDT()
+
+load("data/SEA0_sf.RData")
+SEA0_sf <- SEA0_sf %>% rename(country=NAME_0)
+
+pre_SEA3_sf <- merge(pre_SEA3, SEA0_sf, by=c("country"))
+pre_SEA3_plot <- pre_SEA3_sf %>% st_as_sf(crs = 4326)
+
+country_present_SEA3 <- pre_SEA3[, .N, by = .(country, haplo3)]
+country_present_SEA3 <- country_present_SEA3 %>%
+  group_by(country) %>% arrange(haplo3, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+res_pre <- country_present_SEA3 %>%
+  rename(ID=country) %>%
+  group_by(haplo3) %>%
+  mutate(Country=order(ID)) %>%
+  ungroup() %>%
+  rename(key=haplo3, value=N) %>%
+  select(-percent) %>%
+  arrange(key)
+
+res_pre <- res_pre %>% left_join(countries_coords)
+
+dt_res <- spread(res_pre, key = key, value = value) %>% replace(is.na(.), 0)
+DT <- dt_res %>% select(-c(ID, X, Y, Country))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+Country <- dt_res$Country
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(Country=order(ID)) %>% left_join(countries_coords) %>% rename(x=X, y=Y)
+dt_x <- dt %>% select(-c(Country, ID))
+
+pre_SEA3_plot_max <- pre_SEA3_plot %>% group_by(country) %>% slice(1)
+
+ggplot() + geom_sf() + geom_sf(data=pre_SEA3_plot_max, aes(fill=haplo3_max), lwd=0, alpha=0.6) +
+  geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:139], color=NA, alpha=0.8) +
+  annotate(geom = "table", x = 135, y = 20, label = list(pre_SEA3_plot_max), size = 6.5) +
+  guides(fill=guide_legend(nrow=8, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(text = element_text(size=36), 
+        axis.text.x = element_text(size=30), 
+        axis.text.y = element_text(size=30), 
+        legend.text=element_text(size=30), 
+        legend.key.size = unit(1, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Geographic distribution of Present Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia")
+ggsave(filename = file.path("figures", "Present_SEA3 (2).png"), width = 49, height = 33)
 
 ## Ethnicity
 
