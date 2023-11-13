@@ -7408,4 +7408,46 @@ nanc.post     = 10,
 pos           = 136608646,
 sel.allele    = 1)
 
+# BEAST
+
+library(devtools)
+# devtools::install_github("laduplessis/bdskytools")
+library(bdskytools)
+fname <- "beast/NClean.log.txt"
+lf <- readLogfile(fname, burnin =0.1)
+Re_sky <- getSkylineSubset(lf, "skyline.popSize1")
+Re_hpd <- getMatrixHPD(Re_sky)
+delta_hpd <- getHPD(lf$becomeUninfectiousRate)
+
+plotSkyline (1:10, Re_hpd, type='step', ylab="Ne")
+
+library(treeio)
+library(ggtree)
+library(tidytree)
+help(offspring.treedata)
+
+file <- ("beast/FClean2.mcc.tre")
+beast <- read.beast(file)
+
+p <- ggtree(beast) + 
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='red', size=2, alpha=.5) + 
+  geom_text2(aes(label=round(as.numeric(height), 0), 
+                 subset=as.numeric(posterior) > 0.98, 
+                 x=branch), vjust=0) 
+
+p1 <- p + geom_strip(grep("F3", beast@phylo$tip.label), grep("F3", beast@phylo$tip.label), barsize=2, color='red', 
+           label="F3", offset.text=.1)
+
+p1
+
+p2 <- p1 + geom_strip(grep("F1", beast@phylo$tip.label), grep("F1", beast@phylo$tip.label), barsize=2, color='blue', 
+               label="F1", offset.text=.1)
+
+p2
+
+zoom(tree_M7, grep("Vietnam", tree_M7$tip.label), xmax_adjust=2)
+
+p + geom_cladelab(node=1, label="another clade", align=TRUE, 
+                  offset = .2, textcolor='blue', barcolor='blue')
 
