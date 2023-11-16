@@ -7393,7 +7393,7 @@ legend("topleft","most recent common ancestor\nof Puerto Rican TG anoles",
 par(mar=c(5.1,4.1,4.1,2.1)) ## reset margin to default
 
 library(devtools)
-install_github("jhavsmith/startmrca")
+# install_github("jhavsmith/startmrca")
 library(startmrca)
 help(run.startmrca)
 run.startmrca(vcf.file = "examples/FIN_chr2_pos136608646.vcf.gz",
@@ -7429,20 +7429,38 @@ help(offspring.treedata)
 file <- ("beast/FClean2.mcc.tre")
 beast <- read.beast(file)
 
-p <- ggtree(beast) + 
+p <- ggtree(beast, size=1.25) + 
   # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
-  geom_range("height_0.95_HPD", color='red', size=2, alpha=.5) + 
+  geom_range("height_0.95_HPD", color='orange', size=3, alpha=0.5) + 
   geom_text2(aes(label=round(as.numeric(height), 0), 
-                 subset=as.numeric(posterior) > 0.98, 
-                 x=branch), vjust=0) 
+                 subset=as.numeric(posterior) > 0.99 & height > 3000, 
+                 x=branch), size=10, color='red', vjust=-0.5, hjust=-0.5) 
 
-p1 <- p + geom_strip(grep("F3", beast@phylo$tip.label), grep("F3", beast@phylo$tip.label), barsize=2, color='red', 
-           label="F3", offset.text=.1)
+p1 <- p + 
+  geom_strip('Thailand.CT457.MG272694.F3b', 'Vietnam.PaThen524.MH449356.F3a1', color='orange',
+             label="F3", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 10,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) + 
+  geom_strip('Vietnam.PaThen523.MH449355.F2a', 'Thailand.UT408.KX457584.F2e', color='blue', 
+             label="F2", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 10,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) + 
+  geom_strip('Thailand.A2YU234.KX456507.F4b', 'Thailand.CT715.MG272762.F4a2', color='purple', 
+             label="F4", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 10,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) + 
+  geom_strip('Thailand.BR_567.MN006847.F1', 'Cambodia.1_F1a1(Tor49).AY963572.F1a1a1', color='darkgreen', 
+             label="F1", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 10,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE)
 
 p1
 
-p2 <- p1 + geom_strip(grep("F1", beast@phylo$tip.label), grep("F1", beast@phylo$tip.label), barsize=2, color='blue', 
-               label="F1", offset.text=.1)
+ggsave(filename = file.path("figures", "F_beast.png"), width = 49, height = 33)
+
+geom_strip(taxa1, taxa2, label = NA, offset = 0, offset.text = 0,
+           align = TRUE, barsize = 0.5, extend = 0, fontsize = 3.88,
+           angle = 0, geom = "text", hjust = 0, fill = NA,
+           family = "sans", parse = FALSE, ...)
+
+p2 <- p1 + geom_strip(grep("F2", beast@phylo$tip.label), grep("F2", beast@phylo$tip.label), barsize=1.5, color='blue', 
+               label="F2", offset.text=.1)
 
 p2
 
