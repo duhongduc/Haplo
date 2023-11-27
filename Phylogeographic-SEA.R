@@ -3690,8 +3690,8 @@ p <- p %<+% metadata
 
 p
 
-p1 <- p %<+% meta2.ed + new_scale_color() + geom_tippoint(aes(color=Region), size=2.5, alpha=1, shape=20) + 
-  scale_colour_manual(name=levels(factor(meta2.ed$Region)), values = c("#97b3d0ff", "#002147", "#f0e1b9ff", "#bf87b3", "#ed254eff"))
+# p1 <- p %<+% meta2.ed + new_scale_color() + geom_tippoint(aes(color=Region), size=2.5, alpha=1, shape=20) + 
+#   scale_colour_manual(name=levels(factor(meta2.ed$Region)), values = c("#97b3d0ff", "#002147", "#f0e1b9ff", "#bf87b3", "#ed254eff"))
 
 p1 <- p %<+% metadata + 
   new_scale_color() +
