@@ -3469,6 +3469,458 @@ p7
 
 ggsave(filename = file.path("figures", "Tree_Timor-Leste.png"), width = 49, height = 33)
 
+# BEAST
+
+library(devtools)
+# devtools::install_github("laduplessis/bdskytools")
+library(bdskytools)
+fname <- "beast/NClean.log.txt"
+lf <- readLogfile(fname, burnin =0.1)
+Re_sky <- getSkylineSubset(lf, "skyline.popSize1")
+Re_hpd <- getMatrixHPD(Re_sky)
+delta_hpd <- getHPD(lf$becomeUninfectiousRate)
+
+plotSkyline (1:10, Re_hpd, type='step', ylab="Ne")
+
+library(treeio)
+library(ggtree)
+library(tidytree)
+help(offspring.treedata)
+
+show_col(c("#0099ff", "#163566", "#336699", "#339900", "#660000", "#66ccff", "#9900ff", "#990f80", "#996666", "#99ff99", "#cc0000", "#cc66ff", "#cccc33", "#fa0f0c", "#ff6633", "#ff9999", "#ffcc33", "#ffcc99", "#ffff00"))
+
+show_col(hue_pal()(10), borders = NA)
+
+# F
+
+library(ggtree)
+library(ggtreeExtra)
+library(ggnewscale)
+library(reshape2)
+library(tidytree)
+library(ggstar)
+library(TDbook)
+library(phytools)
+library(ape)
+
+show_col("#39B600")
+
+show_col(hue_pal(h = c(90, 180))(9))
+
+file <- ("beast/FClean2.mcc.tre")
+beast <- read.beast(file)
+beast@phylo$tip.label <- gsub("\\+", "", beast@phylo$tip.label)
+beast@phylo$tip.label <- gsub("\\'", "", beast@phylo$tip.label)
+beast@phylo$tip.label <- gsub("\\(", "", beast@phylo$tip.label)
+beast@phylo$tip.label <- gsub("\\)", "", beast@phylo$tip.label)
+beast@phylo$tip.label <- gsub("\\_", "", beast@phylo$tip.label)
+beast@phylo$tip.label <- gsub(" ", "", beast@phylo$tip.label)
+beast@phylo$tip.label <- gsub("\\*", "", beast@phylo$tip.label)
+beast@phylo$tip.label <- gsub("\\@", "", beast@phylo$tip.label)
+beast@phylo$tip.label <- gsub("\\!", "", beast@phylo$tip.label)
+beast@phylo$tip.label <- gsub("\\,", "", beast@phylo$tip.label)
+beast@phylo$tip.label <- gsub("\\,", "", beast@phylo$tip.label)
+beast@phylo$tip.label <- trimws(gsub("\\s+", " ", beast@phylo$tip.label))
+
+library(tidyr)
+library(dplyr)
+library(data.table)
+library(readxl)
+library(scales)
+
+dat <- read_excel("IsolateExplanation.xlsx")
+dat$name <- gsub("\\+", "", dat$name)
+dat$name <- gsub("\\'", "", dat$name)
+dat$name <- gsub("\\(", "", dat$name)
+dat$name <- gsub("\\)", "", dat$name)
+dat$name <- gsub("\\_", "", dat$name)
+dat$name <- gsub(" ", "", dat$name)
+dat$name <- gsub("\\*", "", dat$name)
+dat$name <- gsub("\\@", "", dat$name)
+dat$name <- gsub("\\!", "", dat$name)
+dat$name <- gsub("\\,", "", dat$name)
+dat$name <- gsub("\\,", "", dat$name)
+dat2 <- dat %>% filter(name %in% beast@phylo$tip.label)
+dat$name <- trimws(gsub("\\s+", " ", dat$name))
+table(beast@phylo$tip.label %in% dat$name)
+table(dat$name %in% beast@phylo$tip.label)
+dat <- as.data.frame(dat)
+
+dat <- dat %>%
+  mutate(haplogroup2=ifelse(haplogroup2=="A+152"|haplogroup2=="A+152+16362"|haplogroup2=="A+152+16362+200", "A+",
+                            ifelse(haplogroup2=="R+16189", "R+", haplogroup2)),
+         Country_color=NA,
+         Country_color=ifelse(Country=="Brunei", "#ff6633",
+                              ifelse(Country=="Cambodia", "#ffff00",
+                                     ifelse(Country=="Indonesia", "#9900ff",
+                                            ifelse(Country=="Laos", "#0099ff",
+                                                   ifelse(Country=="Malaysia", "#990f80",
+                                                          ifelse(Country=="Myanmar", "#99ff99",
+                                                                 ifelse(Country=="Philippines", "#cc66ff",
+                                                                        ifelse(Country=="Singapore", "#ff9999",
+                                                                               ifelse(Country=="Thailand", "#339900",
+                                                                                      ifelse(Country=="Timor-Leste", "#66ccff",
+                                                                                             ifelse(Country=="Vietnam", "#fa0f0c",
+                                                                                                    ifelse(Country=="RSRS", "black",
+                                                                                                           ifelse(Country=="rCRS", "orange", Country_color))))))))))))),
+         `Language family`=ifelse(Ethnicity=="Mon", "Austroasiatic",
+                                  ifelse(Ethnicity=="Hmong", "Hmong-Mien",
+                                         ifelse(Ethnicity=="Shan", "Tai-Kadai",
+                                                ifelse(Ethnicity=="Jehai (or Jahai)", "Austroasiatic",
+                                                       ifelse(Ethnicity=="Temuan", "Austronesian",
+                                                              ifelse(Ethnicity=="Maranao", "Austronesian",
+                                                                     ifelse(Ethnicity=="Semelai", "Austroasiatic",
+                                                                            ifelse(Ethnicity=="Bru (Brao)", "Austroasiatic",
+                                                                                   ifelse(Ethnicity=="Jarai", "Austronesian",
+                                                                                          ifelse(Ethnicity=="Kadazan-Dusun", "Austronesian",
+                                                                                                 ifelse(Ethnicity=="Alor", "Austronesian",
+                                                                                                        ifelse(Ethnicity=="Arakanese (or Rakhine)", "Sino-Tibetan",
+                                                                                                               ifelse(Ethnicity=="Timorese", "Austronesian",
+                                                                                                                      ifelse(Ethnicity=="Mang", "Austroasiatic",`Language family`)))))))))))))),
+         `Language family`=ifelse(`Language family`=="Austronesian, Austroasiatic" | `Language family`=="Austroasiatic, Austronesian", "Austroasiatic, Austronesian, Sino-Tibetan",
+                                  ifelse(`Language family`=="Austronesian, Spanish" | `Language family`=="Austronesian, Trans-New Guinea" | `Language family`=="Papuan, Austronesian, English", "Austronesian",
+                                         ifelse(`Language family`=="Hmong-Mien" | `Language family`=="Hmong-Mien, Mongolic", "Hmong-Mien +",
+                                                ifelse(`Language family`=="Indo-European, Sino-Tibetan" | `Language family`=="Sino-Tibetan, Austroasiatic, Tai-Kadai" | `Language family`=="Sino-Tibetan, Tai-Kada" | `Language family`=="Tai-Kadai, Sino-Tibetan", "Sino-Tibetan +",
+                                                       ifelse(`Language family`=="Trans-New Guinea" | `Language family`=="Trans–New Guinea (Alor-Pantar, Papuan)", "Trans-New Guinea +",
+                                                              ifelse(`Language family`=="Austronesian, Austroasiatic, Indo-European", "Austroasiatic, Austronesian + (xSino-Tibetan)",
+                                                                     ifelse(`Language family`=="Austroasiatic, Tai-Kadai" | `Language family`=="Austroasiatic, Tai-Kadai, Hmong-Mien, Sino-Tibetan" | `Language family`=="Tai-Kadai, Hmong-Mien, Austroasiatic", "Austroasiatic, Tai-Kadai +",
+                                                                            ifelse(`Language family`=="Sino-Tibetan", "Sino-Tibetan +", `Language family`))))))))) %>%
+  droplevels()
+
+countries <- c("Brunei", "Cambodia", "Indonesia", "Laos", "Malaysia", "Myanmar", "Philippines", "rCRS", "RSRS", "Singapore", "Thailand", "Timor-Leste", "Vietnam")
+
+# For the tip points
+dat1 <- dat %>% dplyr::select(c("name", "Country", "Country_color", "haplogroup2"))
+dat1$Country <- factor(dat1$Country, levels=countries)
+Countrycolors <- dat1[match(countries,dat$Country),"Country_color"]
+
+# For the haplogroup layer
+dat3 <- dat %>% dplyr::select(c("name", "haplogroup2")) %>%
+  melt(id="name", variable.name="haplo", value.name="haplogroup")
+
+# For the clade group
+dat4 <- dat %>% dplyr::select(c("name", "Language family"))
+dat4 <- aggregate(.~`Language family`, dat4, FUN=paste, collapse=",")
+clades <- lapply(dat4$name, function(x){unlist(strsplit(x,split=","))})
+names(clades) <- dat4$`Language family`
+
+info <- dat
+cols <- Countrycolors
+
+metadata <- dat %>%
+  mutate(Language_color=NA,
+         Language_color=ifelse(`Language family`=="RSRS", "black",
+                               ifelse(`Language family`=="Austroasiatic", "#fa0f0c",
+                                      ifelse(`Language family`=="Austroasiatic, Austronesian, Sino-Tibetan", "#cccc33",
+                                             ifelse(`Language family`=="Austroasiatic, Tai-Kadai +", "#ffcc99",
+                                                    ifelse(`Language family`=="Austronesian", "#9900ff",
+                                                           ifelse(`Language family`=="rCRS", "white",
+                                                                  ifelse(`Language family`=="Hmong-Mien +", "#0099ff",
+                                                                         ifelse(`Language family`=="Mayan", "#660000",
+                                                                                ifelse(`Language family`=="Sino-Tibetan +", "#336699",
+                                                                                       ifelse(`Language family`=="Tai-Kadai", "#339900",
+                                                                                              ifelse(`Language family`=="Trans-New Guinea +", "#66ccff",
+                                                                                                     ifelse(`Language family`=="Unknown", "lightgrey",
+                                                                                                            Language_color)))))))))))),
+         Ethnicity=ifelse(Ethnicity=="Lao, Akha, Hmong, Khmu, Yao/Mien, Phuan", "Lao, Akha, Hmong, Khmu, Dao, Mien, Phuan",
+                          ifelse(Ethnicity=="Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan",
+                                 ifelse(Ethnicity=="Yao", "Dao", Ethnicity))),
+         Ethnicity_color=NA,
+         Ethnicity_color=ifelse(Ethnicity %in% c("Abaknon", "Alor", "Ambelau, Ambonese", "Ambonese", "Balantak, Bali Aga, Balinese", "Bali Aga, Balinese", "Banjar", "Banjar, Bantenese, Banyumasan", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Bicolano", "Bidayuh", "Bruneian Malay", "Bugis", "Bugis, Malay", "Bugkalot (or Ilongot)", "Cebuano", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Filipino", "Filipino (or Tagalog)", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Ivatan", "Jarai", "Javanese", "Javanese, Malay", "Javanese, Palembang, Batak, Minangkabau, Komering", "Kadazan-Dusun", "Kankanaey", "Makassarese", "Malay", "Malay, Achehnese", "Malay, Banjar Malay", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Palembangese", "Papuan", "Seletar (or Orang Seletar)", "Semende", "SiLa", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Temuan", "Tetum", "The Kalanguya (or Ikalahan)", "Timorese", "Toraja", "UrakLawoi", "Zambal"), "#9900ff",
+                                ifelse(Ethnicity %in% c("Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chinese", "Dai", "Deang", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "LaHu", "Naga"), "#336699",
+                                       ifelse(Ethnicity=="RSRS", "black",
+                                              ifelse(Ethnicity %in% c("Akar", "Akar Jambat", "Bru (Brao)", "Ede", "Giarai", "Jehai (or Jahai)", "Khmer", "Khuen", "Kinh", "Kintaq", "Kreung", "Mang", "Mon", "PaThen", "Phnong", "PhuLa", "Semelai", "Stieng", "Tompoun"), "#fa0f0c",
+                                                     ifelse(Ethnicity %in% c("Batek", "Jahai, Semang", "Kensiu", "Khmer, Cham, Chinese-Cambodian, Vietnamese", "Lisu", "LoLo", "Orang Asli"), "#cccc33",
+                                                            ifelse(Ethnicity %in% c("Bunak", "Fataluku", "Kemak", "Makasae", "Makassai", "Mambai"), "#66ccff",
+                                                                   ifelse(Ethnicity %in% c("CoLao", "Isan (or Lao)", "LaChi", "Lao", "Lao Islan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Nung", "Phutai", "Shan", "Tay", "Tay Nung", "Thai"), "#339900",
+                                                                          ifelse(Ethnicity %in% c("Dao", "Hmong", "IuMien"), "#0099ff",
+                                                                                 ifelse(Ethnicity %in% c("rCRS"), "white",
+                                                                                        ifelse(Ethnicity %in% c("Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung", "Lao, Akha, Hmong, Khmu, Dao, Mien, Phuan"), "#ffcc99",
+                                                                                               ifelse(Ethnicity %in% c("Mam"), "#660000",
+                                                                                                      ifelse(Ethnicity %in% c("Unknown"), "lightgrey", Ethnicity)))))))))))),
+         Haplogroup1_color=NA,
+         Haplogroup1_color=ifelse(haplogroup1=="A", "#F8766D",
+                                  ifelse(haplogroup1=="B", "#EA8331",
+                                         ifelse(haplogroup1=="C", "#D89000",
+                                                ifelse(haplogroup1=="D", "#C09B00",
+                                                       ifelse(haplogroup1=="E", "#A3A500",
+                                                              ifelse(haplogroup1=="F", "#39B600",
+                                                                     ifelse(haplogroup1=="G", "#7CAE00",
+                                                                            ifelse(haplogroup1=="H", "yellow",
+                                                                                   ifelse(haplogroup1=="I", "#00BF7D",
+                                                                                          ifelse(haplogroup1=="K", "#00C1A3",
+                                                                                                 ifelse(haplogroup1=="L", "black",
+                                                                                                        ifelse(haplogroup1=="M", "#00BAE0",
+                                                                                                               ifelse(haplogroup1=="N", "#00B0F6",
+                                                                                                                      ifelse(haplogroup1=="P", "#35A2FF",
+                                                                                                                             ifelse(haplogroup1=="Q", "#9590FF",
+                                                                                                                                    ifelse(haplogroup1=="R", "#C77CFF",
+                                                                                                                                           ifelse(haplogroup1=="U", "#E76BF3",
+                                                                                                                                                  ifelse(haplogroup1=="W", "#FA62DB",
+                                                                                                                                                         ifelse(haplogroup1=="Y", "#FF62BC",
+                                                                                                                                                                ifelse(haplogroup1=="Z", "#FF6A98",
+                                                                                                                                                                       Haplogroup1_color))))))))))))))))))))) %>%
+  droplevels()
+
+metadata <- metadata %>%
+  left_join(dat1 %>% dplyr::select(name, Country_color)) %>% 
+  dplyr::select(c("name", "Country", "Country_color",
+                  "Language family", "Language_color", "haplogroup1", "haplogroup2", "Ethnicity", "Ethnicity_color", "Haplogroup1_color")) %>%
+  droplevels()
+
+languages <- c("Austroasiatic", "Austroasiatic, Austronesian, Sino-Tibetan", "Austroasiatic, Tai-Kadai +", "Austronesian", "Hmong-Mien +", "Mayan", "rCRS", "RSRS", "Sino-Tibetan +", "Tai-Kadai", "Trans-New Guinea +", "Unknown")
+Languagecolors <- metadata[match(languages, metadata$`Language family`),"Language_color"]
+
+ethnics <- c("Abaknon", "Achang", "Aini", "Akar", "Akar Jambat", "Alor", "Ambelau, Ambonese", "Ambonese", "Arakanese (or Rakhine)", "Balantak, Bali Aga, Balinese", "Bali Aga, Balinese", "Bamar (or Burman)", "Banjar", "Banjar, Bantenese, Banyumasan", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Batek", "Bicolano", "Bidayuh", "Bru (Brao)", "Bruneian Malay", "Bugis", "Bugis, Malay", "Bugkalot (or Ilongot)", "Bunak", "Cebuano", "Cebuano - Filipino", "Cham", "Chinese", "CoLao", "Cuyunin (or Cuyonon)", "Dai", "Dao", "Dayak", "Deang", "Ede", "Fataluku", "Filipino", "Filipino (or Tagalog)", "Giarai", "HaNhi", "Hmong", "Hui", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Isan (or Lao)", "IuMien", "Ivatan", "Jahai, Semang", "Jarai", "Javanese", "Javanese, Malay", "Javanese, Palembang, Batak, Minangkabau, Komering", "Jehai (or Jahai)", "Jingpo", "Kadazan-Dusun", "Kankanaey", "Karen", "Kemak", "Kensiu", "Khmer", "Khmer, Cham, Chinese-Cambodian, Vietnamese", "Khuen", "Kinh", "Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung", "Kintaq", "Kreung", "LaChi", "Lahu", "LaHu", "Lao", "Lao Islan", "Lao, Akha, Hmong, Khmu, Dao, Mien, Phuan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Lisu", "LoLo", "Makasae", "Makassai", "Makassarese", "Malay", "Malay, Achehnese", "Malay, Banjar Malay", "Mam", "Mambai", "Mang", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Mon", "Naga", "Nung", "Orang Asli", "Palembangese", "Papuan", "PaThen", "Phnong", "PhuLa", "Phutai", "rCRS", "RSRS", "Seletar (or Orang Seletar)", "Semelai", "Semende", "Shan", "SiLa", "Stieng", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Tay", "Tay Nung", "Temuan", "Tetum", "Thai", "The Kalanguya (or Ikalahan)", "Timorese", "Tompoun", "Toraja", "Unknown", "UrakLawoi", "Zambal")
+Ethniccolors <- metadata[match(ethnics, metadata$Ethnicity), "Ethnicity_color"]
+
+haplos <- c("A", "B", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "U", "W", "Y", "Z")
+Haplocolors <- metadata[match(haplos, metadata$haplogroup1), "Haplogroup1_color"]
+
+p <- ggtree(beast, size=1.25, mrsd = "0-01-01") + 
+  theme_tree2() + 
+  scale_x_continuous(breaks=c(-60000,0), minor_breaks=seq(-60000,0,10000)) +
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='#9DA700', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height), 0), 
+                 subset=as.numeric(posterior) > 0.99 & height > 10000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5)
+
+p <- p %<+% metadata
+
+p
+
+p1 <- p %<+% meta2.ed + new_scale_color() + geom_tippoint(aes(color=Region), size=2.5, alpha=1, shape=20) + 
+  scale_colour_manual(name=levels(factor(meta2.ed$Region)), values = c("#97b3d0ff", "#002147", "#f0e1b9ff", "#bf87b3", "#ed254eff"))
+
+p1 <- p %<+% metadata + 
+  new_scale_color() +
+  geom_tippoint(aes(color=Country), size=5) + 
+  scale_color_manual(values=cols, 
+                     guide=guide_legend(keywidth=2,
+                                        keyheight=3,
+                                        order=2,
+                                        override.aes=list(size=15,alpha=1))) + 
+  theme(legend.position="right",
+        legend.background=element_rect(fill=NA),
+        legend.title=element_text(size=30, face="bold"),
+        legend.text=element_text(size=24),
+        legend.key.size = unit(30, "cm"),
+        legend.spacing.y = unit(2, "cm"))
+
+
+
+## find nodes that represent F clades
+tre1 <- beast@phylo
+library(caper)
+trenodelist <- clade.members.list(tre1, tip.labels = TRUE, include.nodes = FALSE)
+F1 <- metadata[which(metadata$haplogroup2 == "F1"), "name"]
+F2 <- metadata[which(metadata$haplogroup2 == "F2"), "name"]
+F3 <- metadata[which(metadata$haplogroup2 == "F3"), "name"]
+F4 <- metadata[which(metadata$haplogroup2 == "F4"), "name"]
+
+findnode <- function(tree, tips) {
+  require(caper)
+  trenodelist <- clade.members.list(tree, tip.labels = TRUE, include.nodes = FALSE)
+  kk <- c()
+  for (i in 1:length(trenodelist)) {
+    kk[i] <- all(all(trenodelist[[i]] %in% tips) & (length(trenodelist[[i]]) == length(tips)))
+  }
+  val <- names(trenodelist)[which(kk)]
+  return(val)
+}
+
+ann_node <- c(findnode(tre1, F1),
+              findnode(tre1, F2), 
+              findnode(tre1, F3),
+              findnode(tre1, F4))
+dt <- data.frame(node=as.numeric(ann_node), name=c("F1", "F2", "F3", "F4"))
+
+p1 <- p + new_scale_color() + geom_hilight(data=dt, mapping=aes(node=node, fill=name), alpha=0.5, type="rect")
+
+#####################
+
+# F
+
+show_col("#39B600")
+
+show_col(hue_pal(h = c(90, 180))(9))
+
+file <- ("beast/FClean2.mcc.tre")
+beast <- read.beast(file)
+
+p <- ggtree(beast, size=1.25) + 
+  theme_tree2() + 
+  # scale_x_continuous(breaks=c(-60000,0), minor_breaks=seq(-60000,0,10000)) +
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='#9DA700', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height), 0), 
+                 subset=as.numeric(posterior) > 0.99 & height > 10000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5)
+
+p1 <- p + 
+  geom_strip('Thailand.CT457.MG272694.F3b', 'Vietnam.PaThen524.MH449356.F3a1', color='#85AD00',
+             label="F3", offset = 0, offset.text=25, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) + 
+  geom_strip('Vietnam.PaThen523.MH449355.F2a', 'Thailand.UT408.KX457584.F2e', color='#00BD5D', 
+             label="F2", offset = 0, offset.text=25, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) + 
+  geom_strip('Thailand.A2YU234.KX456507.F4b', 'Thailand.CT715.MG272762.F4a2', color='#00C1A9', 
+             label="F4", offset = 0, offset.text=25, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) + 
+  geom_strip('Thailand.BR_567.MN006847.F1', 'Cambodia.1_F1a1(Tor49).AY963572.F1a1a1', color='#35B600', 
+             label="F1", offset = 0, offset.text=25, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  ggtitle("Haplogroup F") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "F_beast.png"), width = 33, height = 49)
+
+### F1a1a1
+
+F1a1a1 <- tree_subset(beast, "Cambodia.1_F1a1(Tor49).AY963572.F1a1a1", levels_back = 13)
+
+p <- ggtree(F1a1a1, size=1.25) + 
+  geom_tiplab(align=F, linetype='dashed', linesize=.3, size=8) + 
+  geom_range("height_0.95_HPD", color='#35B600', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height), 0), 
+                 subset=as.numeric(posterior) > 0.8 & height > 2000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5) +
+  theme_tree2() + 
+  xlim(0, 20000)
+
+p1 <- p + 
+  ggtitle("Haplogroup F1a1a1") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "F1a1a1_beast.png"), width = 33, height = 49)
+
+
+# M
+
+show_col("#00B0F6")
+
+show_col(hue_pal(h = c(180, 270))(30))
+
+file <- ("beast/MClean.mcc.tre")
+beast <- read.beast(file)
+
+p <- ggtree(beast, size=1.25) + 
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='#00B9E2', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height), 0), 
+                 subset=as.numeric(posterior) == 1 & height > 20000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5) 
+
+p1 <- p + 
+  geom_strip('Thailand.CT353.MG272662.M7b1a1a', 'Philippines.PH277.KU131352.M7a1a6', color='#00B1F5',
+             label="M7", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.MON247.KX457137.M74b1', 'Vietnam.Thai254.MH449484.M74', color='#00AFF8',
+             label="M74", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Cambodia.Kravet01_M12b.KC505075.M12b1a2a', 'Myanmar.MMR258.JX289125.M12a2*', color='#00ADFB',
+             label="M12", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Indonesia.BJM081.MK128882.M21b', 'Malaysia.10_M21c(Tor61).AY963581.M21b1a*', color='#00AAFE',
+             label="M21", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.CT249.MG272630.M71b', 'Thailand.Moken284(M*).GU810024.M71c*', color='#00A8FF',
+             label="M71", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.Thai345(M*).GU810079.M17a', 'Thailand.BST135.OQ731963.M17', color='#00A5FF',
+             label="M17", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.SO147.KX457426.M20', 'Laos.VIE143.KX457615.M20', color='#2DA2FF',
+             label="M20", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Cambodia.Khmer51_M51.KC505097.M51a', 'Thailand.YOH119.KX457654.M51b1a', color='#4A9FFF',
+             label="M51", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Cambodia.Jarai06_M24.KC505093.M24b', 'Philippines.TB6.JF739543.M24a', color='#5E9CFF',
+             label="M24", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.MO141.KX457113.M73', 'Vietnam.Thai12.GQ301883.M73a1', color='#6E99FF',
+             label="M73", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.MO141.KX457113.M73', 'Vietnam.Thai12.GQ301883.M73a1', color='#6E99FF',
+             label="M73", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Vietnam.Cham10.HM346881.M9b', 'Myanmar.Naga514.HM346895.M9a1b+150', color='#7D96FF',
+             label="M9", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Cambodia.Khmer78_M68a.KC887496.M68a2', 'Thailand.SO113.KX457409.M68a', color='#8993FF',
+             label="M68", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Myanmar.Burman606.KP346016.M13c', 'Indonesia.BJM007.MK128860.M13b1', color='#9490FF',
+             label="M13", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.CT401.MG272666.M76*', 'Cambodia.Khmer01_M76a.KC505113.M76a', color='#9F8CFF',
+             label="M76", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.PT141.KX457304.M91b', 'Thailand.EPB516.MG272875.M91a', color='#00B3F2',
+             label="M91", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  ggtitle("Haplogroup M") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "M_beast.png"), width = 33, height = 49)
+
+### M7b1a1
+
+F1a1a1 <- tree_subset(beast, "Cambodia.1_F1a1(Tor49).AY963572.F1a1a1", levels_back = 13)
+
+p <- ggtree(F1a1a1, size=1.25) + 
+  geom_tiplab(align=F, linetype='dashed', linesize=.3, size=8) + 
+  geom_range("height_0.95_HPD", color='#35B600', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height), 0), 
+                 subset=as.numeric(posterior) > 0.8 & height > 2000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5) +
+  theme_tree2() + 
+  xlim(0, 20000)
+
+p1 <- p + 
+  ggtitle("Haplogroup F1a1a1") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "F1a1a1_beast.png"), width = 33, height = 49)
+
+
+Haplogroup1_color=ifelse(haplogroup1=="A", "#F8766D",
+                         ifelse(haplogroup1=="B", "#EA8331",
+                                ifelse(haplogroup1=="C", "#D89000",
+                                       ifelse(haplogroup1=="D", "#C09B00",
+                                              ifelse(haplogroup1=="E", "#A3A500",
+                                                     ifelse(haplogroup1=="F", "#39B600",
+                                                            ifelse(haplogroup1=="G", "#7CAE00",
+                                                                   ifelse(haplogroup1=="H", "yellow",
+                                                                          ifelse(haplogroup1=="I", "#00BF7D",
+                                                                                 ifelse(haplogroup1=="K", "#00C1A3",
+                                                                                        ifelse(haplogroup1=="L", "black",
+                                                                                               ifelse(haplogroup1=="M", "#00BAE0",
+                                                                                                      ifelse(haplogroup1=="N", "#00B0F6",
+                                                                                                             ifelse(haplogroup1=="P", "#35A2FF",
+                                                                                                                    ifelse(haplogroup1=="Q", "#9590FF",
+                                                                                                                           ifelse(haplogroup1=="R", "#C77CFF",
+                                                                                                                                  ifelse(haplogroup1=="U", "#E76BF3",
+                                                                                                                                         ifelse(haplogroup1=="W", "#FA62DB",
+                                                                                                                                                ifelse(haplogroup1=="Y", "#FF62BC",
+                                                                                                                                                       ifelse(haplogroup1=="Z", "#FF6A98",
+                                                                                                                                                              Haplogroup1_color))))))))))))))))))))) %>%
+
+
 # Create dataset of sequences and subclades
 
 library(tidyr)
@@ -7408,64 +7860,4 @@ nanc.post     = 10,
 pos           = 136608646,
 sel.allele    = 1)
 
-# BEAST
-
-library(devtools)
-# devtools::install_github("laduplessis/bdskytools")
-library(bdskytools)
-fname <- "beast/NClean.log.txt"
-lf <- readLogfile(fname, burnin =0.1)
-Re_sky <- getSkylineSubset(lf, "skyline.popSize1")
-Re_hpd <- getMatrixHPD(Re_sky)
-delta_hpd <- getHPD(lf$becomeUninfectiousRate)
-
-plotSkyline (1:10, Re_hpd, type='step', ylab="Ne")
-
-library(treeio)
-library(ggtree)
-library(tidytree)
-help(offspring.treedata)
-
-file <- ("beast/FClean2.mcc.tre")
-beast <- read.beast(file)
-
-p <- ggtree(beast, size=1.25) + 
-  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
-  geom_range("height_0.95_HPD", color='orange', size=3, alpha=0.5) + 
-  geom_text2(aes(label=round(as.numeric(height), 0), 
-                 subset=as.numeric(posterior) > 0.99 & height > 3000, 
-                 x=branch), size=10, color='red', vjust=-0.5, hjust=-0.5) 
-
-p1 <- p + 
-  geom_strip('Thailand.CT457.MG272694.F3b', 'Vietnam.PaThen524.MH449356.F3a1', color='orange',
-             label="F3", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 10,
-             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) + 
-  geom_strip('Vietnam.PaThen523.MH449355.F2a', 'Thailand.UT408.KX457584.F2e', color='blue', 
-             label="F2", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 10,
-             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) + 
-  geom_strip('Thailand.A2YU234.KX456507.F4b', 'Thailand.CT715.MG272762.F4a2', color='purple', 
-             label="F4", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 10,
-             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) + 
-  geom_strip('Thailand.BR_567.MN006847.F1', 'Cambodia.1_F1a1(Tor49).AY963572.F1a1a1', color='darkgreen', 
-             label="F1", offset = 0, offset.text=0, align = TRUE, barsize = 2, extend = 0, fontsize = 10,
-             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE)
-
-p1
-
-ggsave(filename = file.path("figures", "F_beast.png"), width = 49, height = 33)
-
-geom_strip(taxa1, taxa2, label = NA, offset = 0, offset.text = 0,
-           align = TRUE, barsize = 0.5, extend = 0, fontsize = 3.88,
-           angle = 0, geom = "text", hjust = 0, fill = NA,
-           family = "sans", parse = FALSE, ...)
-
-p2 <- p1 + geom_strip(grep("F2", beast@phylo$tip.label), grep("F2", beast@phylo$tip.label), barsize=1.5, color='blue', 
-               label="F2", offset.text=.1)
-
-p2
-
-zoom(tree_M7, grep("Vietnam", tree_M7$tip.label), xmax_adjust=2)
-
-p + geom_cladelab(node=1, label="another clade", align=TRUE, 
-                  offset = .2, textcolor='blue', barcolor='blue')
 
