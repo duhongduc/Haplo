@@ -4240,28 +4240,431 @@ p1
 ggsave(filename = file.path("figures", "N_beast.png"), width = 33, height = 49)
 
 
-Haplogroup1_color=ifelse(haplogroup1=="A", "#F8766D",
-                         ifelse(haplogroup1=="B", "#EA8331",
-                                ifelse(haplogroup1=="C", "#D89000",
-                                       ifelse(haplogroup1=="D", "#C09B00",
-                                              ifelse(haplogroup1=="E", "#A3A500",
-                                                     ifelse(haplogroup1=="F", "#39B600",
-                                                            ifelse(haplogroup1=="G", "#7CAE00",
-                                                                   ifelse(haplogroup1=="H", "yellow",
-                                                                          ifelse(haplogroup1=="I", "#00BF7D",
-                                                                                 ifelse(haplogroup1=="K", "#00C1A3",
-                                                                                        ifelse(haplogroup1=="L", "black",
-                                                                                               ifelse(haplogroup1=="M", "#00BAE0",
-                                                                                                      ifelse(haplogroup1=="N", "#00B0F6",
-                                                                                                             ifelse(haplogroup1=="P", "#35A2FF",
-                                                                                                                    ifelse(haplogroup1=="Q", "#9590FF",
-                                                                                                                           ifelse(haplogroup1=="R", "#C77CFF",
-                                                                                                                                  ifelse(haplogroup1=="U", "#E76BF3",
-                                                                                                                                         ifelse(haplogroup1=="W", "#FA62DB",
-                                                                                                                                                ifelse(haplogroup1=="Y", "#FF62BC",
-                                                                                                                                                       ifelse(haplogroup1=="Z", "#FF6A98",
-                                                                                                                                                              Haplogroup1_color))))))))))))))))))))) %>%
+# P
 
+show_col("#35A2FF")
+
+show_col(hue_pal(h = c(180, 270))(30))
+
+file <- ("beast/PClean.mcc.tre")
+beast <- read.beast(file)
+
+p <- ggtree(beast, size=1.25) + 
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='#35A2FF', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height_median), 0), 
+                 subset=as.numeric(posterior) == 1 & height_median > 20000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5) 
+
+p1 <- p + 
+  geom_strip('Indonesia.PB119.MN849692.P1d1', 'Indonesia.PB76.MN849727.P1', color='#2DA2FF',
+             label="P1", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Indonesia.PNG87.MN849861.P2', 'Indonesia.NU71.MN849579.P', color='#4A9FFF',
+             label="P2", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Indonesia.NV16.MN849600.P3b', 'Indonesia.PNG80.MN849856.P3b', color='#5E9CFF',
+             label="P3", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Philippines.PH285.GQ119036.P10', 'Philippines.Bug3272_Bugkalot.KC993997.P10', color='#6E99FF',
+             label="P10", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Philippines.AeB4069_Aeta_Bataan.KC993935.P9a*', 'Philippines.AeB4080_Aeta_Bataan.KC993942.P9*', color='#7D96FF',
+             label="P9", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Indonesia.NZ96.MN849681.P4a1', 'Indonesia.MJ3.MN849505.P4a', color='#8993FF',
+             label="P4", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  ggtitle("Haplogroup P") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "P_beast.png"), width = 33, height = 49)
+
+# Q
+
+show_col("#9590FF")
+
+show_col(hue_pal(h = c(180, 270))(30))
+
+file <- ("beast/QClean.mcc.tre")
+beast <- read.beast(file)
+
+p <- ggtree(beast, size=1.25) + 
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='#9590FF', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height_median), 0), 
+                 subset=as.numeric(posterior) == 1 & height_median > 20000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5) 
+
+p1 <- p + 
+  geom_strip('Indonesia.NZ180.MN849637.Q1a1', 'Indonesia.PNG81.MN849857.Q1', color='#8993FF',
+             label="Q1", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Indonesia.NJ26.MN849513.Q3a1', 'Indonesia.PM18.MN849752.Q3b', color='#9490FF',
+             label="Q3", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Indonesia.PM86.MN849783.Q2a', 'Indonesia.PNG54.MN849847.Q2a4', color='#9F8CFF',
+             label="Q2", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  ggtitle("Haplogroup Q") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "Q_beast.png"), width = 33, height = 49)
+
+# A
+
+show_col("#F8766D")
+
+show_col(hue_pal(h = c(0, 90))(30))
+
+file <- ("beast/AClean.mcc.tre")
+beast <- read.beast(file)
+
+p <- ggtree(beast, size=1.25) + 
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='#F8766D', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height_median), 0), 
+                 subset=as.numeric(posterior) == 1 & height_median > 20000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5) 
+
+p1 <- p + 
+  geom_strip('Vietnam.PaThen507.MH449339.A14', 'Thailand.CT251.MG272631.A14', color='#FF6C91',
+             label="A14", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.LS119.MT419145.A13*', 'Thailand.A1YU113.KX456443.A13', color='#FE6E8A',
+             label="A13", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Vietnam.Mang290.MH449268.A+152+16362+200', 'Thailand.A4YU105.KX456634.A+152', color='#FD7083',
+             label="A+152", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.LW624.KX457056.A17', 'Thailand.RM115.KX457344.A17', color='#FB727B',
+             label="A17", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.CT605.MG272728.A5b1', 'Vietnam.Tay72.MH449471.A5b1', color='#F97474',
+             label="A5", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  ggtitle("Haplogroup A") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "A_beast.png"), width = 33, height = 49)
+
+# C
+
+show_col("#D89000")
+
+show_col(hue_pal(h = c(0, 90))(30))
+
+file <- ("beast/CClean.mcc.tre")
+beast <- read.beast(file)
+
+p <- ggtree(beast, size=1.25) + 
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='#D89000', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height_median), 0), 
+                 subset=as.numeric(posterior) == 1 & height_median > 20000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5) 
+
+p1 <- p + 
+  geom_strip('Vietnam.HMong218.MH449049.C5d', 'Vietnam.HMong228.MH449059.C5d', color='#DD8D00',
+             label="C5", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.PL113.KX457186.C4a1b', 'Vietnam.HaNhi320.MH449073.C4a2b', color='#D98F00',
+             label="C4", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.CT351.MG272661.C7*', 'Thailand.HM134.MT418991.C7a', color='#D69100',
+             label="C7", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  ggtitle("Haplogroup C") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "C_beast.png"), width = 33, height = 49)
+
+# D
+
+show_col("#C09B00")
+
+show_col(hue_pal(h = c(0, 90))(30))
+
+file <- ("beast/DClean.mcc.tre")
+beast <- read.beast(file)
+
+p <- ggtree(beast, size=1.25) + 
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='#C09B00', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height_median), 0), 
+                 subset=as.numeric(posterior) == 1 & height_median > 20000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5) 
+
+p1 <- p + 
+  geom_strip('Philippines.Igorot17.KU752562.D5b1c1a', 'Laos.VIE111.KX457600.D5b3', color='#CE9500',
+             label="D5", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Timor-Leste.ET126.KJ676774.D6a', 'Philippines.PH348.GQ119040.D6c1', color='#C69900',
+             label="D6", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Vietnam.Thai136.MH449477.D4g2a1', 'Vietnam.LaChi550.MH449169.D4', color='#C19B00',
+             label="D4", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  ggtitle("Haplogroup D") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "D_beast.png"), width = 33, height = 49)
+
+# E
+
+show_col("#A3A500")
+
+show_col(hue_pal(h = c(0, 90))(30))
+
+file <- ("beast/EClean.mcc.tre")
+beast <- read.beast(file)
+
+p <- ggtree(beast, size=1.25) + 
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='#A3A500', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height_median), 0), 
+                 subset=as.numeric(posterior) == 1 & height_median > 20000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5) 
+
+p1 <- p + 
+  geom_strip('Thailand.Thai223(E2b1).GU810070.E2b', 'Philippines.Sur22.GU733820.E2a', color='#AEA200',
+             label="E2", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Indonesia.BJM024.MK128866.E1a2+(16261)', 'Philippines.Man104.GU733761.E1a1a1', color='#A3A500',
+             label="E1", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  ggtitle("Haplogroup E") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "E_beast.png"), width = 33, height = 49)
+
+# G
+
+show_col("#7CAE00")
+
+show_col(hue_pal(h = c(90, 120))(30))
+
+file <- ("beast/GClean.mcc.tre")
+beast <- read.beast(file)
+
+p <- ggtree(beast, size=1.25) + 
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='#7CAE00', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height_median), 0), 
+                 subset=as.numeric(posterior) == 1 & height_median > 20000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5) 
+
+p1 <- p + 
+  geom_strip('Malaysia.SL16.AP012400.G1c', 'Thailand.Y208.MT419323.G1a1', color='#7DAE00',
+             label="G1", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.BST129.OQ731960.G', 'Vietnam.Dao623.MH448984.G', color='#7CAE00',
+             label="G", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.Y218.MT419329.G2a+152', 'Myanmar.MMR018.JX289093.G2b1a1', color='#7AAE00',
+             label="G2", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  ggtitle("Haplogroup G") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "G_beast.png"), width = 33, height = 49)
+
+# R
+
+show_col("#C77CFF")
+
+show_col(hue_pal(h = c(270, 300))(40))
+
+file <- ("beast/RClean.mcc.tre")
+beast <- read.beast(file)
+
+p <- ggtree(beast, size=1.25) + 
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='#C77CFF', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height_median), 0), 
+                 subset=as.numeric(posterior) == 1 & height_median > 20000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5) 
+
+p1 <- p + 
+  geom_strip('Indonesia.BJM121.MK128858.R22', 'Thailand.LAO505.KX456900.R22*', color='#C17FFF',
+             label="R22", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Vietnam.Cham57.GQ301864.R23', 'Cambodia.C105_Seim_Riep_R23.KT587454.R23', color='#C37EFF',
+             label="R23", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.UrakLawoi109(R*).GU810037.R6+16129*', 'Thailand.MLB107.KX457070.R6a2', color='#C67DFF',
+             label="R6", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.LW148.KX457017.R2+13500', 'Thailand.TK115.MG272924.R2+13500', color='#C87CFF',
+             label="R2+13500", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Philippines.Mam4.GU733726.R24', 'Philippines.Aba5044_Abaknon.KC993925.R24a', color='#CA7AFF',
+             label="R24", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.TL151.MG272964.R+16189', 'Thailand.HMP107.MT419089.R+16189', color='#CD79FF',
+             label="R+16189", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.KHM223.KX456813.R11b1', 'Thailand.TL167.MG272968.R11_B6', color='#CF78FF',
+             label="R11", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Malaysia.JHM068.AP012392.R21', 'Thailand.CT213.MG272612.R21', color='#C87CFF',
+             label="R21", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.A1YU119.KX456446.R9c1a', 'Thailand.SPP108.KX457433.R9b1a3', color='#C77CFF',
+             label="R9", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  ggtitle("Haplogroup R") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "R_beast.png"), width = 33, height = 49)
+
+# U
+
+show_col("#E76BF3")
+
+show_col(hue_pal(h = c(270, 300))(30))
+
+file <- ("beast/UClean.mcc.tre")
+beast <- read.beast(file)
+
+p <- ggtree(beast, size=1.25) + 
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='#E76BF3', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height_median), 0), 
+                 subset=as.numeric(posterior) == 1 & height_median > 20000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5) 
+
+p1 <- p + 
+  geom_strip('Thailand.CT517.MG272704.U1a1c1a', 'Thailand.CT257.MG272634.U1a1c1d', color='#E06FF8',
+             label="U1", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.CT617.MG272734.U2a1b', 'Myanmar.WA8.KY686212.U2', color='#E36EF6',
+             label="U2", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  ggtitle("Haplogroup U") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "U_beast.png"), width = 33, height = 49)
+
+# W
+
+show_col("#FA62DB")
+
+show_col(hue_pal(h = c(300, 360))(30))
+
+file <- ("beast/WClean.mcc.tre")
+beast <- read.beast(file)
+
+p <- ggtree(beast, size=1.25) + 
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='#FA62DB', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height_median), 0), 
+                 subset=as.numeric(posterior) == 1 & height_median > 20000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5) 
+
+p1 <- p + 
+  geom_strip('Cambodia.C266_Banteay_Meanchey_W3b.KT587614.W3b', 'Thailand.MO113.KX457099.W3a1b', color='#FA62DB',
+             label="W3", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  ggtitle("Haplogroup W") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "W_beast.png"), width = 33, height = 49)
+
+# Y
+
+show_col("#FF62BC")
+
+show_col(hue_pal(h = c(300, 360))(30))
+
+file <- ("beast/YClean.mcc.tre")
+beast <- read.beast(file)
+
+p <- ggtree(beast, size=1.25) + 
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='#FF62BC', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height_median), 0), 
+                 subset=as.numeric(posterior) == 1 & height_median > 20000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5) 
+
+p1 <- p + 
+  geom_strip('Thailand.Y178.MT419312.Y1', 'Thailand.Y178.MT419312.Y1', color='#FF62BF',
+             label="Y1", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Philippines.Mara3676_Maranao.KC994149.Y2a', 'Indonesia.IN302.GQ119013.Y2a1', color='#FF66A7',
+             label="Y2", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  ggtitle("Haplogroup Y") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "Y_beast.png"), width = 33, height = 49)
+
+# Z
+
+show_col("#FF6A98")
+
+show_col(hue_pal(h = c(300, 360))(30))
+
+file <- ("beast/ZClean.mcc.tre")
+beast <- read.beast(file)
+
+p <- ggtree(beast, size=1.25) + 
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='#FF6A98', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height_median), 0), 
+                 subset=as.numeric(posterior) == 1 & height_median > 20000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5) 
+
+p1 <- p + 
+  geom_strip('Thailand.LS112.MT419138.Z3', 'Thailand.LW527.KX457031.Z3a', color='#FF67A3',
+             label="Z3", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Philippines.PH247.GQ119035.Z4', 'Thailand.SPP115.KX457438.Z4', color='#FF6A9A',
+             label="Z4", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  geom_strip('Thailand.LAO443.KX456893.Z3', 'Cambodia.C037_Seim_Riep_Z3c.KT587386.Z3c', color='#FF6C91',
+             label="Z3", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+             angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  ggtitle("Haplogroup Z") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "Z_beast.png"), width = 33, height = 49)
 
 # Create dataset of sequences and subclades
 
