@@ -4666,6 +4666,75 @@ p1
 
 ggsave(filename = file.path("figures", "Z_beast.png"), width = 33, height = 49)
 
+# Bayesian estimates (BE) of coalescence time of the major SEA haplogroups
+
+library(tidyr)
+library(dplyr)
+library(data.table)
+library(readxl)
+
+be <- read_excel("SEA_BE_Results.xlsx")
+be <- be %>% mutate(haplo=Haplogroup)
+
+dat <- read_excel("IsolateExplanation.xlsx")
+
+hap <- dat %>%
+  mutate_all(funs(gsub("\\(", "", .))) %>% 
+  mutate_all(funs(gsub("\\)", "", .))) %>%
+  mutate_all(funs(gsub("\\@", "", .))) %>%
+  mutate_all(funs(gsub("\\!", "", .))) %>%
+  mutate(haplogroup2 = str_extract(haplo, "^([A-Z])\\d+"),
+         haplogroup3 = str_extract(haplo, "^([A-Z])\\d+\\w"),
+         haplogroup4 = str_extract(haplo, "^([A-Z])\\d+\\w\\d"),
+         haplogroup5 = str_extract(haplo, "^([A-Z])\\d+\\w\\d\\w"),
+         haplogroup6 = str_extract(haplo, "^([A-Z])\\d+\\w\\d\\w\\d"),
+         haplogroup7 = str_extract(haplo, "^([A-Z])\\d+\\w\\d\\w\\d\\w"),
+         haplogroup8 = str_extract(haplo, "^([A-Z])\\d+\\w"),
+         haplogroup9 = str_extract(haplo, "^([A-Z])\\d+\\w\\d\\+\\@\\d+"),
+         haplogroup9 = ifelse(haplogroup9=="F1b1+@152", "F1b1+152", haplogroup9),
+         haplogroup10 = str_extract(haplo, "^([A-Z])\\d+\\w\\d\\w\\d\\+\\!\\d+"),
+         haplogroup10 = ifelse(haplogroup10=="D5a2a1+!16172", "D5a2a1+16172", haplogroup10)) %>%
+  dplyr::select(haplo, haplogroup1, haplogroup2, haplogroup3, haplogroup4, haplogroup5, haplogroup6, haplogroup7, haplogroup8, haplogroup9, haplogroup10) %>%
+  setDT()
+
+hapf <- hap %>% dplyr::filter(!haplo %in% c(hap$haplogroup1, hap$haplogroup2, hap$haplogroup3, hap$haplogroup4, hap$haplogroup5, hap$haplogroup6, hap$haplogroup7, hap$haplogroup8, hap$haplogroup9, hap$haplogroup10)) %>% setDT()
+hapf <- hapf[, .N, by = .(haplo)] %>% arrange(desc(N))
+
+extra <- c("B4a1", "B4b1a2b", "B4c1", "B5a1c1", "D4e1", "D5a2", "D5a2a1+16172", "F1b1+152", "F1c1a", "F3b1a", "M7b1", "M7c1", "M9a4", "M9a4a", "M9a1b", "M12a1", "M12b1", "M35b", "M51a1", "M51b", "M51b1", "R9b1a", "R9b1a2", "U1a1c1")
+hapex <- hap %>% filter(haplo %in% extra) %>% setDT()
+
+hapex <- datex[, .N, by = .(haplo)] %>% arrange(desc(N))
+
+hap1 <- hap[, .N, by = .(haplogroup1)] %>% arrange(desc(N)) %>% setnames(c("haplo", "N"))
+hap2 <- hap[, .N, by = .(haplogroup2)] %>% arrange(desc(N)) %>% setnames(c("haplo", "N")) %>% filter(!haplo %in% hap1$haplo)
+hap3 <- hap[, .N, by = .(haplogroup3)] %>% arrange(desc(N)) %>% setnames(c("haplo", "N")) %>% filter(!haplo %in% c(hap1$haplo, hap2$haplo))
+hap4 <- hap[, .N, by = .(haplogroup4)] %>% arrange(desc(N)) %>% setnames(c("haplo", "N")) %>% filter(!haplo %in% c(hap1$haplo, hap2$haplo, hap3$haplo))
+hap5 <- hap[, .N, by = .(haplogroup5)] %>% arrange(desc(N)) %>% setnames(c("haplo", "N")) %>% filter(!haplo %in% c(hap1$haplo, hap2$haplo, hap3$haplo, hap4$haplo))
+hap6 <- hap[, .N, by = .(haplogroup6)] %>% arrange(desc(N)) %>% setnames(c("haplo", "N")) %>% filter(!haplo %in% c(hap1$haplo, hap2$haplo, hap3$haplo, hap4$haplo, hap5$haplo))
+hap7 <- hap[, .N, by = .(haplogroup7)] %>% arrange(desc(N)) %>% setnames(c("haplo", "N")) %>% filter(!haplo %in% c(hap1$haplo, hap2$haplo, hap3$haplo, hap4$haplo, hap5$haplo, hap6$haplo))
+hap8 <- hap[, .N, by = .(haplogroup8)] %>% arrange(desc(N)) %>% setnames(c("haplo", "N")) %>% filter(!haplo %in% c(hap1$haplo, hap2$haplo, hap3$haplo, hap4$haplo, hap5$haplo, hap6$haplo, hap7$haplo))
+hap9 <- hap[, .N, by = .(haplogroup9)] %>% arrange(desc(N)) %>% setnames(c("haplo", "N")) %>% filter(!haplo %in% c(hap1$haplo, hap2$haplo, hap3$haplo, hap4$haplo, hap5$haplo, hap6$haplo, hap7$haplo, hap8$haplo))
+hap10 <- hap[, .N, by = .(haplogroup10)] %>% arrange(desc(N)) %>% setnames(c("haplo", "N")) %>% filter(!haplo %in% c(hap1$haplo, hap2$haplo, hap3$haplo, hap4$haplo, hap5$haplo, hap6$haplo, hap7$haplo, hap8$haplo, hap9$haplo))
+
+hap_all <- rbind(hapf, hapex, hap1, hap2, hap3, hap4, hap5, hap6, hap7, hap8, hap9, hap10)
+hap_all <- unique(hap_all, by = c('haplo','N'))
+
+table(be$haplo %in% hap_all$haplo)
+be$haplo[which(!be$haplo %in% hap_all$haplo)]
+
+be_hap <- merge(be, hap_all, by="haplo")
+be_hap <- unique(be_hap, by = c('haplo','N')) %>% setDT()
+be_hap <- be_hap[, -c(1,3)]
+be_hap <- be_hap[, c(1,6,2,3,4,5)]
+
+## Rename
+setnames(x = be_hap,
+         old = c("Haplogroup", "N", "BE coalescent time", "Lower", "Upper", "Posterior"),
+         new = c("Haplogroup", "Sample size", "BE coalescent time", "Lower", "Upper", "Posterior"))
+
+library(writexl)
+write_xlsx(be_hap, "SEA_BE_results_updated.xlsx")
+
 # Create dataset of sequences and subclades
 
 library(tidyr)
