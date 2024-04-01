@@ -4666,6 +4666,40 @@ p1
 
 ggsave(filename = file.path("figures", "Z_beast.png"), width = 33, height = 49)
 
+# H
+
+show_col("yellow")
+
+show_col(hue_pal(h = c(0, 90))(30))
+
+file <- ("beast/HClean.mcc.tre")
+beast <- read.beast(file)
+
+p <- ggtree(beast, size=1.25) + 
+  # geom_tiplab(align=TRUE, linetype='dashed', linesize=.3) + 
+  geom_range("height_0.95_HPD", color='yellow', size=4, alpha=0.6) + 
+  geom_text2(aes(label=round(as.numeric(height_median), 0), 
+                 subset=as.numeric(posterior) == 1 & height_median > 20000, 
+                 x=branch), size=12, color='red', vjust=-0.5, hjust=-0.5) 
+
+p1 <- p + 
+  # geom_strip('Thailand.LS112.MT419138.Z3', 'Thailand.LW527.KX457031.Z3a', color='#FF67A3',
+  #            label="Z3", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+  #            angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  # geom_strip('Philippines.PH247.GQ119035.Z4', 'Thailand.SPP115.KX457438.Z4', color='#FF6A9A',
+  #            label="Z4", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+  #            angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  # geom_strip('Thailand.LAO443.KX456893.Z3', 'Cambodia.C037_Seim_Riep_Z3c.KT587386.Z3c', color='#FF6C91',
+  #            label="Z3", offset = 0, offset.text=0.1, align = TRUE, barsize = 2, extend = 0, fontsize = 15,
+  #            angle = 0, geom = "text", hjust = 0, fill = NA, family = "sans", parse = FALSE) +
+  ggtitle("Haplogroup Z") + 
+  theme(plot.title = element_text(size = 100, face = "bold", hjust = 0),
+        plot.title.position = "panel")
+
+p1
+
+ggsave(filename = file.path("figures", "H_beast.png"), width = 33, height = 49)
+
 # Bayesian estimates (BE) of coalescence time of the major SEA haplogroups
 
 library(tidyr)
