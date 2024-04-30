@@ -7186,6 +7186,11 @@ country_present_SEA3 <- country_present_SEA3 %>%
   group_by(country) %>% arrange(haplo3, .by_group = TRUE) %>% 
   mutate(percent=(N*100)/sum(N)) %>% ungroup()
 
+countries <- SEA0_sf
+countries_coords <- st_coordinates(st_centroid(SEA0_sf)) %>%
+  data.frame(stringsAsFactors = FALSE) %>%
+  mutate(ID = countries$country)
+
 res_pre <- country_present_SEA3 %>%
   rename(ID=country) %>%
   group_by(haplo3) %>%
@@ -7215,7 +7220,7 @@ pre_SEA3_plot_max <- pre_SEA3_plot %>% group_by(country) %>% slice(1)
 
 ggplot() + geom_sf() + geom_sf(data=pre_SEA3_plot_max, aes(fill=haplo3_max), lwd=0, alpha=0.6) +
   geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:139], color=NA, alpha=0.8) +
-  annotate(geom = "table", x = 135, y = 20, label = list(pre_SEA3_plot_max), size = 6.5) +
+  # annotate(geom = "table", x = 135, y = 20, label = list(pre_SEA3_plot_max), size = 6.5) +
   guides(fill=guide_legend(nrow=8, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
