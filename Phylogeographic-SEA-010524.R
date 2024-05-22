@@ -5530,6 +5530,8 @@ write_xlsx(dat_c, "SEA_country.xlsx")
 
 # Ethnicity
 
+## Diversity
+
 ethnic <- read_excel("IsolateExplanation.xlsx")
 
 library(janitor)
@@ -5579,6 +5581,230 @@ library(ape)
 # 
 # library(writexl)
 # write_xlsx(dat_e, "SEA_ethnicity.xlsx")
+
+## Fst shared haplotype
+
+library("hierfstat")
+library("adegenet")
+
+### Load the meta file that contains population structure 
+dat <- read_excel("IsolateExplanation.xlsx")
+dat$name <- gsub("\\+", "", dat$name)
+dat$name <- gsub("\\'", "", dat$name)
+dat$name <- gsub("\\(", "", dat$name)
+dat$name <- gsub("\\)", "", dat$name)
+dat$name <- gsub("\\_", "", dat$name)
+dat$name <- gsub("\\-", "", dat$name)
+dat$name <- gsub(" ", "", dat$name)
+dat$name <- gsub("\\*", "", dat$name)
+dat$name <- gsub("\\@", "", dat$name)
+dat$name <- gsub("\\!", "", dat$name)
+dat$name <- gsub("\\,", "", dat$name)
+dat$name <- gsub("\\,", "", dat$name)
+dat$name <- trimws(gsub("\\s+", " ", dat$name))
+dat <- as.data.frame(dat)
+
+meta <- dat %>%
+  mutate(haplogroup2=ifelse(haplogroup2=="A+152"|haplogroup2=="A+152+16362"|haplogroup2=="A+152+16362+200", "A+",
+                            ifelse(haplogroup2=="R+16189", "R+", haplogroup2)),
+         Country_color=NA,
+         Country_color=ifelse(Country=="Brunei", "#ff6633",
+                              ifelse(Country=="Cambodia", "#ffff00",
+                                     ifelse(Country=="Indonesia", "#9900ff",
+                                            ifelse(Country=="Laos", "#0099ff",
+                                                   ifelse(Country=="Malaysia", "#990f80",
+                                                          ifelse(Country=="Myanmar", "#99ff99",
+                                                                 ifelse(Country=="Philippines", "#cc66ff",
+                                                                        ifelse(Country=="Singapore", "#ff9999",
+                                                                               ifelse(Country=="Thailand", "#339900",
+                                                                                      ifelse(Country=="Timor-Leste", "#66ccff",
+                                                                                             ifelse(Country=="Vietnam", "#fa0f0c",
+                                                                                                    ifelse(Country=="RSRS", "black",
+                                                                                                           ifelse(Country=="rCRS", "orange", Country_color))))))))))))),
+         `Language family`=ifelse(Ethnicity=="Mon", "Austroasiatic",
+                                  ifelse(Ethnicity=="Hmong", "Hmong-Mien",
+                                         ifelse(Ethnicity=="Shan", "Tai-Kadai",
+                                                ifelse(Ethnicity=="Jehai (or Jahai)", "Austroasiatic",
+                                                       ifelse(Ethnicity=="Temuan", "Austronesian",
+                                                              ifelse(Ethnicity=="Maranao", "Austronesian",
+                                                                     ifelse(Ethnicity=="Semelai", "Austroasiatic",
+                                                                            ifelse(Ethnicity=="Bru (Brao)", "Austroasiatic",
+                                                                                   ifelse(Ethnicity=="Jarai", "Austronesian",
+                                                                                          ifelse(Ethnicity=="Kadazan-Dusun", "Austronesian",
+                                                                                                 ifelse(Ethnicity=="Alor", "Austronesian",
+                                                                                                        ifelse(Ethnicity=="Arakanese (or Rakhine)", "Sino-Tibetan",
+                                                                                                               ifelse(Ethnicity=="Timorese", "Austronesian",
+                                                                                                                      ifelse(Ethnicity=="Mang", "Austroasiatic",`Language family`)))))))))))))),
+         `Language family`=ifelse(`Language family`=="Austronesian, Austroasiatic" | `Language family`=="Austroasiatic, Austronesian", "Austroasiatic, Austronesian, Sino-Tibetan",
+                                  ifelse(`Language family`=="Austronesian, Spanish" | `Language family`=="Austronesian, Trans-New Guinea" | `Language family`=="Papuan, Austronesian, English", "Austronesian",
+                                         ifelse(`Language family`=="Hmong-Mien" | `Language family`=="Hmong-Mien, Mongolic", "Hmong-Mien +",
+                                                ifelse(`Language family`=="Indo-European, Sino-Tibetan" | `Language family`=="Sino-Tibetan, Austroasiatic, Tai-Kadai" | `Language family`=="Sino-Tibetan, Tai-Kada" | `Language family`=="Tai-Kadai, Sino-Tibetan", "Sino-Tibetan +",
+                                                       ifelse(`Language family`=="Trans-New Guinea" | `Language family`=="Trans–New Guinea (Alor-Pantar, Papuan)", "Trans-New Guinea +",
+                                                              ifelse(`Language family`=="Austronesian, Austroasiatic, Indo-European", "Austroasiatic, Austronesian + (xSino-Tibetan)",
+                                                                     ifelse(`Language family`=="Austroasiatic, Tai-Kadai" | `Language family`=="Austroasiatic, Tai-Kadai, Hmong-Mien, Sino-Tibetan" | `Language family`=="Tai-Kadai, Hmong-Mien, Austroasiatic", "Austroasiatic, Tai-Kadai +",
+                                                                            ifelse(`Language family`=="Sino-Tibetan", "Sino-Tibetan +", `Language family`)))))))),
+         Language_color=NA,
+         Language_color=ifelse(`Language family`=="RSRS", "black",
+                               ifelse(`Language family`=="Austroasiatic", "#fa0f0c",
+                                      ifelse(`Language family`=="Austroasiatic, Austronesian, Sino-Tibetan", "#cccc33",
+                                             ifelse(`Language family`=="Austroasiatic, Tai-Kadai +", "#ffcc99",
+                                                    ifelse(`Language family`=="Austronesian", "#9900ff",
+                                                           ifelse(`Language family`=="rCRS", "orange",
+                                                                  ifelse(`Language family`=="Hmong-Mien +", "#0099ff",
+                                                                         ifelse(`Language family`=="Mayan", "#660000",
+                                                                                ifelse(`Language family`=="Sino-Tibetan +", "#336699",
+                                                                                       ifelse(`Language family`=="Tai-Kadai", "#339900",
+                                                                                              ifelse(`Language family`=="Trans-New Guinea +", "#66ccff",
+                                                                                                     ifelse(`Language family`=="Unknown", "lightgrey",
+                                                                                                            Language_color)))))))))))),
+         Ethnicity=ifelse(Ethnicity=="Lao, Akha, Hmong, Khmu, Yao/Mien, Phuan", "Lao, Akha, Hmong, Khmu, Dao, Mien, Phuan",
+                          ifelse(Ethnicity=="Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan",
+                                 ifelse(Ethnicity=="Yao", "Dao", Ethnicity))),
+         Ethnicity_color=NA,
+         Ethnicity_color=ifelse(Ethnicity %in% c("Abaknon", "Alor", "Ambelau, Ambonese", "Ambonese", "Balantak, Bali Aga, Balinese", "Bali Aga, Balinese", "Banjar", "Banjar, Bantenese, Banyumasan", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Bicolano", "Bidayuh", "Bruneian Malay", "Bugis", "Bugis, Malay", "Bugkalot (or Ilongot)", "Cebuano", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Filipino", "Filipino (or Tagalog)", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Ivatan", "Jarai", "Javanese", "Javanese, Malay", "Javanese, Palembang, Batak, Minangkabau, Komering", "Kadazan-Dusun", "Kankanaey", "Makassarese", "Malay", "Malay, Achehnese", "Malay, Banjar Malay", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Palembangese", "Papuan", "Seletar (or Orang Seletar)", "Semende", "SiLa", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Temuan", "Tetum", "The Kalanguya (or Ikalahan)", "Timorese", "Toraja", "UrakLawoi", "Zambal"), "#9900ff",
+                                ifelse(Ethnicity %in% c("Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chinese", "Dai", "Deang", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "LaHu", "Naga"), "#336699",
+                                       ifelse(Ethnicity=="RSRS", "black",
+                                              ifelse(Ethnicity %in% c("Akar", "Akar Jambat", "Bru (Brao)", "Ede", "Giarai", "Jehai (or Jahai)", "Khmer", "Khuen", "Kinh", "Kintaq", "Kreung", "Mang", "Mon", "PaThen", "Phnong", "PhuLa", "Semelai", "Stieng", "Tompoun"), "#fa0f0c",
+                                                     ifelse(Ethnicity %in% c("Batek", "Jahai, Semang", "Kensiu", "Khmer, Cham, Chinese-Cambodian, Vietnamese", "Lisu", "LoLo", "Orang Asli"), "#cccc33",
+                                                            ifelse(Ethnicity %in% c("Bunak", "Fataluku", "Kemak", "Makasae", "Makassai", "Mambai"), "#66ccff",
+                                                                   ifelse(Ethnicity %in% c("CoLao", "Isan (or Lao)", "LaChi", "Lao", "Lao Islan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Nung", "Phutai", "Shan", "Tay", "Tay Nung", "Thai"), "#339900",
+                                                                          ifelse(Ethnicity %in% c("Dao", "Hmong", "IuMien"), "#0099ff",
+                                                                                 ifelse(Ethnicity %in% c("rCRS"), "orange",
+                                                                                        ifelse(Ethnicity %in% c("Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung", "Lao, Akha, Hmong, Khmu, Dao, Mien, Phuan"), "#ffcc99",
+                                                                                               ifelse(Ethnicity %in% c("Mam"), "#660000",
+                                                                                                      ifelse(Ethnicity %in% c("Unknown"), "lightgrey", Ethnicity)))))))))))),
+         Haplogroup1_color=NA,
+         Haplogroup1_color=ifelse(haplogroup1=="A", "#F8766D",
+                                  ifelse(haplogroup1=="B", "#EA8331",
+                                         ifelse(haplogroup1=="C", "#D89000",
+                                                ifelse(haplogroup1=="D", "#C09B00",
+                                                       ifelse(haplogroup1=="E", "#A3A500",
+                                                              ifelse(haplogroup1=="F", "#39B600",
+                                                                     ifelse(haplogroup1=="G", "#7CAE00",
+                                                                            ifelse(haplogroup1=="H", "yellow",
+                                                                                   ifelse(haplogroup1=="I", "#00BF7D",
+                                                                                          ifelse(haplogroup1=="K", "#00C1A3",
+                                                                                                 ifelse(haplogroup1=="L", "black",
+                                                                                                        ifelse(haplogroup1=="M", "#00BAE0",
+                                                                                                               ifelse(haplogroup1=="N", "#00B0F6",
+                                                                                                                      ifelse(haplogroup1=="P", "#35A2FF",
+                                                                                                                             ifelse(haplogroup1=="Q", "#9590FF",
+                                                                                                                                    ifelse(haplogroup1=="R", "#C77CFF",
+                                                                                                                                           ifelse(haplogroup1=="U", "#E76BF3",
+                                                                                                                                                  ifelse(haplogroup1=="W", "#FA62DB",
+                                                                                                                                                         ifelse(haplogroup1=="Y", "#FF62BC",
+                                                                                                                                                                ifelse(haplogroup1=="Z", "#FF6A98",
+                                                                                                                                                                       Haplogroup1_color))))))))))))))))))))) %>%
+  droplevels()
+
+### Lets load the fasta file by extract only the SNPs
+seq.snp = fasta2DNAbin('Iso_RSRS_RCRS_countriesAlign.fasta', snpOnly=T)
+obj = DNAbin2genind(seq.snp)
+
+rownames(obj$tab) <- gsub("'", "", rownames(obj$tab))
+rownames(obj$tab) <- gsub("_", "", rownames(obj$tab))
+rownames(obj$tab) <- gsub("-", "", rownames(obj$tab))
+rownames(obj$tab) <- gsub(" ", "", rownames(obj$tab))
+rownames(obj$tab) <- gsub(",", "", rownames(obj$tab))
+rownames(obj$tab) <- trimws(gsub("\\s+", " ", rownames(obj$tab)))
+rownames(obj$tab)[4933] <- "NC012920.1"
+
+dat2 <- dat %>% filter(!name %in% rownames(obj$tab))
+table(rownames(obj$tab) %in% dat$name)
+table(dat$name %in% rownames(obj$tab))
+
+
+### Add the structure I want to test in the GenInd object
+obj$pop = as.factor(meta[match(rownames(obj$tab), meta$name),]$Ethnicity)
+
+### Convert genind object into hierfstat object
+obj.hf = genind2hierfstat(obj)
+
+### Various estimation of Fst
+fst_nei <- genet.dist(obj.hf, method='Nei87', diploid=F)
+fst_dch <- genet.dist(obj.hf, method='Dch', diploid=F)
+
+### Visualise pairwise FST for Ethnicity.
+ethnic3 <- dat %>%
+  dplyr::select(name, Country, `Language family`, Ethnicity, haplo, haplogroup1, haplogroup2, haplogroup3) %>% setDT()
+ethnic_name <- ethnic3[, .N, by = .(Ethnicity)] %>% arrange(Ethnicity) %>% filter(N>1)
+
+# Desired order of labels
+lab_order = ethnic_name$Ethnicity
+
+# Change order of rows and cols
+fst.mat = as.matrix(fst_nei)
+fst.mat1 = fst.mat
+fst.mat2 = fst.mat1
+
+# Create a data.frame
+ind = which(upper.tri(fst.mat2), arr.ind = TRUE)
+fst.df = data.frame(Site1 = dimnames(fst.mat2)[[2]][ind[,2]],
+                    Site2 = dimnames(fst.mat2)[[1]][ind[,1]],
+                    Fst = fst.mat2[ ind ])
+
+fst.df <- fst.df %>% mutate_all(~ifelse(is.nan(.), NA, .))
+
+# Keep the order of the levels in the data.frame for plotting 
+fst.df$Site1 = factor(fst.df$Site1, levels = unique(fst.df$Site1))
+fst.df$Site2 = factor(fst.df$Site2, levels = unique(fst.df$Site2))
+
+# Convert minus values to zero
+fst.df$Fst[fst.df$Fst < 0] = 0
+
+# Print data.frame summary
+fst.df %>% str
+## 'data.frame':    15 obs. of  3 variables:
+##  $ Site1: Factor w/ 5 levels "Brd","Pad","Vig",..: 1 2 2 3 3 3 4 4 4 4 ...
+##  $ Site2: Factor w/ 5 levels "Ber","Brd","Pad",..: 1 1 2 1 2 3 1 2 3 4 ...
+##  $ Fst  : num  0.007 0.025 0.008 0.064 0.038 0.018 0.174 0.171 0.161 0.112 ...
+
+# Fst italic label
+fst.label = expression(italic("F")[ST])
+
+# Extract middle Fst value for gradient argument
+mid = max(fst.df$Fst, na.rm = TRUE) / 2
+
+ethnics1 <- c("Achang", "Aini", "Akar", "Akar Jambat", "Alor", "Ambelau, Ambonese", "Ambonese", "Arakanese (or Rakhine)", "Balantak, Bali Aga, Balinese", "Bali Aga, Balinese", "Bamar (or Burman)", "Banjar", "Banjar, Bantenese, Banyumasan", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Batek", "Bicolano", "Bidayuh", "Bru (Brao)", "Bruneian Malay", "Bugis", "Bugis, Malay", "Bugkalot (or Ilongot)", "Bunak", "Cebuano", "Cebuano - Filipino", "Cham", "Chinese", "CoLao", "Cuyunin (or Cuyonon)", "Dai", "Dao", "Dayak", "Deang", "Ede", "Fataluku", "Filipino", "Filipino (or Tagalog)", "Giarai", "HaNhi", "Hmong", "Hui", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Isan (or Lao)", "IuMien", "Ivatan", "Jahai, Semang", "Jarai", "Javanese", "Javanese, Malay", "Javanese, Palembang, Batak, Minangkabau, Komering", "Jehai (or Jahai)", "Jingpo", "Kadazan-Dusun", "Kankanaey", "Karen", "Kemak", "Kensiu", "Khmer", "Khmer, Cham, Chinese-Cambodian, Vietnamese", "Khuen", "Kinh", "Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung", "Kintaq", "Kreung", "LaChi", "Lahu", "LaHu", "Lao", "Lao Islan", "Lao, Akha, Hmong, Khmu, Dao, Mien, Phuan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Lisu", "LoLo", "Makasae", "Makassai", "Makassarese", "Malay", "Malay, Achehnese", "Malay, Banjar Malay", "Mam", "Mambai", "Mang", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Mon", "Naga", "Nung", "Orang Asli", "Palembangese", "Papuan", "PaThen", "Phnong", "PhuLa", "Phutai", "rCRS", "RSRS", "Seletar (or Orang Seletar)", "Semelai", "Semende", "Shan", "SiLa", "Stieng", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Tay", "Tay Nung", "Temuan", "Tetum", "Thai", "The Kalanguya (or Ikalahan)", "Timorese", "Tompoun", "Toraja", "Unknown", "UrakLawoi", "Zambal")
+Ethniccolors1 <- meta[match(ethnics1, meta$Ethnicity), "Ethnicity_color"]
+
+ethnics2 <- c("Abaknon", "Achang", "Aini", "Akar", "Akar Jambat", "Alor", "Ambelau, Ambonese", "Ambonese", "Arakanese (or Rakhine)", "Balantak, Bali Aga, Balinese", "Bali Aga, Balinese", "Bamar (or Burman)", "Banjar", "Banjar, Bantenese, Banyumasan", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Batek", "Bicolano", "Bidayuh", "Bru (Brao)", "Bruneian Malay", "Bugis", "Bugis, Malay", "Bugkalot (or Ilongot)", "Bunak", "Cebuano", "Cebuano - Filipino", "Cham", "Chinese", "CoLao", "Cuyunin (or Cuyonon)", "Dai", "Dao", "Dayak", "Deang", "Ede", "Fataluku", "Filipino", "Filipino (or Tagalog)", "Giarai", "HaNhi", "Hmong", "Hui", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Isan (or Lao)", "IuMien", "Ivatan", "Jahai, Semang", "Jarai", "Javanese", "Javanese, Malay", "Javanese, Palembang, Batak, Minangkabau, Komering", "Jehai (or Jahai)", "Jingpo", "Kadazan-Dusun", "Kankanaey", "Karen", "Kemak", "Kensiu", "Khmer", "Khmer, Cham, Chinese-Cambodian, Vietnamese", "Khuen", "Kinh", "Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung", "Kintaq", "Kreung", "LaChi", "Lahu", "LaHu", "Lao", "Lao Islan", "Lao, Akha, Hmong, Khmu, Dao, Mien, Phuan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Lisu", "LoLo", "Makasae", "Makassai", "Makassarese", "Malay", "Malay, Achehnese", "Malay, Banjar Malay", "Mam", "Mambai", "Mang", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Mon", "Naga", "Nung", "Orang Asli", "Palembangese", "Papuan", "PaThen", "Phnong", "PhuLa", "Phutai", "rCRS", "RSRS", "Seletar (or Orang Seletar)", "Semelai", "Semende", "Shan", "SiLa", "Stieng", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Tay", "Tay Nung", "Temuan", "Tetum", "Thai", "The Kalanguya (or Ikalahan)", "Timorese", "Tompoun", "Toraja", "Unknown", "UrakLawoi")
+Ethniccolors2 <- meta[match(ethnics2, meta$Ethnicity), "Ethnicity_color"]
+
+# level_order1 <- c("Akar", "Akar Jambat", "Bru (Brao)", "Ede", "Giarai", "Jehai (or Jahai)", "Khmer", "Khuen", "Kinh", "Kintaq", "Kreung", "Mang", "Mon", "PaThen", "PhuLa", "Semelai", "Stieng", "Tompoun", "Batek", "Jahai, Semang", "Kensiu", "Khmer, Cham, Chinese-Cambodian, Vietnamese", "Orang Asli", "Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung", "Lao, Akha, Hmong, Khmu, Dao, Mien, Phuan", "Alor", "Ambelau, Ambonese", "Ambonese", "Balantak, Bali Aga, Balinese", "Bali Aga, Balinese", "Banjar", "Banjar, Bantenese, Banyumasan", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Bicolano", "Bidayuh", "Bruneian Malay", "Bugis", "Bugis, Malay", "Bugkalot (or Ilongot)", "Cebuano", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Filipino", "Filipino (or Tagalog)", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Ivatan", "Jarai", "Javanese", "Javanese, Malay", "Javanese, Palembang, Batak, Minangkabau, Komering", "Kadazan-Dusun", "Kankanaey", "Makassarese", "Malay", "Malay, Achehnese", "Malay, Banjar Malay", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Palembangese", "Papuan", "Seletar (or Orang Seletar)", "Semende", "SiLa", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Temuan", "Tetum", "The Kalanguya (or Ikalahan)", "Timorese", "Toraja", "UrakLawoi", "Zambal", "Dao", "Hmong", "IuMien", "Mam", "RSRS", "Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chinese", "Dai", "Deang", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "LaHu", "Lisu", "LoLo", "Naga", "CoLao", "Isan (or Lao)", "LaChi", "Lao", "Lao Islan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Nung", "Phutai", "Shan", "Tay", "Tay Nung", "Thai", "Bunak", "Fataluku", "Kemak", "Makasae", "Makassai", "Mambai", "Unknown", "rCRS")
+# 
+# level_order2 <- c("Akar", "Akar Jambat", "Bru (Brao)", "Ede", "Giarai", "Jehai (or Jahai)", "Khmer", "Khuen", "Kinh", "Kintaq", "Kreung", "Mang", "Mon", "PaThen", "PhuLa", "Semelai", "Stieng", "Tompoun", "Batek", "Jahai, Semang", "Kensiu", "Khmer, Cham, Chinese-Cambodian, Vietnamese", "Orang Asli", "Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung", "Lao, Akha, Hmong, Khmu, Dao, Mien, Phuan", "Abaknon", "Alor", "Ambelau, Ambonese", "Ambonese", "Balantak, Bali Aga, Balinese", "Bali Aga, Balinese", "Banjar", "Banjar, Bantenese, Banyumasan", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Bicolano", "Bidayuh", "Bruneian Malay", "Bugis", "Bugis, Malay", "Bugkalot (or Ilongot)", "Cebuano", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Filipino", "Filipino (or Tagalog)", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Ivatan", "Jarai", "Javanese", "Javanese, Malay", "Javanese, Palembang, Batak, Minangkabau, Komering", "Kadazan-Dusun", "Kankanaey", "Makassarese", "Malay", "Malay, Achehnese", "Malay, Banjar Malay", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Palembangese", "Papuan", "Seletar (or Orang Seletar)", "Semende", "SiLa", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Temuan", "Tetum", "The Kalanguya (or Ikalahan)", "Timorese", "Toraja", "UrakLawoi", "Dao", "Hmong", "IuMien", "Mam", "RSRS", "Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chinese", "Dai", "Deang", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "LaHu", "Lisu", "LoLo", "Naga", "CoLao", "Isan (or Lao)", "LaChi", "Lao", "Lao Islan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Nung", "Phutai", "Shan", "Tay", "Tay Nung", "Thai", "Bunak", "Fataluku", "Kemak", "Makasae", "Makassai", "Mambai", "Unknown", "rCRS")
+
+# Keep the order of the levels in the data.frame for plotting 
+# fst.df$Site1 = factor(fst.df$Site1, levels = level_order1)
+# fst.df$Site2 = factor(fst.df$Site2, levels = level_order2)
+
+# Plot heatmap
+ggplot(data = fst.df, aes(x = Site1, y = Site2, fill = Fst)) +
+  geom_tile(colour = "black")+
+  # geom_text(aes(label = Fst), color="black", size = 3)+
+  scale_fill_gradient2(low = "blue", mid = "yellow", high = "red", midpoint = mid, name = fst.label, limits = c(0, max(fst.df$Fst)), breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
+  scale_x_discrete(expand = c(0,0), labels = wrap_format(50))+
+  scale_y_discrete(expand = c(0,0), position = "right")+
+  theme(axis.text = element_text(colour = "black", size = 15, face = "bold"),
+        axis.title = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_blank(),
+        legend.position = "top",
+        legend.title = element_text(size = 30, face = "bold"),
+        legend.text = element_text(size = 20),
+        legend.key.width = unit(4, "cm"),
+        legend.spacing.x = unit(2, "cm"),
+        axis.text.x=element_text(color=Ethniccolors1, angle = 90, size=20, vjust=0, hjust=1),
+        axis.text.y=element_text(color=Ethniccolors2, size=20)
+  )
+
+ggsave("figures/Fst_Ethnicity.png", width = 45, height = 40)
+
+library(xlsx)
+# write.xlsx(fst.mat, "Fst.xlsx")
+
+## MDS
 
 dat_e <- read_excel("SEA_ethnicity.xlsx")
 
