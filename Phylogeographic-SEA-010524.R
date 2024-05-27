@@ -5912,6 +5912,94 @@ ggsave("figures/Fst_Ethnicity_short.png", width = 45, height = 40)
 # library(xlsx)
 # write.xlsx(fst.mat_short, "Fst_short.xlsx")
 
+## PCA
+### Perform a PCA (principle components analysis) on the fst.df_short data set.
+
+### Replace missing data with the mean allele frequencies
+x = tab(obj_short, NA.method = "zero")
+
+### Perform PCA
+pca1 = dudi.pca(x, scannf = FALSE, scale = FALSE, nf = 3)
+
+# Analyse how much percent of genetic variance is explained by each axis
+percent = pca1$eig/sum(pca1$eig)*100
+barplot(percent, ylab = "Genetic variance explained by eigenvectors (%)", ylim = c(0,12),
+        names.arg = round(percent, 1))
+
+### Visualise PCA results.
+
+### Create a data.frame containing individual coordinates
+ind_coords = as.data.frame(pca1$li)
+
+### Rename columns of dataframe
+colnames(ind_coords) = c("Axis1","Axis2","Axis3")
+
+### Add a column containing individuals
+ind_coords$Ind = indNames(obj_short)
+
+### Add a column with the site IDs
+ind_coords$Site = as.factor(meta_short[match(rownames(obj_short$tab), meta_short$name),]$Ethnicity)
+
+ind_coords$Site = factor(ind_coords$Site, levels = unique(ind_coords$Site))
+
+### Calculate centroid (average) position for each population
+centroid = aggregate(cbind(Axis1, Axis2, Axis3) ~ Site, data = ind_coords, FUN = mean)
+centroid$Site = factor(centroid$Site, levels = unique(centroid$Site))
+
+### Add centroid coordinates to ind_coords dataframe
+ind_coords = left_join(ind_coords, centroid, by = "Site", suffix = c("",".cen"))
+
+# Keep the order of the levels in the data.frame for plotting 
+ind_coords$Site = factor(ind_coords$Site, levels = unique(ind_coords$Site))
+
+### Define colour palette
+library(RColorBrewer)
+cols = brewer.pal(nPop(obj_short), "Set1")
+library(ggthemes)
+library(scales)
+colourCount =length(unique(obj_short$pop))
+cols =colorRampPalette(solarized_pal()(8))(colourCount)
+
+cols <- meta_short[match(centroid$Site, meta_short$Ethnicity), "Ethnicity_color"]
+
+# Custom x and y labels
+xlab = paste("Axis 1 (", format(round(percent[1], 1), nsmall=1)," %)", sep="")
+ylab = paste("Axis 2 (", format(round(percent[2], 1), nsmall=1)," %)", sep="")
+
+# Custom theme for ggplot2
+ggtheme = theme(axis.text.y = element_text(colour="black", size=18),
+                axis.text.x = element_text(colour="black", size=18),
+                axis.title = element_text(colour="black", size=20),
+                panel.border = element_rect(colour="black", fill=NA, size=1),
+                panel.background = element_blank(),
+                plot.title = element_text(hjust=0.5, size=20) 
+)
+
+library(grid)
+grid.newpage();grid.draw(roundrectGrob(gp = gpar(lwd = NA)))
+
+# Scatter plot axis 1 vs. 2
+ggplot(data = ind_coords, aes(x = Axis1, y = Axis2)) +
+  geom_hline(yintercept = 0)+
+  geom_vline(xintercept = 0)+
+  # spider segments
+  # geom_segment(aes(xend = Axis1.cen, yend = Axis2.cen, colour = Site), show.legend = FALSE) +
+  # points
+  geom_point(aes(fill = Site), shape = 21, size = 4, show.legend = FALSE) +
+  # centroids
+  geom_label(data = centroid, aes(label = Site, colour = Site), position=position_jitter(width=-0.5,height=0.5), size = 6, show.legend = FALSE) +
+  # colouring
+  scale_fill_manual(values = cols)+
+  scale_colour_manual(values = cols)+
+  # custom labels
+  labs(x = xlab, y = ylab)+
+  ggtitle("Ethnicity PCA")+
+  # custom theme
+  ggtheme
+
+### Export plot
+ggsave("figures/Ethinicity_PCA.png", width = 24, height = 16, dpi = 600)
+
 ## MDS
 
 dat_e <- read_excel("SEA_ethnicity.xlsx")
