@@ -5754,10 +5754,10 @@ fst.df$Fst[fst.df$Fst < 0] = 0
 
 # Print data.frame summary
 fst.df %>% str
-## 'data.frame':    15 obs. of  3 variables:
-##  $ Site1: Factor w/ 5 levels "Brd","Pad","Vig",..: 1 2 2 3 3 3 4 4 4 4 ...
-##  $ Site2: Factor w/ 5 levels "Ber","Brd","Pad",..: 1 1 2 1 2 3 1 2 3 4 ...
-##  $ Fst  : num  0.007 0.025 0.008 0.064 0.038 0.018 0.174 0.171 0.161 0.112 ...
+# 'data.frame':	8128 obs. of  3 variables:
+#   $ Site1: Factor w/ 127 levels "Achang","Aini",..: 1 2 2 3 3 3 4 4 4 4 ...
+# $ Site2: Factor w/ 127 levels "Abaknon","Achang",..: 1 1 2 1 2 3 1 2 3 4 ...
+# $ Fst  : num  0 0.0362 NA 0 0 0 0.0339 0 0 0.0139 ...
 
 # Fst italic label
 fst.label = expression(italic("F")[ST])
@@ -5803,6 +5803,114 @@ ggsave("figures/Fst_Ethnicity.png", width = 45, height = 40)
 
 library(xlsx)
 # write.xlsx(fst.mat, "Fst.xlsx")
+
+### Single ethnicity
+
+ethnics1_short <- c("Akar Jambat", "Bru (Brao)", "Ede", "Giarai", "Jehai (or Jahai)", "Khmer", "Khuen", "Kinh", "Kintaq", "Kreung", "Mang", "Mon", "PaThen", "PhuLa", "Semelai", "Stieng", "Tompoun", "Batek", "Jahai, Semang", "Kensiu", "Orang Asli", "Abaknon", "Alor", "Ambelau, Ambonese", "Ambonese", "Banjar", "Batak", "Bicolano", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Cebuano", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Filipino", "Filipino (or Tagalog)", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey", "Makassarese", "Malay", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Palembangese", "Papuan", "Seletar (or Orang Seletar)", "Semende", "SiLa", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Temuan", "Tetum", "The Kalanguya (or Ikalahan)", "Timorese", "Toraja", "UrakLawoi", "Zambal", "Dao", "Hmong", "IuMien", "Mam", "RSRS", "Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chinese", "Dai", "Deang", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "LaHu", "Lisu", "LoLo", "Naga", "CoLao", "Isan (or Lao)", "LaChi", "Lao", "Lao Islan", "Nung", "Phutai", "Shan", "Tay", "Tay Nung", "Thai", "Bunak", "Fataluku", "Kemak", "Makasae", "Makassai", "Mambai", "Unknown", "rCRS")
+ethnics2_short <- c("Akar", "Akar Jambat", "Bru (Brao)", "Ede", "Giarai", "Jehai (or Jahai)", "Khmer", "Khuen", "Kinh", "Kintaq", "Kreung", "Mang", "Mon", "PaThen", "PhuLa", "Semelai", "Stieng", "Tompoun", "Batek", "Jahai, Semang", "Kensiu", "Orang Asli", "Abaknon", "Alor", "Ambelau, Ambonese", "Ambonese", "Banjar", "Batak", "Bicolano", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Cebuano", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Filipino", "Filipino (or Tagalog)", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey", "Makassarese", "Malay", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Palembangese", "Papuan", "Seletar (or Orang Seletar)", "Semende", "SiLa", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Temuan", "Tetum", "The Kalanguya (or Ikalahan)", "Timorese", "Toraja", "UrakLawoi", "Zambal", "Dao", "Hmong", "IuMien", "Mam", "RSRS", "Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chinese", "Dai", "Deang", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "LaHu", "Lisu", "LoLo", "Naga", "CoLao", "Isan (or Lao)", "LaChi", "Lao", "Lao Islan", "Nung", "Phutai", "Shan", "Tay", "Tay Nung", "Thai", "Bunak", "Fataluku", "Kemak", "Makasae", "Makassai", "Mambai", "Unknown")
+
+meta_short <- meta %>% filter(Ethnicity %in% ethnics1_short | Ethnicity %in% ethnics2_short) %>% 
+  mutate(Ethnicity=factor(Ethnicity, levels = c("Akar", "Akar Jambat", "Bru (Brao)", "Ede", "Giarai", "Jehai (or Jahai)", "Khmer", "Khuen", "Kinh", "Kintaq", "Kreung", "Mang", "Mon", "PaThen", "PhuLa", "Semelai", "Stieng", "Tompoun", "Batek", "Jahai, Semang", "Kensiu", "Orang Asli", "Abaknon", "Alor", "Ambelau, Ambonese", "Ambonese", "Banjar", "Batak", "Bicolano", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Cebuano", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Filipino", "Filipino (or Tagalog)", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey", "Makassarese", "Malay", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Palembangese", "Papuan", "Seletar (or Orang Seletar)", "Semende", "SiLa", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Temuan", "Tetum", "The Kalanguya (or Ikalahan)", "Timorese", "Toraja", "UrakLawoi", "Zambal", "Dao", "Hmong", "IuMien", "Mam", "RSRS", "Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chinese", "Dai", "Deang", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "LaHu", "Lisu", "LoLo", "Naga", "CoLao", "Isan (or Lao)", "LaChi", "Lao", "Lao Islan", "Nung", "Phutai", "Shan", "Tay", "Tay Nung", "Thai", "Bunak", "Fataluku", "Kemak", "Makasae", "Makassai", "Mambai", "Unknown", "rCRS")))
+  
+obj_short <- obj[rownames(obj$tab) %in% meta_short$name] 
+
+
+### Add the structure I want to test in the GenInd object
+obj_short$pop = as.factor(meta_short[match(rownames(obj_short$tab), meta_short$name),]$Ethnicity)
+
+### Convert genind object into hierfstat object
+obj.hf_short = genind2hierfstat(obj_short)
+
+# obj.hf_short$names <- rownames(obj.hf_short)
+# 
+# obj.hf_short <- obj.hf_short %>% mutate(names=factor(names, levels=meta_short$name))
+# 
+# library(tidyverse)
+# obj.hf_short <- obj.hf_short %>% remove_rownames %>% column_to_rownames(var="names")
+
+### Various estimation of Fst
+fst_nei_short <- genet.dist(obj.hf_short, method='Nei87', diploid=F)
+# fst_dch_short <- genet.dist(obj.hf_short, method='Dch', diploid=F)
+
+### Visualise pairwise FST for Ethnicity.
+ethnic3_short <- meta_short %>%
+  dplyr::select(name, Country, `Language family`, Ethnicity, haplo, haplogroup1, haplogroup2, haplogroup3) %>% setDT()
+
+ethnic_name_short <- ethnic3_short[, .N, by = .(Ethnicity)] %>% filter(N>1)
+
+# Desired order of labels
+lab_order_short = ethnic_name_short$Ethnicity
+
+# Change order of rows and cols
+fst.mat_short = as.matrix(fst_nei_short)
+fst.mat1_short = fst.mat_short
+fst.mat2_short = fst.mat1_short
+
+# Create a data.frame
+ind_short = which(upper.tri(fst.mat2_short), arr.ind = TRUE)
+fst.df_short = data.frame(Site1 = dimnames(fst.mat2_short)[[2]][ind_short[,2]],
+                          Site2 = dimnames(fst.mat2_short)[[1]][ind_short[,1]],
+                          Fst = fst.mat2_short[ ind_short ])
+
+fst.df_short <- fst.df_short %>% mutate_all(~ifelse(is.nan(.), NA, .))
+
+# Keep the order of the levels in the data.frame for plotting 
+fst.df_short$Site1 = factor(fst.df_short$Site1, levels = unique(fst.df_short$Site1))
+fst.df_short$Site2 = factor(fst.df_short$Site2, levels = unique(fst.df_short$Site2))
+
+# rows1 = lapply(ethnics1_short, FUN = function(x) which(fst.df_short$Site1 == x))
+# result1 = fst.df_short[unlist(rows1), ]
+# result1 <- unique(result1)
+# 
+# rows2 = lapply(ethnics2_short, FUN = function(x) which(fst.df_short$Site2 == x))
+# result2 = fst.df_short[unlist(rows2), ]
+# result2 <- unique(result2)
+# 
+# fst.df_short <- fst.df_short %>% mutate(Site1=factor(Site1, levels=unique(result1$Site1)), Site2=factor(Site2, levels=unique(result2$Site2)))
+
+# Convert minus values to zero
+fst.df_short$Fst[fst.df_short$Fst < 0] = 0
+
+# Print data.frame summary
+fst.df_short %>% str
+# 'data.frame':	6216 obs. of  3 variables:
+#   $ Site1: Factor w/ 111 levels "Akar Jambat",..: 1 2 2 3 3 3 4 4 4 4 ...
+# $ Site2: Factor w/ 111 levels "Akar","Akar Jambat",..: 1 1 2 1 2 3 1 2 3 4 ...
+# $ Fst  : num  0.0139 0.1953 0.2891 0 0.1863 ...
+
+# Fst italic label
+fst.label_short = expression(italic("F")[ST])
+
+# Extract middle Fst value for gradient argument
+mid_short = max(fst.df_short$Fst, na.rm = TRUE) / 2
+
+Ethniccolors1_short <- meta_short[match(ethnics1_short, meta_short$Ethnicity), "Ethnicity_color"]
+Ethniccolors2_short <- meta_short[match(ethnics2_short, meta_short$Ethnicity), "Ethnicity_color"]
+
+# Plot heatmap
+ggplot(data = fst.df_short, aes(Site1, y = Site2, fill = Fst)) +
+  geom_tile(colour = "black") +
+  # geom_text(aes(label = Fst), color="black", size = 3)+
+  scale_fill_gradient2(low = "blue", mid = "yellow", high = "red", midpoint = mid, name = fst.label_short, limits = c(0, max(fst.df_short$Fst)), breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
+  scale_x_discrete(expand = c(0,0), labels = wrap_format(50))+
+  scale_y_discrete(expand = c(0,0), position = "right")+
+  theme(axis.text = element_text(colour = "black", size = 15, face = "bold"),
+        axis.title = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_blank(),
+        legend.position = "top",
+        legend.title = element_text(size = 30, face = "bold"),
+        legend.text = element_text(size = 20),
+        legend.key.width = unit(4, "cm"),
+        legend.spacing.x = unit(2, "cm"),
+        axis.text.x=element_text(color=Ethniccolors1_short, angle = 90, size=22, vjust=0, hjust=1),
+        axis.text.y=element_text(color=Ethniccolors2_short, size=22)
+  )
+
+ggsave("figures/Fst_Ethnicity_short.png", width = 45, height = 40)
+
+# library(xlsx)
+# write.xlsx(fst.mat_short, "Fst_short.xlsx")
 
 ## MDS
 
