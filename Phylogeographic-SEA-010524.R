@@ -5806,11 +5806,11 @@ library(xlsx)
 
 ### Single ethnicity
 
-ethnics1_short <- c("Akar Jambat", "Bru (Brao)", "Ede", "Giarai", "Jehai (or Jahai)", "Khmer", "Khuen", "Kinh", "Kintaq", "Kreung", "Mang", "Mon", "PaThen", "PhuLa", "Semelai", "Stieng", "Tompoun", "Batek", "Jahai, Semang", "Kensiu", "Orang Asli", "Abaknon", "Alor", "Ambelau, Ambonese", "Ambonese", "Banjar", "Batak", "Bicolano", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Cebuano", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Filipino", "Filipino (or Tagalog)", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey", "Makassarese", "Malay", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Palembangese", "Papuan", "Seletar (or Orang Seletar)", "Semende", "SiLa", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Temuan", "Tetum", "The Kalanguya (or Ikalahan)", "Timorese", "Toraja", "UrakLawoi", "Zambal", "Dao", "Hmong", "IuMien", "Mam", "RSRS", "Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chinese", "Dai", "Deang", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "LaHu", "Lisu", "LoLo", "Naga", "CoLao", "Isan (or Lao)", "LaChi", "Lao", "Lao Islan", "Nung", "Phutai", "Shan", "Tay", "Tay Nung", "Thai", "Bunak", "Fataluku", "Kemak", "Makasae", "Makassai", "Mambai", "Unknown", "rCRS")
-ethnics2_short <- c("Akar", "Akar Jambat", "Bru (Brao)", "Ede", "Giarai", "Jehai (or Jahai)", "Khmer", "Khuen", "Kinh", "Kintaq", "Kreung", "Mang", "Mon", "PaThen", "PhuLa", "Semelai", "Stieng", "Tompoun", "Batek", "Jahai, Semang", "Kensiu", "Orang Asli", "Abaknon", "Alor", "Ambelau, Ambonese", "Ambonese", "Banjar", "Batak", "Bicolano", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Cebuano", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Filipino", "Filipino (or Tagalog)", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey", "Makassarese", "Malay", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Palembangese", "Papuan", "Seletar (or Orang Seletar)", "Semende", "SiLa", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Temuan", "Tetum", "The Kalanguya (or Ikalahan)", "Timorese", "Toraja", "UrakLawoi", "Zambal", "Dao", "Hmong", "IuMien", "Mam", "RSRS", "Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chinese", "Dai", "Deang", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "LaHu", "Lisu", "LoLo", "Naga", "CoLao", "Isan (or Lao)", "LaChi", "Lao", "Lao Islan", "Nung", "Phutai", "Shan", "Tay", "Tay Nung", "Thai", "Bunak", "Fataluku", "Kemak", "Makasae", "Makassai", "Mambai", "Unknown")
+ethnics1_short <- c("Akar Jambat", "Bru (Brao)", "Ede", "Giarai", "Jehai (or Jahai)", "Khmer", "Khuen", "Kinh", "Kintaq", "Kreung", "Mang", "Mon", "PaThen", "Phnong", "PhuLa", "Semelai", "Stieng", "Tompoun", "Batek", "Jahai, Semang", "Kensiu", "Orang Asli", "Abaknon", "Alor", "Ambelau, Ambonese", "Ambonese", "Banjar", "Batak", "Bicolano", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Cebuano", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Filipino", "Filipino (or Tagalog)", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey", "Makassarese", "Malay", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Palembangese", "Papuan", "Seletar (or Orang Seletar)", "Semende", "SiLa", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Temuan", "Tetum", "The Kalanguya (or Ikalahan)", "Timorese", "Toraja", "UrakLawoi", "Zambal", "Dao", "Hmong", "IuMien", "Mam", "RSRS", "Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chinese", "Dai", "Deang", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "LaHu", "Lisu", "LoLo", "Naga", "CoLao", "Isan (or Lao)", "LaChi", "Lao", "Lao Islan", "Nung", "Phutai", "Shan", "Tay", "Tay Nung", "Thai", "Bunak", "Fataluku", "Kemak", "Makasae", "Makassai", "Mambai", "Unknown", "rCRS")
+ethnics2_short <- c("Akar", "Akar Jambat", "Bru (Brao)", "Ede", "Giarai", "Jehai (or Jahai)", "Khmer", "Khuen", "Kinh", "Kintaq", "Kreung", "Mang", "Mon", "PaThen", "Phnong", "PhuLa", "Semelai", "Stieng", "Tompoun", "Batek", "Jahai, Semang", "Kensiu", "Orang Asli", "Abaknon", "Alor", "Ambelau, Ambonese", "Ambonese", "Banjar", "Batak", "Bicolano", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Cebuano", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Filipino", "Filipino (or Tagalog)", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey", "Makassarese", "Malay", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Palembangese", "Papuan", "Seletar (or Orang Seletar)", "Semende", "SiLa", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Temuan", "Tetum", "The Kalanguya (or Ikalahan)", "Timorese", "Toraja", "UrakLawoi", "Zambal", "Dao", "Hmong", "IuMien", "Mam", "RSRS", "Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chinese", "Dai", "Deang", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "LaHu", "Lisu", "LoLo", "Naga", "CoLao", "Isan (or Lao)", "LaChi", "Lao", "Lao Islan", "Nung", "Phutai", "Shan", "Tay", "Tay Nung", "Thai", "Bunak", "Fataluku", "Kemak", "Makasae", "Makassai", "Mambai", "Unknown")
 
 meta_short <- meta %>% filter(Ethnicity %in% ethnics1_short | Ethnicity %in% ethnics2_short) %>% 
-  mutate(Ethnicity=factor(Ethnicity, levels = c("Akar", "Akar Jambat", "Bru (Brao)", "Ede", "Giarai", "Jehai (or Jahai)", "Khmer", "Khuen", "Kinh", "Kintaq", "Kreung", "Mang", "Mon", "PaThen", "PhuLa", "Semelai", "Stieng", "Tompoun", "Batek", "Jahai, Semang", "Kensiu", "Orang Asli", "Abaknon", "Alor", "Ambelau, Ambonese", "Ambonese", "Banjar", "Batak", "Bicolano", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Cebuano", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Filipino", "Filipino (or Tagalog)", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey", "Makassarese", "Malay", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Palembangese", "Papuan", "Seletar (or Orang Seletar)", "Semende", "SiLa", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Temuan", "Tetum", "The Kalanguya (or Ikalahan)", "Timorese", "Toraja", "UrakLawoi", "Zambal", "Dao", "Hmong", "IuMien", "Mam", "RSRS", "Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chinese", "Dai", "Deang", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "LaHu", "Lisu", "LoLo", "Naga", "CoLao", "Isan (or Lao)", "LaChi", "Lao", "Lao Islan", "Nung", "Phutai", "Shan", "Tay", "Tay Nung", "Thai", "Bunak", "Fataluku", "Kemak", "Makasae", "Makassai", "Mambai", "Unknown", "rCRS")))
+  mutate(Ethnicity=factor(Ethnicity, levels = c("Akar", "Akar Jambat", "Bru (Brao)", "Ede", "Giarai", "Jehai (or Jahai)", "Khmer", "Khuen", "Kinh", "Kintaq", "Kreung", "Mang", "Mon", "PaThen", "Phnong", "PhuLa", "Semelai", "Stieng", "Tompoun", "Batek", "Jahai, Semang", "Kensiu", "Orang Asli", "Abaknon", "Alor", "Ambelau, Ambonese", "Ambonese", "Banjar", "Batak", "Bicolano", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Cebuano", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Filipino", "Filipino (or Tagalog)", "Ibaloi", "Ifugao", "Igorot", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey", "Makassarese", "Malay", "Maranao", "Melanau", "Minahasa", "Minangkabau", "Moken", "Palembangese", "Papuan", "Seletar (or Orang Seletar)", "Semende", "SiLa", "Sumbanese", "Sundanese", "Surigaonon", "Tagalog", "Temuan", "Tetum", "The Kalanguya (or Ikalahan)", "Timorese", "Toraja", "UrakLawoi", "Zambal", "Dao", "Hmong", "IuMien", "Mam", "RSRS", "Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chinese", "Dai", "Deang", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "LaHu", "Lisu", "LoLo", "Naga", "CoLao", "Isan (or Lao)", "LaChi", "Lao", "Lao Islan", "Nung", "Phutai", "Shan", "Tay", "Tay Nung", "Thai", "Bunak", "Fataluku", "Kemak", "Makasae", "Makassai", "Mambai", "Unknown", "rCRS")))
   
 obj_short <- obj[rownames(obj$tab) %in% meta_short$name] 
 
@@ -5873,9 +5873,9 @@ fst.df_short$Fst[fst.df_short$Fst < 0] = 0
 
 # Print data.frame summary
 fst.df_short %>% str
-# 'data.frame':	6216 obs. of  3 variables:
-#   $ Site1: Factor w/ 111 levels "Akar Jambat",..: 1 2 2 3 3 3 4 4 4 4 ...
-# $ Site2: Factor w/ 111 levels "Akar","Akar Jambat",..: 1 1 2 1 2 3 1 2 3 4 ...
+# 'data.frame':	6328 obs. of  3 variables:
+#   $ Site1: Factor w/ 112 levels "Akar Jambat",..: 1 2 2 3 3 3 4 4 4 4 ...
+# $ Site2: Factor w/ 112 levels "Akar","Akar Jambat",..: 1 1 2 1 2 3 1 2 3 4 ...
 # $ Fst  : num  0.0139 0.1953 0.2891 0 0.1863 ...
 
 # Fst italic label
@@ -5954,11 +5954,11 @@ ind_coords$Site = factor(ind_coords$Site, levels = unique(ind_coords$Site))
 
 ### Define colour palette
 library(RColorBrewer)
-cols = brewer.pal(nPop(obj_short), "Set1")
 library(ggthemes)
 library(scales)
-colourCount =length(unique(obj_short$pop))
-cols =colorRampPalette(solarized_pal()(8))(colourCount)
+# cols = brewer.pal(nPop(obj_short), "Set1")
+# colourCount =length(unique(obj_short$pop))
+# cols =colorRampPalette(solarized_pal()(8))(colourCount)
 
 cols <- meta_short[match(centroid$Site, meta_short$Ethnicity), "Ethnicity_color"]
 
@@ -5998,7 +5998,7 @@ ggplot(data = ind_coords, aes(x = Axis1, y = Axis2)) +
   ggtheme
 
 ### Export plot
-ggsave("figures/Ethinicity_PCA.png", width = 24, height = 16, dpi = 600)
+ggsave("figures/Ethinicity_PCA3.png", width = 24, height = 16, dpi = 600)
 
 ## MDS
 
@@ -6011,7 +6011,7 @@ df <- dat_e %>%
                                   ifelse(`Language`=="Hmong-Mien" | `Language`=="Hmong-Mien, Mongolic", "Hmong-Mien +",
                                          ifelse(`Language`=="Indo-European, Sino-Tibetan" | `Language`=="Sino-Tibetan, Austroasiatic, Tai-Kadai" | `Language`=="Sino-Tibetan, Tai-Kada" | `Language`=="Tai-Kadai, Sino-Tibetan", "Sino-Tibetan +",
                                                 ifelse(`Language`=="Trans-New Guinea" | `Language`=="Trans–New Guinea (Alor-Pantar, Papuan)", "Trans-New Guinea +",
-                                                       ifelse(`Language`=="Austronesian, Austroasiatic, Indo-European", "Austroasiatic, Austronesian + (xSino-Tibetan)",
+                                                       ifelse(`Language`=="Austronesian, Austroasiatic, Indo-European", "Austronesian",
                                                               ifelse(`Language`=="Austroasiatic, Tai-Kadai" | `Language`=="Austroasiatic, Tai-Kadai, Hmong-Mien, Sino-Tibetan" | `Language`=="Tai-Kadai, Hmong-Mien, Austroasiatic", "Austroasiatic, Tai-Kadai +",
                                                                      ifelse(`Language`=="Sino-Tibetan", "Sino-Tibetan +", `Language`)))))))),
          `Language`=ifelse(Ethnic=="Mon", "Austroasiatic",
@@ -6029,7 +6029,13 @@ df <- dat_e %>%
                                                                                                         ifelse(Ethnic=="Timorese", "Austronesian",
                                                                                                                ifelse(Ethnic=="Mang", "Austroasiatic", `Language`))))))))))))))) %>%
   na.omit() %>% dplyr::select(1,2,3,4,6,8,10) %>% setDF()
-df <- df %>% filter(`Sample size`>2 & !`Ethnic` %in% c("Unknown", "Khmer, Cham, Chinese-Cambodian, Vietnamese", "Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung", "Lao, Akha, Hmong, Khmu, Dao, Mien, Phuan", "Lao, Tai Dam, Tai Deng, Tai Yuan, Katang, Phuan", "Banjar, Bantenese, Banyumasan", "Batak, Minangkabau, Acehnese, Lampung", "Banjar, Dayak, Javanese"))
+df <- df %>% filter(`Sample size`>2 & Ethnic %in% meta_short$Ethnicity)
+
+df$Language = as.factor(meta_short[match(df$Ethnic, meta_short$Ethnicity),]$`Language family`)
+
+Ethniccolors_mds <- meta_short[match(df$Ethnic, meta_short$Ethnicity), "Ethnicity_color"]
+Languagecolors_mds <- meta_short[match(df$Language, meta_short$`Language family`), "Language_color"]
+
 # dist_matrix <- dist(dat_e[,-1])
 # mds_result <- cmdscale(dist_matrix)
 # plot(mds_result, col = dat_e$ethnic, pch = 19, xlab = "MDS1", ylab = "MDS2")
@@ -6070,7 +6076,7 @@ ggscatter(mds, x = "Dim.1", y = "Dim.2",
 clust <- kmeans(mds, 10)$cluster %>%
   as.factor()
 mds <- mds %>%
-  mutate(groups = clust)
+  mutate(groups = clust, Ethnic = df$Ethnic, Ethnic_color = Ethniccolors_mds, Language = df$Language)
 # Plot and color by groups
 ggscatter(mds, x = "Dim.1", y = "Dim.2", 
           label = df$Ethnic,
@@ -6080,6 +6086,9 @@ ggscatter(mds, x = "Dim.1", y = "Dim.2",
           ellipse = TRUE,
           ellipse.type = "convex",
           repel = TRUE)
+
+# palette = c(Abaknon="#9900ff", Akar="#fa0f0c", `Akar Jambat`="#fa0f0c", Alor="#9900ff", Ambonese="#9900ff", `Arakanese (or Rakhine)`="#336699", `Bamar (or Burman)`="#336699", Banjar="#9900ff", Batak="#9900ff", `Bicolano, Bidayuh`="#9900ff", `Bru (Brao)`="#fa0f0c", `Bruneian Malay`="#9900ff", `Bugkalot (or Ilongot)`="#9900ff", Cham="#9900ff", CoLao="#339900", Dao="#0099ff", Dayak="#9900ff", Ede="#fa0f0c", Filipino="#9900ff", `Filipino (or Tagalog)`="#9900ff", Giarai="#fa0f0c", HaNhi="#336699", Hmong="#0099ff", Ibaloi="#9900ff", Ifugao="#9900ff", Igorot="#9900ff", Indonesian="#9900ff", `Isan (or Lao)`="#339900", IuMien="#0099ff", Ivatan="#9900ff", Jarai="#9900ff", Javanese="#9900ff", `Jehai (or Jahai)`="#fa0f0c", Jingpo="#336699", `Kadazan-Dusun`="#9900ff", Kankanaey="#9900ff", Karen="#336699", Khmer="#fa0f0c", Khuen="#fa0f0c", Kinh="#fa0f0c", Kreung="#fa0f0c", LaChi="#339900", Lahu="#336699", LaHu="#336699", Lao="#339900", `Lao Islan`="#339900", Lisu="#336699", LoLo="#336699", Makasae="#66ccff", Malay="#9900ff", Mam="#660000", Mang="#fa0f0c", Maranao="#9900ff", Melanau="#9900ff", Minahasa="#9900ff", Minangkabau="#9900ff", Moken="#9900ff", Mon="#fa0f0c", Nung="#339900", PaThen="#fa0f0c", Phnong="#fa0f0c", PhuLa="#fa0f0c", Phutai="#339900", `Seletar (or Orang Seletar)`="#9900ff", Semelai="#fa0f0c", Semende="#9900ff", Shan="#339900", SiLa="#9900ff", Stieng="#fa0f0c", Sumbanese="#9900ff", Surigaonon="#9900ff", Tagalog="#9900ff", Tay="#339900", `Tay Nung`="#339900", Temuan="#9900ff", Thai="#339900", `The Kalanguya (or Ikalahan)`="#9900ff", Tompoun="#fa0f0c", Toraja="#9900ff", Unknown="lightgrey", UrakLawoi="#9900ff", Zambal="#9900ff")
+
 ggsave(filename = file.path("figures", "ethnic_K10.png"), width = 15, height = 10)
 
 # K-means clustering (K=10) - Language
@@ -6092,17 +6101,19 @@ colnames(mds) <- c("Dim.1", "Dim.2")
 clust_lang <- kmeans(mds, 10)$cluster %>%
   as.factor()
 mds_lang <- mds %>%
-  mutate(groups = clust, language = df$Language)
+  mutate(groups = clust, Language = df$Language, Language_color = Languagecolors_mds, Ethnic = df$Ethnic, Ethnic_color = Ethniccolors_mds)
 # Plot and color by groups
 ggscatter(mds_lang, x = "Dim.1", y = "Dim.2", 
           label = df$Ethnic,
-          color = "language",
-          palette = "jco",
+          color = "Language",
+          # palette = "jco",
           size = 1, 
           ellipse = TRUE,
           ellipse.type = "convex",
-          repel = TRUE)
-ggsave(filename = file.path("figures", "ethnic_K10_language.png"), width = 15, height = 10)
+          repel = TRUE,
+          palette = c(Austroasiatic="#fa0f0c", Austronesian="#9900ff", `Hmong-Mien +`="#0099ff", Mayan="#660000", `Sino-Tibetan +`="#336699", `Tai-Kadai`="#339900", `Trans-New Guinea +`="#66ccff", Unknown="lightgrey"))
+          
+ggsave(filename = file.path("figures", "ethnic_K10_language_new.png"), width = 15, height = 10)
 
 # K-means clustering (K=6)
 clust <- kmeans(mds, 6)$cluster %>%
