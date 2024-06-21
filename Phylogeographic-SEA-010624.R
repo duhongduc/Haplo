@@ -6087,7 +6087,7 @@ ggplot(data = ind_coords, aes(x = Axis1, y = Axis2)) +
   # points
   geom_point(aes(fill = Site), shape = 21, size = 4, show.legend = FALSE) +
   # centroids
-  geom_label(data = centroid, aes(label = Site, colour = Site), position=position_jitter(width=-0.5,height=0.5), size = 6, show.legend = FALSE) +
+  geom_label(data = centroid, aes(label = Site, colour = Site), position=position_jitter(width=-1.5,height=1.5), size = 6, show.legend = FALSE) +
   # colouring
   scale_fill_manual(values = cols)+
   scale_colour_manual(values = cols)+
@@ -6190,7 +6190,7 @@ ggscatter(mds_lang, x = "Dim.1", y = "Dim.2",
           ellipse = TRUE,
           ellipse.type = "convex",
           repel = TRUE,
-          palette = c(Austroasiatic="#fa0f0c", Austronesian="#9900ff", `Hmong-Mien`="#0099ff", Mayan="#660000", `Sino-Tibetan`="#336699", `Tai-Kadai`="#339900", `Trans-New Guinea`="#66ccff", Unknown="lightgrey"))
+          palette = c(Austroasiatic="#fa0f0c", `Austroasiatic, Austronesian`="#996666", Austronesian="#9900ff", `Hmong-Mien`="#0099ff", Mayan="#660000", `Sino-Tibetan`="#336699", `Tai-Kadai`="#339900", `Trans–New Guinea`="#66ccff", Unknown="lightgrey"))
           
 ggsave(filename = file.path("figures", "ethnic_K10_language_new_new.png"), width = 15, height = 10)
 
@@ -6279,7 +6279,7 @@ ggsave(filename = file.path("figures", "ethnic_K5_final.png"), width = 15, heigh
 
 # Ethnicity - FULL
 
-dat_e <- read_excel("SEA_ethnicity.xlsx")
+dat_e <- read_excel("SEA_ethnicity_new.xlsx")
 
 # ethnic <- read_excel("IsolateExplanation.xlsx")
 # 
@@ -6329,30 +6329,13 @@ dat_e <- read_excel("SEA_ethnicity.xlsx")
 
 # df <- dat_e %>% na.omit() %>% dplyr::select(1,4,6,8)
 df <- dat_e %>%
-  mutate(`Language`=ifelse(`Language`=="Austronesian, Austroasiatic" | `Language`=="Austroasiatic, Austronesian", "Austroasiatic, Austronesian, Sino-Tibetan",
-                           ifelse(`Language`=="Austronesian, Spanish" | `Language`=="Austronesian, Trans-New Guinea" | `Language`=="Papuan, Austronesian, English", "Austronesian",
-                                  ifelse(`Language`=="Hmong-Mien" | `Language`=="Hmong-Mien, Mongolic", "Hmong-Mien +",
-                                         ifelse(`Language`=="Indo-European, Sino-Tibetan" | `Language`=="Sino-Tibetan, Austroasiatic, Tai-Kadai" | `Language`=="Sino-Tibetan, Tai-Kada" | `Language`=="Tai-Kadai, Sino-Tibetan", "Sino-Tibetan +",
-                                                ifelse(`Language`=="Trans-New Guinea" | `Language`=="Trans–New Guinea (Alor-Pantar, Papuan)", "Trans-New Guinea +",
-                                                       ifelse(`Language`=="Austronesian, Austroasiatic, Indo-European", "Austroasiatic, Austronesian + (xSino-Tibetan)",
-                                                              ifelse(`Language`=="Austroasiatic, Tai-Kadai" | `Language`=="Austroasiatic, Tai-Kadai, Hmong-Mien, Sino-Tibetan" | `Language`=="Tai-Kadai, Hmong-Mien, Austroasiatic", "Austroasiatic, Tai-Kadai +",
-                                                                     ifelse(`Language`=="Sino-Tibetan", "Sino-Tibetan +", `Language`)))))))),
-         `Language`=ifelse(Ethnic=="Mon", "Austroasiatic",
-                           ifelse(Ethnic=="Hmong", "Hmong-Mien +",
-                                  ifelse(Ethnic=="Shan", "Tai-Kadai",
-                                         ifelse(Ethnic=="Jehai (or Jahai)", "Austroasiatic",
-                                                ifelse(Ethnic=="Temuan", "Austronesian",
-                                                       ifelse(Ethnic=="Maranao", "Austronesian",
-                                                              ifelse(Ethnic=="Semelai", "Austroasiatic",
-                                                                     ifelse(Ethnic=="Bru (Brao)", "Austroasiatic",
-                                                                            ifelse(Ethnic=="Jarai", "Austronesian",
-                                                                                   ifelse(Ethnic=="Kadazan-Dusun", "Austronesian",
-                                                                                          ifelse(Ethnic=="Alor", "Austronesian",
-                                                                                                 ifelse(Ethnic=="Arakanese (or Rakhine)", "Sino-Tibetan +",
-                                                                                                        ifelse(Ethnic=="Timorese", "Austronesian",
-                                                                                                               ifelse(Ethnic=="Mang", "Austroasiatic", `Language`))))))))))))))) %>%
   na.omit() %>% dplyr::select(1,2,3,4,6,8,10) %>% setDF()
-df <- df %>% filter(`Ethnic`!="Unknown")
+
+df$Language = as.factor(meta[match(df$Ethnic, meta$Ethnicity),]$`Language family`)
+
+Ethniccolors_mds <- meta[match(df$Ethnic, meta$Ethnicity), "Ethnicity_color"]
+Languagecolors_mds <- meta[match(df$Language, meta$`Language family`), "Language_color"]
+
 # dist_matrix <- dist(dat_e[,-1])
 # mds_result <- cmdscale(dist_matrix)
 # plot(mds_result, col = dat_e$ethnic, pch = 19, xlab = "MDS1", ylab = "MDS2")
@@ -6384,7 +6367,7 @@ ggscatter(mds, x = "Dim.1", y = "Dim.2",
           ellipse = TRUE,
           ellipse.type = "convex",
           repel = TRUE)
-ggsave(filename = file.path("figures", "ethnic_K10_full.png"), width = 15, height = 10)
+ggsave(filename = file.path("figures", "ethnic_K10_full_new.png"), width = 15, height = 10)
 
 # K-means clustering (K=10) - Language
 mds <- df %>% na.omit() %>% dplyr::select(-c(1,2,3,4)) %>%
@@ -6396,17 +6379,19 @@ colnames(mds) <- c("Dim.1", "Dim.2")
 clust_lang <- kmeans(mds, 10)$cluster %>%
   as.factor()
 mds_lang <- mds %>%
-  mutate(groups = clust, language = df$Language)
+  mutate(groups = clust, Language = df$Language, Language_color = Languagecolors_mds, Ethnic = df$Ethnic, Ethnic_color = Ethniccolors_mds)
 # Plot and color by groups
 ggscatter(mds_lang, x = "Dim.1", y = "Dim.2", 
           label = df$Ethnic,
-          color = "language",
-          palette = "jco",
+          color = "Language",
+          # palette = "jco",
           size = 1, 
           ellipse = TRUE,
           ellipse.type = "convex",
-          repel = TRUE)
-ggsave(filename = file.path("figures", "ethnic_K10_language_full.png"), width = 15, height = 10)
+          repel = TRUE,
+          palette = c(Austroasiatic="#fa0f0c", `Austroasiatic, Austronesian`="#996666", Austronesian="#9900ff", `Hmong-Mien`="#0099ff", Mayan="#660000", `Sino-Tibetan`="#336699", `Tai-Kadai`="#339900", `Trans–New Guinea`="#66ccff", Unknown="lightgrey"))
+
+ggsave(filename = file.path("figures", "ethnic_K10_language_full_new.png"), width = 15, height = 10)
 
 # K-means clustering (K=6)
 clust <- kmeans(mds, 6)$cluster %>%
