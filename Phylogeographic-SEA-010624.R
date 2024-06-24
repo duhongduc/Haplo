@@ -435,128 +435,6 @@ Ethniccolors <- metadata[match(ethnics, metadata$Ethnicity), "Ethnicity_color"]
 haplos <- c("A", "B", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "U", "W", "Y", "Z")
 Haplocolors <- metadata[match(haplos, metadata$haplogroup1), "Haplogroup1_color"]
 
-p <- ggtree(tree2, layout='circular')
-
-p <- p %<+% metadata
-
-p1 <- p +
-  geom_tippoint(aes(color=Country),
-                size=4) + 
-  scale_color_manual(values=cols, 
-                     guide=guide_legend(keywidth=2,
-                                        keyheight=3,
-                                        order=2,
-                                        override.aes=list(size=10,alpha=1))) + 
-  theme(legend.position="right",
-        legend.background=element_rect(fill=NA),
-        legend.title=element_text(size=30, face="bold"),
-        legend.text=element_text(size=20),
-        legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(2, "cm")) + 
-  new_scale_colour()
-
-# p2 <-p1 +
-#   geom_fruit(
-#     geom=geom_tile,
-#     mapping=aes(fill=`Language family`),
-#     width=0.01,
-#     offset=0.1
-#   ) +
-#   scale_fill_manual(
-#     name="Language",
-#     values=Languagecolors,
-#     guide=guide_legend(keywidth=2, 
-#                        keyheight=1, 
-#                        ncol=1, 
-#                        order=1,
-#                        override.aes=list(size=5,alpha=1))
-#   ) +
-#   theme(legend.background=element_rect(fill=NA),
-#         legend.title=element_text(size=30, face="bold"), 
-#         legend.text=element_text(size=20),
-#         legend.key.size = unit(30, "cm"),
-#         legend.spacing.y = unit(2, "cm")) + 
-#   new_scale_colour()
-# 
-# p3 <- p2 +
-#   new_scale_fill() +
-#   geom_fruit(geom=geom_star,
-#              mapping=aes(fill=haplogroup1),
-#              size=10,
-#              starstroke=0,
-#              pwidth=0.1,
-#              inherit.aes = FALSE,
-#              grid.params=list(linetype=3, size=0.2)) +
-#   scale_fill_discrete(
-#     name="Haplogroup",
-#     guide=guide_legend(keywidth=2, 
-#                        keyheight=1, 
-#                        ncol=10,
-#                        order=3,
-#                        override.aes=list(size=10)),
-#     na.translate=FALSE) +
-#   scale_starshape_discrete(guide="none") +
-#   theme(legend.background=element_rect(fill=NA),
-#         legend.title=element_text(size=30, face="bold"), 
-#         legend.text=element_text(size=20),
-#         legend.key.size = unit(30, "cm"),
-#         legend.spacing.y = unit(2, "cm")) + 
-#   new_scale_colour()
-# 
-# p3
-# ggsave(filename = file.path("figures", "Treefull(2).png"), width = 30, height = 20)
-
-p4 <-p1 +
-  geom_fruit(
-    geom=geom_tile,
-    mapping=aes(fill=`Language family`),
-    width=0.006,
-    offset=0.03
-  ) +
-  scale_fill_manual(
-    name="Language",
-    values=Languagecolors,
-    guide=guide_legend(keywidth=3, 
-                       keyheight=3, 
-                       ncol=1, 
-                       order=1,
-                       override.aes=list(size=10,alpha=1))
-  ) +
-  theme(legend.background=element_rect(fill=NA),
-        legend.title=element_text(size=30, face="bold"), 
-        legend.text=element_text(size=20),
-        legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(2, "cm")) + 
-  new_scale_colour()
-
-p5 <- p4 +
-  new_scale_fill() +
-  geom_fruit(geom=geom_star,
-             mapping=aes(fill=haplogroup1),
-             size=15,
-             starstroke=0,
-             pwidth=0.2,
-             inherit.aes = FALSE,
-             grid.params=list(linetype=3, size=0.2)) +
-  scale_fill_discrete(
-    name="Haplogroup",
-    guide=guide_legend(keywidth=2, 
-                       keyheight=2, 
-                       ncol=10,
-                       order=3,
-                       override.aes=list(size=10)),
-    na.translate=FALSE) +
-  scale_starshape_discrete(guide="none") +
-  theme(legend.background=element_rect(fill=NA),
-        legend.title=element_text(size=30, face="bold"), 
-        legend.text=element_text(size=20),
-        legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(2, "cm")) + 
-  new_scale_colour()
-
-p5
-ggsave(filename = file.path("figures", "Treefull(3).png"), width = 30, height = 20)
-
 # Final tree
 
 p <- ggtree(tree2, layout='circular')
@@ -616,9 +494,9 @@ p6 <- p +
     name="Ethnicity",
     values=Ethniccolors,
     guide=guide_legend(keywidth=2, 
-                       keyheight=2, 
+                       keyheight=2.5, 
                        ncol = 3,
-                       override.aes=list(size=1,alpha=1),
+                       override.aes=list(size=10,alpha=1),
                        title.position="top")
   ) +
   theme(legend.background=element_rect(fill=NA),
@@ -643,8 +521,8 @@ p7 <- p4 +
   scale_fill_manual(
     name="Haplogroup",
     values = Haplocolors,
-    guide=guide_legend(keywidth=1, 
-                       keyheight=1, 
+    guide=guide_legend(keywidth=3, 
+                       keyheight=3, 
                        order=3,
                        nrow = 4, byrow = TRUE,
                        override.aes=list(size=10)),
@@ -654,7 +532,7 @@ p7 <- p4 +
         legend.title=element_text(size=40, face="bold"), 
         legend.text=element_text(size=30),
         legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(1, "cm"),
+        legend.spacing.y = unit(2, "cm"),
         legend.box = "vertical",
         legend.direction = "vertical",
         legend.position = "left", 
@@ -951,8 +829,8 @@ p7 <- p6 +
   scale_fill_manual(
     name="Haplogroup",
     values = Haplocolors,
-    guide=guide_legend(keywidth=1, 
-                       keyheight=1, 
+    guide=guide_legend(keywidth=2, 
+                       keyheight=3, 
                        order=3,
                        nrow = 2, byrow = TRUE,
                        override.aes=list(size=10)),
@@ -964,7 +842,7 @@ p7 <- p6 +
         legend.title=element_text(size=40, face="bold"), 
         legend.text=element_text(size=30),
         legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(1, "cm"),
+        legend.spacing.y = unit(2, "cm"),
         legend.box = "vertical",
         legend.direction = "vertical",
         legend.position = "right") + 
@@ -1237,8 +1115,8 @@ p7 <- p6 +
   scale_fill_manual(
     name="Haplogroup",
     values = Haplocolors,
-    guide=guide_legend(keywidth=1, 
-                       keyheight=1, 
+    guide=guide_legend(keywidth=2, 
+                       keyheight=3, 
                        order=3,
                        nrow = 2, byrow = TRUE,
                        override.aes=list(size=10)),
@@ -1537,8 +1415,8 @@ p7 <- p6 +
   scale_fill_manual(
     name="Haplogroup",
     values = Haplocolors,
-    guide=guide_legend(keywidth=1, 
-                       keyheight=1, 
+    guide=guide_legend(keywidth=2, 
+                       keyheight=3, 
                        order=3,
                        nrow = 2, byrow = TRUE,
                        override.aes=list(size=10)),
@@ -1550,7 +1428,7 @@ p7 <- p6 +
         legend.title=element_text(size=40, face="bold"), 
         legend.text=element_text(size=30),
         legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(1, "cm"),
+        legend.spacing.y = unit(2, "cm"),
         legend.box = "vertical",
         legend.direction = "vertical",
         legend.position = "right") + 
@@ -1831,8 +1709,8 @@ p7 <- p6 +
   scale_fill_manual(
     name="Haplogroup",
     values = Haplocolors,
-    guide=guide_legend(keywidth=1, 
-                       keyheight=1, 
+    guide=guide_legend(keywidth=2, 
+                       keyheight=3, 
                        order=3,
                        nrow = 2, byrow = TRUE,
                        override.aes=list(size=10)),
@@ -1844,7 +1722,7 @@ p7 <- p6 +
         legend.title=element_text(size=40, face="bold"), 
         legend.text=element_text(size=30),
         legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(1, "cm"),
+        legend.spacing.y = unit(2, "cm"),
         legend.box = "vertical",
         legend.direction = "vertical",
         legend.position = "right") + 
@@ -2117,8 +1995,8 @@ p7 <- p6 +
   scale_fill_manual(
     name="Haplogroup",
     values = Haplocolors,
-    guide=guide_legend(keywidth=1, 
-                       keyheight=1, 
+    guide=guide_legend(keywidth=2, 
+                       keyheight=3, 
                        order=3,
                        nrow = 2, byrow = TRUE,
                        override.aes=list(size=10)),
@@ -2130,7 +2008,7 @@ p7 <- p6 +
         legend.title=element_text(size=40, face="bold"), 
         legend.text=element_text(size=30),
         legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(1, "cm"),
+        legend.spacing.y = unit(2, "cm"),
         legend.box = "vertical",
         legend.direction = "vertical",
         legend.position = "right") + 
@@ -2406,8 +2284,8 @@ p7 <- p6 +
   scale_fill_manual(
     name="Haplogroup",
     values = Haplocolors,
-    guide=guide_legend(keywidth=1, 
-                       keyheight=1, 
+    guide=guide_legend(keywidth=2, 
+                       keyheight=3, 
                        order=3,
                        nrow = 2, byrow = TRUE,
                        override.aes=list(size=10)),
@@ -2419,7 +2297,7 @@ p7 <- p6 +
         legend.title=element_text(size=40, face="bold"), 
         legend.text=element_text(size=30),
         legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(1, "cm"),
+        legend.spacing.y = unit(2, "cm"),
         legend.box = "vertical",
         legend.direction = "vertical",
         legend.position = "right") + 
@@ -2695,8 +2573,8 @@ p7 <- p6 +
   scale_fill_manual(
     name="Haplogroup",
     values = Haplocolors,
-    guide=guide_legend(keywidth=1, 
-                       keyheight=1, 
+    guide=guide_legend(keywidth=2, 
+                       keyheight=3, 
                        order=3,
                        nrow = 2, byrow = TRUE,
                        override.aes=list(size=10)),
@@ -2708,7 +2586,7 @@ p7 <- p6 +
         legend.title=element_text(size=40, face="bold"), 
         legend.text=element_text(size=30),
         legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(1, "cm"),
+        legend.spacing.y = unit(2, "cm"),
         legend.box = "vertical",
         legend.direction = "vertical",
         legend.position = "right") + 
@@ -2981,8 +2859,8 @@ p7 <- p6 +
   scale_fill_manual(
     name="Haplogroup",
     values = Haplocolors,
-    guide=guide_legend(keywidth=1, 
-                       keyheight=1, 
+    guide=guide_legend(keywidth=2, 
+                       keyheight=3, 
                        order=3,
                        nrow = 2, byrow = TRUE,
                        override.aes=list(size=10)),
@@ -2994,7 +2872,7 @@ p7 <- p6 +
         legend.title=element_text(size=40, face="bold"), 
         legend.text=element_text(size=30),
         legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(1, "cm"),
+        legend.spacing.y = unit(2, "cm"),
         legend.box = "vertical",
         legend.direction = "vertical",
         legend.position = "right") + 
@@ -3267,8 +3145,8 @@ p7 <- p6 +
   scale_fill_manual(
     name="Haplogroup",
     values = Haplocolors,
-    guide=guide_legend(keywidth=1, 
-                       keyheight=1, 
+    guide=guide_legend(keywidth=2, 
+                       keyheight=3, 
                        order=3,
                        nrow = 2, byrow = TRUE,
                        override.aes=list(size=10)),
@@ -3280,7 +3158,7 @@ p7 <- p6 +
         legend.title=element_text(size=40, face="bold"), 
         legend.text=element_text(size=30),
         legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(1, "cm"),
+        legend.spacing.y = unit(2, "cm"),
         legend.box = "vertical",
         legend.direction = "vertical",
         legend.position = "right") + 
@@ -3553,8 +3431,8 @@ p7 <- p6 +
   scale_fill_manual(
     name="Haplogroup",
     values = Haplocolors,
-    guide=guide_legend(keywidth=1, 
-                       keyheight=1, 
+    guide=guide_legend(keywidth=2, 
+                       keyheight=3, 
                        order=3,
                        nrow = 2, byrow = TRUE,
                        override.aes=list(size=10)),
@@ -3566,7 +3444,7 @@ p7 <- p6 +
         legend.title=element_text(size=40, face="bold"), 
         legend.text=element_text(size=30),
         legend.key.size = unit(30, "cm"),
-        legend.spacing.y = unit(1, "cm"),
+        legend.spacing.y = unit(2, "cm"),
         legend.box = "vertical",
         legend.direction = "vertical",
         legend.position = "right") + 
@@ -5613,6 +5491,75 @@ setnames(x = dat_c,
 
 library(writexl)
 write_xlsx(dat_c, "SEA_country_new.xlsx")
+
+# Language family
+
+lf <- read_excel("CompleteFull.xlsx")
+lf <- as.data.frame(lf)
+
+library(janitor)
+lf2 <- lf %>%
+  mutate(`Language family`=ifelse(Ethnicity=="Mon", "Austroasiatic",
+                                  ifelse(Ethnicity=="Hmong", "Hmong-Mien",
+                                         ifelse(Ethnicity=="Shan", "Tai-Kadai",
+                                                ifelse(Ethnicity=="Jehai (or Jahai)", "Austroasiatic",
+                                                       ifelse(Ethnicity=="Temuan", "Austronesian",
+                                                              ifelse(Ethnicity=="Maranao", "Austronesian",
+                                                                     ifelse(Ethnicity=="Semelai", "Austroasiatic",
+                                                                            ifelse(Ethnicity=="Bru (Brao)", "Austroasiatic",
+                                                                                   ifelse(Ethnicity=="Jarai", "Austronesian",
+                                                                                          ifelse(Ethnicity=="Kadazan-Dusun", "Austronesian",
+                                                                                                 ifelse(Ethnicity=="Alor", "Austronesian",
+                                                                                                        ifelse(Ethnicity=="Arakanese (or Rakhine)", "Sino-Tibetan",
+                                                                                                               ifelse(Ethnicity=="Timorese", "Austronesian",
+                                                                                                                      ifelse(Ethnicity=="Mang", "Austroasiatic",
+                                                                                                                             ifelse(Ethnicity=="Dao", "Hmong-Mien", 
+                                                                                                                                    ifelse(Ethnicity=="English", "Unknown",
+                                                                                                                                           ifelse(Ethnicity=="Batek", "Austroasiatic",
+                                                                                                                                                  ifelse(Ethnicity=="Orang Asli", "Austroasiatic",`Language family`))))))))))))))))))) %>%
+  dplyr::select(name, `Language family`, haplo, haplogroup1, haplogroup2, haplogroup3) %>% setDT()
+lf_rank <- lf2[, .N, by = .(`Language family`)]
+
+lf_hap <- lf2[, .N, by = .(`Language family`, haplo)]
+lf_hap <- lf_hap %>%
+  group_by(`Language family`) %>% arrange(haplo, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+lf_hap3 <- lf2[, .N, by = .(`Language family`, haplogroup3)]
+lf_hap3 <- lf_hap3 %>%
+  group_by(`Language family`) %>% arrange(haplogroup3, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+library(pegas)
+library(ape)
+
+dat_lf <- NULL
+for (i in lf_rank$`Language family`) {
+  cat(i, "\n")
+  df_i <- lf2 %>% dplyr::filter(`Language family`==i)
+  n_i <- nrow(df_i)
+  nbin_i <- nbin[labels(nbin) %in% df_i$name]
+  h_i <- pegas::haplotype(nbin_i)
+  n_hi <- length(as.list(h_i))
+  fas_i <- file2[labels(nbin) %in% df_i$name]
+  writeXStringSet(fas_i, paste0("data/language/", i, ".fasta"))
+  dnbin_i <- dist.dna(nbin_i, model = "K80") #computing distance by ape package with K80 model derived by Kimura (1980)
+  x_i <- as.matrix.DNAbin(nbin_i)  #converting DNAbin to matrix
+  dist.gene_i <- dist.gene(x_i, method = "pairwise", variance = TRUE, pairwise.deletion = FALSE)
+  mpd_i <- mean(dist.gene_i)
+  hap.div_i <- hap.div(nbin_i, variance = TRUE)
+  nuc.div_i <- nuc.div(nbin_i, variance = TRUE, pairwise.deletion = FALSE) # hap.div = 1 all haplotypes are unique
+  dati <- data.frame(df_i$`Language family`, n_i, n_hi, hap.div_i[1], hap.div_i[2], nuc.div_i[1], nuc.div_i[2], mpd_i) %>% slice(1)
+  ## combine
+  dat_lf <- rbindlist(l = list(dat_lf, dati)) %>% unique() %>% setDT()
+}
+# Rename
+setnames(x = dat_lf,
+         old = c("df_i..Language.family.", "n_i", "n_hi", "hap.div_i.1.", "hap.div_i.2.", "nuc.div_i.1.", "nuc.div_i.2.", "mpd_i"),
+         new = c("Language", "Sample size", "Number of haplotypes", "Haplotype diversity (H)", "H variance", "Nucleotide diveristy (pi)", "pi SE", "MPD"))
+
+library(writexl)
+write_xlsx(dat_lf, "SEA_language_new.xlsx")
 
 # Ethnicity
 
