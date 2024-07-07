@@ -10,7 +10,7 @@
 # R version 4.2.1 (2022-06-23)
 # Platform: x86_64-pc-linux-gnu (64-bit)
 # Running under: Ubuntu 18.04.6 LTS
-###########################################################################33
+###########################################################################
 
 rm(list = ls(all.names = TRUE))
 
@@ -244,13 +244,13 @@ gt_table <- dat %>% select(Country, `Language family`, Ethnicity, haplo) %>%
 # convert to tibble, then write to xlsx
 gt_table %>%
   gtsummary::as_tibble() %>% 
-  writexl::write_xlsx(., "example_gtsummary3_new.xlsx")
+  writexl::write_xlsx(., "example_gtsummary4_new.xlsx")
 
 a <- dat %>% select(`Language family`, Ethnicity) %>%
   tbl_summary(by=`Language family`) %>%
   add_n() %>%
   gtsummary::as_tibble() %>% 
-  writexl::write_xlsx(., "lf_ethnic_new.xlsx")
+  writexl::write_xlsx(., "lf_ethnic1_new.xlsx")
 
 
 # # Or use `as_hux_xlsx()`
@@ -5839,7 +5839,7 @@ ggplot(data = fst.df, aes(x = Site1, y = Site2, fill = Fst)) +
   scale_fill_gradient2(low = "blue", mid = "yellow", high = "red", midpoint = mid, name = fst.label, limits = c(0, max(fst.df$Fst)), breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
   scale_x_discrete(expand = c(0,0), labels = wrap_format(50))+
   scale_y_discrete(expand = c(0,0), position = "right")+
-  theme(axis.text = element_text(colour = "black", size = 15, face = "bold"),
+  theme(axis.text = element_text(colour = "black", size = 20, face = "bold"),
         axis.title = element_blank(),
         panel.grid = element_blank(),
         panel.background = element_blank(),
@@ -5852,7 +5852,7 @@ ggplot(data = fst.df, aes(x = Site1, y = Site2, fill = Fst)) +
         axis.text.y=element_text(color=Ethniccolors2, size=20)
   )
 
-ggsave("figures/Fst_Ethnicity_new.png", width = 45, height = 40)
+ggsave("figures/Fst_Ethnicity_new.png", width = 45, height = 45)
 
 library(xlsx)
 # write.xlsx(fst.mat, "Fst_new.xlsx")
@@ -5947,7 +5947,7 @@ ggplot(data = fst.df_short, aes(Site1, y = Site2, fill = Fst)) +
   scale_fill_gradient2(low = "blue", mid = "yellow", high = "red", midpoint = mid, name = fst.label_short, limits = c(0, max(fst.df_short$Fst)), breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
   scale_x_discrete(expand = c(0,0), labels = wrap_format(50))+
   scale_y_discrete(expand = c(0,0), position = "right")+
-  theme(axis.text = element_text(colour = "black", size = 15, face = "bold"),
+  theme(axis.text = element_text(colour = "black", size = 20, face = "bold"),
         axis.title = element_blank(),
         panel.grid = element_blank(),
         panel.background = element_blank(),
@@ -5960,7 +5960,7 @@ ggplot(data = fst.df_short, aes(Site1, y = Site2, fill = Fst)) +
         axis.text.y=element_text(color=Ethniccolors2_short, size=22)
   )
 
-ggsave("figures/Fst_Ethnicity_short_new.png", width = 45, height = 40)
+ggsave("figures/Fst_Ethnicity_short_new.png", width = 45, height = 45)
 
 # library(xlsx)
 # write.xlsx(fst.mat_short, "Fst_short.xlsx")
@@ -8405,6 +8405,21 @@ ggplot() + geom_sf(data=SEA1_sf, aes(fill="white"), alpha=0.1) +
   ggtitle("Geographic distribution of Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia by Ethnicity")
 ggsave(filename = file.path("figures", "Ethnicity_SEA_edit2_new.png"), width = 49, height = 33)
 
+ggplot() + geom_sf(data=SEA1_sf, aes(fill="white"), alpha=0.1) + 
+  geom_sf(data=ethnicity_SEA_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_SEA_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", position = "identity", check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.6), data=dt_x, cols = colnames(dt_x)[1:220], color=NA, alpha=0.8) +
+  guides(fill=guide_legend(nrow=10, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(text = element_text(size=36), 
+        axis.text.x = element_text(size=30), 
+        axis.text.y = element_text(size=30), 
+        legend.text=element_text(size=25), 
+        legend.key.size = unit(1, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Geographic distribution of Human mitochondrial DNA (mtDNA) Haplogroups in Southeast Asia by Ethnicity")
+ggsave(filename = file.path("figures", "Ethnicity_SEA_edit2_new.png"), width = 49, height = 33)
 
 ################ SUBCLADES #######################
 
