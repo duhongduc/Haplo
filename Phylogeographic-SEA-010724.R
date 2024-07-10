@@ -5634,6 +5634,141 @@ setnames(x = dat_e,
 library(writexl)
 write_xlsx(dat_e, "SEA_ethnicity_new.xlsx")
 
+## Plot diversity difference from mean
+
+e <- read_excel("SEA_ethnicity_new.xlsx")
+e <- as.data.frame(e)
+  
+### New variable for the difference between each value and the mean
+
+e <- e %>%
+  mutate(hap_dif = (`Haplotype diversity (H)` - mean(`Haplotype diversity (H)`))*100 / mean(`Haplotype diversity (H)`),
+         nu_dif = (`Nucleotide diveristy (pi)` - mean(`Nucleotide diveristy (pi)`))*100 / mean(`Nucleotide diveristy (pi)`),
+         `Ethnic` = factor(`Ethnic`, levels = c("Blang", "Bru (Brao)", "H’tin", "Jehai", "Khamu", "Khmer", "Khuen", "Kinh", "Kinh, Muong, Khmer", "Kreung", "Lawa", "Mang", "Maniq", "Mel Khaonh", "Mlabri", "Mon", "Nyahkur", "Paluang", "Phnong", "Semelai", "Soa", "Stieng", "Suay", "Tompoun", "Khmer Loeu", "Kinh, Cham, Ede, Giarai", "Kinh, Tay, Thai, Muong, Hmong", "Abaknon", "Aeta (Agta)", "Ambonese", "Bali Aga, Balinese", "Banjar", "Banjar, Dayak, Javanese", "Batak", "Batak, Minangkabau, Acehnese, Lampung", "Besemah", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Bumiputera", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Ede", "Filipino (or Tagalog)", "Giarai", "Ibaloi", "Ifugao", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey (or Igorot)", "Makassarese", "Malay", "Malay, Achehnese", "Manabo", "Maranao", "Minahasa", "Minangkabau", "Moken", "Sasak", "Seletar", "Semende", "Southern Thai_AN", "Sumatrans", "Sumbanese", "Surigaonon", "Temuan", "The Kalanguya (or Ikalahan)", "Toraja", "UrakLawoi", "Non-Malaysian (Chinese, Bajau, Kadazan-Dusun)", "Alorese, Alor Malay, Alor-Pantar", "Tetum, Mambai, Makasae", "Dao", "Hmong", "IuMien", "PaThen", "Mamanwa", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chin", "Han", "HaNhi", "Jingpo", "Karen", "Lahu", "Lisu", "LoLo", "Naga", "PhuLa", "SiLa", "Ancient Thai", "Black Tai", "Central Thai", "CoLao", "Isan (or Lao)", "Kalueng", "Khon Mueang", "LaChi", "Lao", "Nung", "Nyaw", "Phuan", "Phutai", "Seak", "Shan", "Southern Thai_TK", "Tai Lue", "Tai Yuan", "Tay", "Tay Nung", "Thai", "Papuan", "Unknown")),
+         Language_color=NA,
+         Language_color=ifelse(`Language`=="RSRS", "black",
+                               ifelse(`Language`=="Austroasiatic", "#fa0f0c",
+                                      ifelse(`Language`=="Austroasiatic, Austronesian", "#996666",
+                                             ifelse(`Language`=="Austroasiatic, Tai-Kaidai, Hmong-Mien", "#cccc33",
+                                                    ifelse(`Language`=="Austronesian", "#9900ff",
+                                                           ifelse(`Language`=="Austronesian, Sino-Tibetan", "#163566",
+                                                                  ifelse(`Language`=="Austronesian, Trans–New Guinea", "#cc66ff",
+                                                                         ifelse(`Language`=="rCRS", "orange",
+                                                                                ifelse(`Language`=="Hmong-Mien", "#0099ff",
+                                                                                       ifelse(`Language`=="Mayan", "#660000",
+                                                                                              ifelse(`Language`=="Sino-Tibetan", "#336699",
+                                                                                                     ifelse(`Language`=="Tai-Kadai", "#339900",
+                                                                                                            ifelse(`Language`=="Trans–New Guinea", "#66ccff",
+                                                                                                                   ifelse(`Language`=="Unknown", "lightgrey",
+                                                                                                                          Language_color)))))))))))))),
+         Ethnicity_color=NA,
+         Ethnicity_color=ifelse(Ethnic %in% c("Abaknon", "Aeta (Agta)", "Ambonese", "Bali Aga, Balinese", "Banjar", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Besemah", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Bumiputera", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Ede", "Filipino (or Tagalog)", "Giarai", "Ibaloi", "Ifugao", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey (or Igorot)", "Makassarese", "Malay", "Malay, Achehnese", "Manabo", "Maranao", "Minahasa", "Minangkabau", "Moken", "Sasak", "Seletar", "Semende", "Southern Thai_AN", "Sumatrans", "Sumbanese", "Sundanese", "Surigaonon", "Tagbanua", "Temuan", "Tengger", "The Kalanguya (or Ikalahan)", "Toraja", "UrakLawoi"), "#9900ff",
+                                ifelse(Ethnic %in% c("Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chin", "Chinese", "Dawei", "Han", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "Lisu", "LoLo", "Naga", "PhuLa", "SiLa"), "#336699",
+                                       ifelse(Ethnic=="RSRS", "black",
+                                              ifelse(Ethnic %in% c("Batek", "Blang", "Bru (Brao)", "Deang", "H’tin", "Jehai", "Kensiu", "Khamu", "Khmer", "Khuen", "Kinh", "Kinh, Muong, Khmer", "Kintaq", "Kreung", "Lawa", "Mang", "Maniq", "Mel Khaonh", "Mlabri", "Mon", "Nyahkur", "Orang Asli", "Paluang", "Phnong", "Semelai", "Soa", "Stieng", "Suay", "Tompoun"), "#fa0f0c",
+                                                     ifelse(Ethnic %in% c("Jahai, Semang", "Khmer Loeu", "Kinh, Cham, Ede, Giarai"), "#996666",
+                                                            ifelse(Ethnic %in% c("Papuan"), "#66ccff",
+                                                                   ifelse(Ethnic %in% c("Ancient Thai", "Black Tai", "Central Thai", "CoLao", "Dai", "Isan (or Lao)", "Kalueng", "Khon Mueang", "LaChi", "Lao", "Nung", "Nyaw", "Phuan", "Phutai", "Seak", "Shan", "Southern Thai_TK", "Tai Lue", "Tai Yuan", "Tay", "Tay Nung", "Thai"), "#339900",
+                                                                          ifelse(Ethnic %in% c("Dao", "Hmong", "IuMien", "PaThen"), "#0099ff",
+                                                                                 ifelse(Ethnic %in% c("rCRS"), "orange",
+                                                                                        ifelse(Ethnic %in% c("Kinh, Tay, Thai, Muong, Hmong"), "#cccc33",
+                                                                                               ifelse(Ethnic %in% c("Mamanwa"), "#660000",
+                                                                                                      ifelse(Ethnic %in% c("English", "Lun", "Unknown"), "lightgrey",
+                                                                                                             ifelse(Ethnic %in% c("Non-Malaysian (Chinese, Bajau, Kadazan-Dusun)", "Taiwan"), "#163566",
+                                                                                                                    ifelse(Ethnic %in% c("Alorese, Alor Malay, Alor-Pantar", "Tetum, Mambai, Makasae"), "#cc66ff", Ethnic)))))))))))))),
+  ) %>% droplevels()
+
+e <- e %>% 
+  mutate(Ethnic=factor(Ethnic, levels = c("Blang", "Bru (Brao)", "H’tin", "Jehai", "Khamu", "Khmer", "Khuen", "Kinh", "Kinh, Muong, Khmer", "Kreung", "Lawa", "Mang", "Maniq", "Mel Khaonh", "Mlabri", "Mon", "Nyahkur", "Paluang", "Phnong", "Semelai", "Soa", "Stieng", "Suay", "Tompoun", "Khmer Loeu", "Kinh, Cham, Ede, Giarai", "Kinh, Tay, Thai, Muong, Hmong", "Abaknon", "Aeta (Agta)", "Ambonese", "Bali Aga, Balinese", "Banjar", "Banjar, Dayak, Javanese", "Batak", "Batak, Minangkabau, Acehnese, Lampung", "Besemah", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Bumiputera", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Ede", "Filipino (or Tagalog)", "Giarai", "Ibaloi", "Ifugao", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey (or Igorot)", "Makassarese", "Malay", "Malay, Achehnese", "Manabo", "Maranao", "Minahasa", "Minangkabau", "Moken", "Sasak", "Seletar", "Semende", "Southern Thai_AN", "Sumatrans", "Sumbanese", "Surigaonon", "Temuan", "The Kalanguya (or Ikalahan)", "Toraja", "UrakLawoi", "Non-Malaysian (Chinese, Bajau, Kadazan-Dusun)", "Alorese, Alor Malay, Alor-Pantar", "Tetum, Mambai, Makasae", "Dao", "Hmong", "IuMien", "PaThen", "Mamanwa", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chin", "Han", "HaNhi", "Jingpo", "Karen", "Lahu", "Lisu", "LoLo", "Naga", "PhuLa", "SiLa", "Ancient Thai", "Black Tai", "Central Thai", "CoLao", "Isan (or Lao)", "Kalueng", "Khon Mueang", "LaChi", "Lao", "Nung", "Nyaw", "Phuan", "Phutai", "Seak", "Shan", "Southern Thai_TK", "Tai Lue", "Tai Yuan", "Tay", "Tay Nung", "Thai", "Papuan", "Unknown")))
+
+ethnics <- c("Blang", "Bru (Brao)", "H’tin", "Jehai", "Khamu", "Khmer", "Khuen", "Kinh", "Kinh, Muong, Khmer", "Kreung", "Lawa", "Mang", "Maniq", "Mel Khaonh", "Mlabri", "Mon", "Nyahkur", "Paluang", "Phnong", "Semelai", "Soa", "Stieng", "Suay", "Tompoun", "Khmer Loeu", "Kinh, Cham, Ede, Giarai", "Kinh, Tay, Thai, Muong, Hmong", "Abaknon", "Aeta (Agta)", "Ambonese", "Bali Aga, Balinese", "Banjar", "Banjar, Dayak, Javanese", "Batak", "Batak, Minangkabau, Acehnese, Lampung", "Besemah", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Bumiputera", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Ede", "Filipino (or Tagalog)", "Giarai", "Ibaloi", "Ifugao", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey (or Igorot)", "Makassarese", "Malay", "Malay, Achehnese", "Manabo", "Maranao", "Minahasa", "Minangkabau", "Moken", "Sasak", "Seletar", "Semende", "Southern Thai_AN", "Sumatrans", "Sumbanese", "Surigaonon", "Temuan", "The Kalanguya (or Ikalahan)", "Toraja", "UrakLawoi", "Non-Malaysian (Chinese, Bajau, Kadazan-Dusun)", "Alorese, Alor Malay, Alor-Pantar", "Tetum, Mambai, Makasae", "Dao", "Hmong", "IuMien", "PaThen", "Mamanwa", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chin", "Han", "HaNhi", "Jingpo", "Karen", "Lahu", "Lisu", "LoLo", "Naga", "PhuLa", "SiLa", "Ancient Thai", "Black Tai", "Central Thai", "CoLao", "Isan (or Lao)", "Kalueng", "Khon Mueang", "LaChi", "Lao", "Nung", "Nyaw", "Phuan", "Phutai", "Seak", "Shan", "Southern Thai_TK", "Tai Lue", "Tai Yuan", "Tay", "Tay Nung", "Thai", "Papuan", "Unknown")
+Ethniccolors <- e[match(ethnics, e$Ethnic), "Ethnicity_color"]
+rev_Ethniccolors <- rev(Ethniccolors)
+
+Languagecolors <- e$Language_color
+
+# Plot heatmap
+
+ggplot(data = fst.df, aes(x = Site1, y = Site2, fill = Fst)) +
+  geom_tile(colour = "black")+
+  # geom_text(aes(label = Fst), color="black", size = 3)+
+  scale_fill_gradient2(low = "blue", mid = "yellow", high = "red", midpoint = mid, name = fst.label, limits = c(0, max(fst.df$Fst)), breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
+  scale_x_discrete(expand = c(0,0), labels = wrap_format(50))+
+  scale_y_discrete(expand = c(0,0), position = "right")+
+  theme(axis.text = element_text(colour = "black", size = 20, face = "bold"),
+        axis.title = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_blank(),
+        legend.position = "top",
+        legend.title = element_text(size = 30, face = "bold"),
+        legend.text = element_text(size = 20),
+        legend.key.width = unit(4, "cm"),
+        legend.spacing.x = unit(2, "cm"),
+        axis.text.x=element_text(color=Ethniccolors1, angle = 90, size=20, vjust=0, hjust=1),
+        axis.text.y=element_text(color=Ethniccolors2, size=20)
+  )
+
+library(ggallin)
+library(scales)
+
+g1 <- ggplot(data = e, aes(x = Ethnic, y = hap_dif, group = Language)) +
+  geom_point(aes(shape=Language, color=Language), size=10, stroke=1) +
+  geom_hline(yintercept=0, linetype="solid", color = "grey", linewidth=6) +
+  coord_flip() +
+  scale_x_discrete(name = "Ethnicity", limits = rev(levels(e$Ethnic))) +
+  scale_y_continuous(name = "Haplotype diversity % difference from mean", trans = pseudolog10_trans) +
+  scale_shape_manual(values=c(1:12))+
+  scale_color_manual(values=c("#fa0f0c", "#996666", "#cccc33", "#9900ff", "#163566", "#66ccff", "#0099ff", "#660000", "#336699", "#339900", "#66ccff", "lightgrey"))+
+  theme(axis.text = element_text(colour = "black", size = 30),
+        plot.background = element_rect(fill = "white"), 
+        panel.background = element_rect(fill = "white"),
+        panel.grid.minor = element_line(colour = "lightgrey"),
+        panel.grid.major = element_line(colour = "lightgrey"),
+        legend.position="right",
+        legend.title = element_text(size = 36, face = "bold"),
+        legend.text = element_text(size = 30),
+        legend.key.height = unit(2, "cm"),
+        legend.spacing.y = unit(1, "cm"),
+        axis.text.y = element_text(colour = rev_Ethniccolors, size=30),
+        axis.title.y = element_text(colour = "black", size=40, face = "bold"),
+        axis.title.x = element_text(colour = "black", size=36, face = "bold"))
+
+ggsave("figures/H_difference.png", width = 30, height = 45)
+
+g2 <- ggplot(data = e, aes(x = Ethnic, y = nu_dif, group = Language)) +
+  geom_point(aes(shape=Language, color=Language), size=10, stroke=1) +
+  geom_hline(yintercept=0, linetype="solid", color = "grey", linewidth=6) +
+  coord_flip() +
+  scale_x_discrete(name = "Ethnicity", limits = rev(levels(e$Ethnic))) +
+  scale_y_continuous(name = "Nucleotide diversity % difference from mean", trans = pseudolog10_trans, breaks = c(-100, -50, 0, 50)) +
+  scale_shape_manual(values=c(1:12))+
+  scale_color_manual(values=c("#fa0f0c", "#996666", "#cccc33", "#9900ff", "#163566", "#66ccff", "#0099ff", "#660000", "#336699", "#339900", "#66ccff", "lightgrey"))+
+  theme(axis.text = element_text(colour = "black", size = 30),
+        plot.background = element_rect(fill = "white"), 
+        panel.background = element_rect(fill = "white"),
+        panel.grid.minor = element_line(colour = "lightgrey"),
+        panel.grid.major = element_line(colour = "lightgrey"),
+        legend.position="right",
+        legend.title = element_text(size = 36, face = "bold"),
+        legend.text = element_text(size = 30),
+        legend.key.height = unit(2, "cm"),
+        legend.spacing.y = unit(1, "cm"),
+        axis.text.y = element_text(colour = rev_Ethniccolors, size=30),
+        axis.title.y = element_text(colour = "black", size=40, face = "bold"),
+        axis.title.x = element_text(colour = "black", size=36, face = "bold"))
+
+ggsave("figures/Nu_difference.png", width = 30, height = 45)
+
+library(ggpubr)
+library(gridExtra)
+library(grid)
+
+g12 <- gridExtra::grid.arrange(g1, g1, ncol=2)
+
+ggarrange(g1, g2, labels = c("A", "B"), hjust=-1.7, vjust=1.5, common.legend = T, legend = "top", font.label = list(size = 48, color = "black"))
+
+ggsave("figures/H_Nu_difference.png", width = 45, height = 47)
+
 ## Fst shared haplotype
 
 library("hierfstat")
