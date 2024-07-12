@@ -6097,7 +6097,7 @@ ggplot(data = fst.df_short, aes(Site1, y = Site2, fill = Fst)) +
 
 ggsave("figures/Fst_Ethnicity_short_new.png", width = 45, height = 45)
 
-# library(xlsx)
+library(xlsx)
 # write.xlsx(fst.mat_short, "Fst_short.xlsx")
 
 ## PCA
