@@ -6188,6 +6188,374 @@ ggplot(data = ind_coords, aes(x = Axis1, y = Axis2)) +
 ### Export plot
 ggsave("figures/Ethinicity_PCA3_short_new.png", width = 24, height = 16, dpi = 600)
 
+## MDS - Ethnic Fst
+
+df <- read_excel("Fst_new_noNA.xlsx")
+
+df <- df %>% na.omit() %>% rename(Ethnic=`...1`) %>% setDF()
+
+df <- df %>% filter(`Sample size`>2 & Ethnic %in% meta_short$Ethnicity)
+
+df$Language = as.factor(meta_short[match(df$Ethnic, meta_short$Ethnicity),]$`Language family`)
+
+Ethniccolors_mds <- meta_short[match(df$Ethnic, meta_short$Ethnicity), "Ethnicity_color"]
+Languagecolors_mds <- meta_short[match(df$Language, meta_short$`Language family`), "Language_color"]
+
+# dist_matrix <- dist(dat_e[,-1])
+# mds_result <- cmdscale(dist_matrix)
+# plot(mds_result, col = dat_e$ethnic, pch = 19, xlab = "MDS1", ylab = "MDS2")
+
+library(MASS)
+library(magrittr)
+library(dplyr)
+library(ggpubr)
+
+# # Cmpute MDS (non-metric)
+# library(MASS)
+# mds <- df %>% na.omit() %>%
+#   dist() %>%
+#   isoMDS() %>%
+#   .$points %>%
+#   as_tibble()
+# colnames(mds) <- c("Dim.1", "Dim.2")
+# # Plot MDS
+# ggscatter(mds, x = "Dim.1", y = "Dim.2",
+#           label = df$Ethnic,
+#           size = 1,
+#           repel = TRUE)
+
+# Compute MDS
+mds <- df %>% na.omit() %>%
+  dist() %>%          
+  cmdscale() %>%
+  as_tibble()
+colnames(mds) <- c("Dim.1", "Dim.2")
+
+# Plot MDS
+ggscatter(mds, x = "Dim.1", y = "Dim.2", 
+          label = df$Ethnic,
+          size = 1,
+          repel = TRUE)
+
+# K-means clustering (K=10)
+clust <- kmeans(mds, 10)$cluster %>%
+  as.factor()
+
+Ethniccolors_mds <- meta[match(df$Ethnic, meta$Ethnicity), "Ethnicity_color"]
+Language_mds <- meta[match(df$Ethnic, meta$Ethnicity), "Language family"]
+
+mds <- mds %>%
+  mutate(groups = clust, Ethnic_color = Ethniccolors_mds, Language = Language_mds)
+
+# Plot and color by groups
+ggscatter(mds, x = "Dim.1", y = "Dim.2", 
+          label = df$Ethnic,
+          color = "groups",
+          palette = "jco",
+          size = 1, 
+          ellipse = TRUE,
+          ellipse.type = "convex",
+          repel = TRUE)
+
+# palette = c(Abaknon="#9900ff", Akar="#fa0f0c", `Akar Jambat`="#fa0f0c", Alor="#9900ff", Ambonese="#9900ff", `Arakanese (or Rakhine)`="#336699", `Bamar (or Burman)`="#336699", Banjar="#9900ff", Batak="#9900ff", `Bicolano, Bidayuh`="#9900ff", `Bru (Brao)`="#fa0f0c", `Bruneian Malay`="#9900ff", `Bugkalot (or Ilongot)`="#9900ff", Cham="#9900ff", CoLao="#339900", Dao="#0099ff", Dayak="#9900ff", Ede="#fa0f0c", Filipino="#9900ff", `Filipino (or Tagalog)`="#9900ff", Giarai="#fa0f0c", HaNhi="#336699", Hmong="#0099ff", Ibaloi="#9900ff", Ifugao="#9900ff", Igorot="#9900ff", Indonesian="#9900ff", `Isan (or Lao)`="#339900", IuMien="#0099ff", Ivatan="#9900ff", Jarai="#9900ff", Javanese="#9900ff", `Jehai (or Jahai)`="#fa0f0c", Jingpo="#336699", `Kadazan-Dusun`="#9900ff", Kankanaey="#9900ff", Karen="#336699", Khmer="#fa0f0c", Khuen="#fa0f0c", Kinh="#fa0f0c", Kreung="#fa0f0c", LaChi="#339900", Lahu="#336699", LaHu="#336699", Lao="#339900", `Lao Islan`="#339900", Lisu="#336699", LoLo="#336699", Makasae="#66ccff", Malay="#9900ff", Mam="#660000", Mang="#fa0f0c", Maranao="#9900ff", Melanau="#9900ff", Minahasa="#9900ff", Minangkabau="#9900ff", Moken="#9900ff", Mon="#fa0f0c", Nung="#339900", PaThen="#fa0f0c", Phnong="#fa0f0c", PhuLa="#fa0f0c", Phutai="#339900", `Seletar (or Orang Seletar)`="#9900ff", Semelai="#fa0f0c", Semende="#9900ff", Shan="#339900", SiLa="#9900ff", Stieng="#fa0f0c", Sumbanese="#9900ff", Surigaonon="#9900ff", Tagalog="#9900ff", Tay="#339900", `Tay Nung`="#339900", Temuan="#9900ff", Thai="#339900", `The Kalanguya (or Ikalahan)`="#9900ff", Tompoun="#fa0f0c", Toraja="#9900ff", Unknown="lightgrey", UrakLawoi="#9900ff", Zambal="#9900ff")
+
+ggsave(filename = file.path("figures", "ethnic_K10_MDS_Fst.png"), width = 15, height = 10)
+
+# K-means clustering (K=10) - Language
+
+mds <- df %>% replace_na("Unknown") %>% na.omit() %>%
+  dist() %>%          
+  cmdscale() %>%
+  as_tibble()
+colnames(mds) <- c("Dim.1", "Dim.2")
+
+clust_lang <- kmeans(mds, 10)$cluster %>%
+  as.factor()
+
+Ethniccolors_mds <- meta[match(df$Ethnic, meta$Ethnicity), "Ethnicity_color"]
+Language_mds <- meta[match(df$Ethnic, meta$Ethnicity), "Language family"]
+Languagecolors_mds <- meta[match(Language_mds, meta$`Language family`), "Language_color"]
+
+mds_lang <- mds %>%
+  mutate(groups = clust, 
+         Ethnic_color = Ethniccolors_mds, 
+         Language = Language_mds, 
+         Language_colors = Languagecolors_mds)
+
+unique_languages <- unique(mds_lang$Language)
+print(unique_languages)
+
+shape_values <- c(Austroasiatic=1, `Austroasiatic, Austronesian`=2, `Austroasiatic, Tai-Kaidai, Hmong-Mien`=3, Austronesian=4, `Austronesian, Sino-Tibetan`=5, `Austronesian, Trans–New Guinea`=6, `Hmong-Mien`=7, Mayan=8, `Sino-Tibetan`=9, `Tai-Kadai`=10, `Trans–New Guinea`=11, Unknown=12)
+color_palette <- c(Austroasiatic="#fa0f0c", `Austroasiatic, Austronesian`="#996666", `Austroasiatic, Tai-Kaidai, Hmong-Mien`="#cccc33", Austronesian="#9900ff", `Austronesian, Sino-Tibetan`="#163566", `Austronesian, Trans–New Guinea`="#cc66ff", `Hmong-Mien`="#0099ff", Mayan="#660000", `Sino-Tibetan`="#336699", `Tai-Kadai`="#339900", `Trans–New Guinea`="#66ccff", Unknown="lightgrey")
+
+missing_shapes <- setdiff(unique_languages, names(shape_values))
+missing_colors <- setdiff(unique_languages, names(color_palette))
+
+print(missing_shapes)
+print(missing_colors)
+
+if (length(missing_shapes) > 0) {
+  shape_values <- c(shape_values, setNames(rep(NA, length(missing_shapes)), missing_shapes))
+}
+if (length(missing_colors) > 0) {
+  color_palette <- c(color_palette, setNames(rep("grey", length(missing_colors)), missing_colors))
+}
+
+mds_lang$Shape <- factor(mds_lang$Language, levels = names(shape_values))
+
+library(ggpubr)
+
+ggscatter(mds_lang, x = "Dim.1", y = "Dim.2", 
+          label = df$Ethnic,
+          color = "Language",
+          size = 2, 
+          ellipse = F,
+          ellipse.type = "euclid",
+          repel = TRUE) +
+  scale_color_manual(values = color_palette) +
+  scale_shape_manual(values = shape_values)
+
+# Plot and color by groups
+ggscatter(mds_lang, x = "Dim.1", y = "Dim.2", 
+          label = df$Ethnic,
+          color = "Language",
+          # palette = "jco",
+          size = 2, 
+          ellipse = F,
+          ellipse.type = "convex",
+          repel = TRUE,
+          palette = c(Austroasiatic="#fa0f0c", `Austroasiatic, Austronesian`="#996666", `Austroasiatic, Tai-Kaidai, Hmong-Mien`="#cccc33", Austronesian="#9900ff", `Austronesian, Sino-Tibetan`="#163566", `Austronesian, Trans–New Guinea`="#cc66ff", `Hmong-Mien`="#0099ff", Mayan="#660000", `Sino-Tibetan`="#336699", `Tai-Kadai`="#339900", `Trans–New Guinea`="#66ccff", Unknown="lightgrey"),
+          shape = "Shape")
+
+ggsave(filename = file.path("figures", "ethnic_K10_language_MDS_Fst_with_ellipse (euclid).png"), width = 15, height = 10)
+
+library(ggplot2)
+library(ggrepel)
+
+unique_languages <- unique(mds_lang$Language)
+print(unique_languages)
+
+shape_values <- c(Austroasiatic=1, `Austroasiatic, Austronesian`=2, `Austroasiatic, Tai-Kaidai, Hmong-Mien`=3, Austronesian=4, `Austronesian, Sino-Tibetan`=5, `Austronesian, Trans–New Guinea`=6, `Hmong-Mien`=7, Mayan=8, `Sino-Tibetan`=9, `Tai-Kadai`=10, `Trans–New Guinea`=11, Unknown=12)
+color_palette <- c(Austroasiatic="#fa0f0c", `Austroasiatic, Austronesian`="#996666", `Austroasiatic, Tai-Kaidai, Hmong-Mien`="#cccc33", Austronesian="#9900ff", `Austronesian, Sino-Tibetan`="#163566", `Austronesian, Trans–New Guinea`="#cc66ff", `Hmong-Mien`="#0099ff", Mayan="#660000", `Sino-Tibetan`="#336699", `Tai-Kadai`="#339900", `Trans–New Guinea`="#66ccff", Unknown="lightgrey")
+
+missing_shapes <- setdiff(unique_languages, names(shape_values))
+missing_colors <- setdiff(unique_languages, names(color_palette))
+
+print(missing_shapes)
+print(missing_colors)
+
+if (length(missing_shapes) > 0) {
+  shape_values <- c(shape_values, setNames(rep(NA, length(missing_shapes)), missing_shapes))
+}
+if (length(missing_colors) > 0) {
+  color_palette <- c(color_palette, setNames(rep("grey", length(missing_colors)), missing_colors))
+}
+
+ggplot(mds_lang, aes(x = Dim.1, y = Dim.2, color = Language, shape = Language, label = df$Ethnic)) +
+  geom_point(size = 2) +
+  geom_text_repel(max.overlaps = 100) +  # Increase max.overlaps to handle more labels
+  scale_color_manual(values = color_palette) +
+  scale_shape_manual(values = shape_values) +
+  theme_bw() +
+  labs(x = "Dimension 1",
+       y = "Dimension 2",
+       color = "Language",
+       shape = "Language") +
+  theme(legend.position = "top")
+
+ggsave(filename = file.path("figures", "ethnic_K10_language_MDS_Fst_with_shape.png"), width = 15, height = 10)
+
+## MDS - Ethnic Haplo
+
+df <- read_excel("table3b_Ethnicity.xlsx") %>% setDF()
+
+df <- df %>% dplyr::select(-2) %>% t() %>% as.data.frame()
+
+colnames(df) <- df[1,]
+
+df <- df[-1, ] 
+
+df <- data.frame(Ethnic = row.names(df), df)
+
+row.names(df) <- NULL
+
+df <- df %>% mutate(Ethnic=ifelse(Ethnic=="Yao", "Dao", 
+                                     ifelse(Ethnic=="Bru", "Bru (Brao)", 
+                                            ifelse(Ethnic=="Aeta" | Ethnic=="Agta", "Aeta (Agta)",
+                                                   ifelse(Ethnic=="Filipino" | Ethnic=="Tagalog", "Filipino (or Tagalog)",
+                                                          ifelse(Ethnic=="Arakanese" | Ethnic=="Rakhine", "Arakanese (or Rakhine)",
+                                                                 ifelse(Ethnic=="Kankanaey" | Ethnic=="Igorot", "Kankanaey (or Igorot)",
+                                                                        Ethnic)))))))
+
+df <- df %>% mutate(across(2:606, ~ as.numeric(.x)))
+
+Ethniccolors_mds <- meta_short[match(df$Ethnic, meta_short$Ethnicity), "Ethnicity_color"]
+Languagecolors_mds <- meta_short[match(df$Language, meta_short$`Language family`), "Language_color"]
+
+# dist_matrix <- dist(dat_e[,-1])
+# mds_result <- cmdscale(dist_matrix)
+# plot(mds_result, col = dat_e$ethnic, pch = 19, xlab = "MDS1", ylab = "MDS2")
+
+library(MASS)
+library(magrittr)
+library(dplyr)
+library(ggpubr)
+
+# # Cmpute MDS (non-metric)
+# library(MASS)
+# mds <- df %>% na.omit() %>%
+#   dist() %>%
+#   isoMDS() %>%
+#   .$points %>%
+#   as_tibble()
+# colnames(mds) <- c("Dim.1", "Dim.2")
+# # Plot MDS
+# ggscatter(mds, x = "Dim.1", y = "Dim.2",
+#           label = df$Ethnic,
+#           size = 1,
+#           repel = TRUE)
+
+# Compute MDS
+mds <- df %>% na.omit() %>%
+  dist() %>%          
+  cmdscale() %>%
+  as_tibble()
+colnames(mds) <- c("Dim.1", "Dim.2")
+
+# Plot MDS
+ggscatter(mds, x = "Dim.1", y = "Dim.2", 
+          label = df$Ethnic,
+          size = 1,
+          repel = TRUE)
+
+# K-means clustering (K=10)
+clust <- kmeans(mds, 10)$cluster %>%
+  as.factor()
+
+Ethniccolors_mds <- meta[match(df$Ethnic, meta$Ethnicity), "Ethnicity_color"]
+Language_mds <- meta[match(df$Ethnic, meta$Ethnicity), "Language family"]
+
+mds <- mds %>%
+  mutate(groups = clust, Ethnic_color = Ethniccolors_mds, Language = Language_mds)
+
+# Plot and color by groups
+ggscatter(mds, x = "Dim.1", y = "Dim.2", 
+          label = df$Ethnic,
+          color = "groups",
+          palette = "jco",
+          size = 1, 
+          ellipse = TRUE,
+          ellipse.type = "convex",
+          repel = TRUE)
+
+# palette = c(Abaknon="#9900ff", Akar="#fa0f0c", `Akar Jambat`="#fa0f0c", Alor="#9900ff", Ambonese="#9900ff", `Arakanese (or Rakhine)`="#336699", `Bamar (or Burman)`="#336699", Banjar="#9900ff", Batak="#9900ff", `Bicolano, Bidayuh`="#9900ff", `Bru (Brao)`="#fa0f0c", `Bruneian Malay`="#9900ff", `Bugkalot (or Ilongot)`="#9900ff", Cham="#9900ff", CoLao="#339900", Dao="#0099ff", Dayak="#9900ff", Ede="#fa0f0c", Filipino="#9900ff", `Filipino (or Tagalog)`="#9900ff", Giarai="#fa0f0c", HaNhi="#336699", Hmong="#0099ff", Ibaloi="#9900ff", Ifugao="#9900ff", Igorot="#9900ff", Indonesian="#9900ff", `Isan (or Lao)`="#339900", IuMien="#0099ff", Ivatan="#9900ff", Jarai="#9900ff", Javanese="#9900ff", `Jehai (or Jahai)`="#fa0f0c", Jingpo="#336699", `Kadazan-Dusun`="#9900ff", Kankanaey="#9900ff", Karen="#336699", Khmer="#fa0f0c", Khuen="#fa0f0c", Kinh="#fa0f0c", Kreung="#fa0f0c", LaChi="#339900", Lahu="#336699", LaHu="#336699", Lao="#339900", `Lao Islan`="#339900", Lisu="#336699", LoLo="#336699", Makasae="#66ccff", Malay="#9900ff", Mam="#660000", Mang="#fa0f0c", Maranao="#9900ff", Melanau="#9900ff", Minahasa="#9900ff", Minangkabau="#9900ff", Moken="#9900ff", Mon="#fa0f0c", Nung="#339900", PaThen="#fa0f0c", Phnong="#fa0f0c", PhuLa="#fa0f0c", Phutai="#339900", `Seletar (or Orang Seletar)`="#9900ff", Semelai="#fa0f0c", Semende="#9900ff", Shan="#339900", SiLa="#9900ff", Stieng="#fa0f0c", Sumbanese="#9900ff", Surigaonon="#9900ff", Tagalog="#9900ff", Tay="#339900", `Tay Nung`="#339900", Temuan="#9900ff", Thai="#339900", `The Kalanguya (or Ikalahan)`="#9900ff", Tompoun="#fa0f0c", Toraja="#9900ff", Unknown="lightgrey", UrakLawoi="#9900ff", Zambal="#9900ff")
+
+ggsave(filename = file.path("figures", "ethnic_K10_MDS_Haplo.png"), width = 15, height = 10)
+
+# K-means clustering (K=10) - Language
+
+mds <- df %>% na.omit() %>%
+  dist() %>%          
+  cmdscale() %>%
+  as_tibble()
+colnames(mds) <- c("Dim.1", "Dim.2")
+
+clust_lang <- kmeans(mds, 10)$cluster %>%
+  as.factor()
+
+Ethniccolors_mds <- meta[match(df$Ethnic, meta$Ethnicity), "Ethnicity_color"]
+Language_mds <- meta[match(df$Ethnic, meta$Ethnicity), "Language family"]
+Languagecolors_mds <- meta[match(Language_mds, meta$`Language family`), "Language_color"]
+
+mds_lang <- mds %>%
+  mutate(groups = clust, 
+         Ethnic_color = Ethniccolors_mds, 
+         Language = Language_mds, 
+         Language_colors = Languagecolors_mds)
+
+unique_languages <- unique(mds_lang$Language)
+print(unique_languages)
+
+shape_values <- c(Austroasiatic=1, `Austroasiatic, Austronesian`=2, `Austroasiatic, Tai-Kaidai, Hmong-Mien`=3, Austronesian=4, `Austronesian, Sino-Tibetan`=5, `Austronesian, Trans–New Guinea`=6, `Hmong-Mien`=7, Mayan=8, `Sino-Tibetan`=9, `Tai-Kadai`=10, `Trans–New Guinea`=11, Unknown=12)
+color_palette <- c(Austroasiatic="#fa0f0c", `Austroasiatic, Austronesian`="#996666", `Austroasiatic, Tai-Kaidai, Hmong-Mien`="#cccc33", Austronesian="#9900ff", `Austronesian, Sino-Tibetan`="#163566", `Austronesian, Trans–New Guinea`="#cc66ff", `Hmong-Mien`="#0099ff", Mayan="#660000", `Sino-Tibetan`="#336699", `Tai-Kadai`="#339900", `Trans–New Guinea`="#66ccff", Unknown="lightgrey")
+
+missing_shapes <- setdiff(unique_languages, names(shape_values))
+missing_colors <- setdiff(unique_languages, names(color_palette))
+
+print(missing_shapes)
+print(missing_colors)
+
+if (length(missing_shapes) > 0) {
+  shape_values <- c(shape_values, setNames(rep(NA, length(missing_shapes)), missing_shapes))
+}
+if (length(missing_colors) > 0) {
+  color_palette <- c(color_palette, setNames(rep("grey", length(missing_colors)), missing_colors))
+}
+
+mds_lang$Shape <- factor(mds_lang$Language, levels = names(shape_values))
+
+library(ggpubr)
+
+ggscatter(mds_lang, x = "Dim.1", y = "Dim.2", 
+          label = df$Ethnic,
+          color = "Language",
+          size = 2, 
+          ellipse = T,
+          ellipse.type = "norm",
+          repel = TRUE) +
+  scale_color_manual(values = color_palette) +
+  scale_shape_manual(values = shape_values)
+
+# Plot and color by groups
+ggscatter(mds_lang, x = "Dim.1", y = "Dim.2", 
+          label = df$Ethnic,
+          color = "Language",
+          # palette = "jco",
+          size = 2, 
+          ellipse = T,
+          ellipse.type = "norm",
+          repel = TRUE,
+          palette = c(Austroasiatic="#fa0f0c", `Austroasiatic, Austronesian`="#996666", `Austroasiatic, Tai-Kaidai, Hmong-Mien`="#cccc33", Austronesian="#9900ff", `Austronesian, Sino-Tibetan`="#163566", `Austronesian, Trans–New Guinea`="#cc66ff", `Hmong-Mien`="#0099ff", Mayan="#660000", `Sino-Tibetan`="#336699", `Tai-Kadai`="#339900", `Trans–New Guinea`="#66ccff", Unknown="lightgrey"),
+          shape = "Shape")
+
+ggsave(filename = file.path("figures", "ethnic_K10_language_MDS_Haplo_with_ellipse.png"), width = 15, height = 10)
+
+library(ggplot2)
+library(ggrepel)
+
+unique_languages <- unique(mds_lang$Language)
+print(unique_languages)
+
+shape_values <- c(Austroasiatic=1, `Austroasiatic, Austronesian`=2, `Austroasiatic, Tai-Kaidai, Hmong-Mien`=3, Austronesian=4, `Austronesian, Sino-Tibetan`=5, `Austronesian, Trans–New Guinea`=6, `Hmong-Mien`=7, Mayan=8, `Sino-Tibetan`=9, `Tai-Kadai`=10, `Trans–New Guinea`=11, Unknown=12)
+color_palette <- c(Austroasiatic="#fa0f0c", `Austroasiatic, Austronesian`="#996666", `Austroasiatic, Tai-Kaidai, Hmong-Mien`="#cccc33", Austronesian="#9900ff", `Austronesian, Sino-Tibetan`="#163566", `Austronesian, Trans–New Guinea`="#cc66ff", `Hmong-Mien`="#0099ff", Mayan="#660000", `Sino-Tibetan`="#336699", `Tai-Kadai`="#339900", `Trans–New Guinea`="#66ccff", Unknown="lightgrey")
+
+missing_shapes <- setdiff(unique_languages, names(shape_values))
+missing_colors <- setdiff(unique_languages, names(color_palette))
+
+print(missing_shapes)
+print(missing_colors)
+
+if (length(missing_shapes) > 0) {
+  shape_values <- c(shape_values, setNames(rep(NA, length(missing_shapes)), missing_shapes))
+}
+if (length(missing_colors) > 0) {
+  color_palette <- c(color_palette, setNames(rep("grey", length(missing_colors)), missing_colors))
+}
+
+ggplot(mds_lang, aes(x = Dim.1, y = Dim.2, color = Language, shape = Language, label = df$Ethnic)) +
+  geom_point(size = 2) +
+  geom_text_repel(max.overlaps = 100) +  # Increase max.overlaps to handle more labels
+  scale_color_manual(values = color_palette) +
+  scale_shape_manual(values = shape_values) +
+  theme_bw() +
+  labs(x = "Dimension 1",
+       y = "Dimension 2",
+       color = "Language",
+       shape = "Language") +
+  theme(legend.position = "top")
+
+ggsave(filename = file.path("figures", "ethnic_K10_language_MDS_Haplo_with_shape.png"), width = 15, height = 10)
+
 ## MDS
 
 dat_e <- read_excel("SEA_ethnicity_new.xlsx")
