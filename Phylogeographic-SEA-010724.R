@@ -6557,7 +6557,7 @@ ggplot(mds_lang, aes(x = Dim.1, y = Dim.2, color = Language, shape = Language, l
 ggsave(filename = file.path("figures", "ethnic_K10_language_MDS_Haplo_with_shape.png"), width = 15, height = 10)
 
 
-## Correspondence Analysis
+## Correspondence Analysis - Full
 
 library("FactoMineR")
 library("factoextra")
@@ -6729,6 +6729,198 @@ fviz_ca_biplot(res.ca,
         axis.title = element_text(colour="black", size=12))
 
 ggsave(filename = file.path("figures", "ethnic_language_CA_Haplo_no_shape.png"), width = 16, height = 11)
+
+# theme(axis.text.y = element_text(colour="black", size=18),
+#       axis.text.x = element_text(colour="black", size=18),
+#       axis.title = element_text(colour="black", size=20),
+#       panel.border = element_rect(colour="black", fill=NA, size=1),
+#       panel.background = element_blank(),
+#       plot.title = element_text(hjust=0.5, size=20)
+
+# Scree plot
+scree.plot <- fviz_eig(res.ca)
+# Biplot of row and column variables
+biplot.ca <- fviz_ca_biplot(res.ca)
+
+library(ggpubr)
+ggexport(plotlist = list(scree.plot, biplot.ca), 
+         filename = "CA.pdf")
+
+# Export into a CSV file
+write.infile(res.ca, "ca.csv", sep = ";")
+
+## Correspondence Analysis - Short
+
+library("FactoMineR")
+library("factoextra")
+
+library("gplots")
+
+df <- read_excel("table3b_Ethnicity.xlsx") %>% setDF()
+
+df <- df %>% dplyr::select(-c(2, 10, 22, 48, 50, 57, 110, 135, 136)) %>% t() %>% as.data.frame()
+
+colnames(df) <- df[1,]
+
+df <- df[-1, ]
+
+df <- df %>% mutate(across(1:605, ~ as.numeric(.x)))
+
+res.ca <- CA(df, graph = FALSE)
+print(res.ca)
+chisq <- chisq.test(df)
+chisq
+
+fviz_screeplot(res.ca, addlabels = TRUE, ylim = c(0, 50))
+
+fviz_screeplot(res.ca) +
+  geom_hline(yintercept=33.33, linetype=2, color="red")
+
+fviz_ca_biplot(res.ca, repel = TRUE)
+
+row <- get_ca_row(res.ca)
+row
+
+# Coordinates
+head(row$coord)
+# Cos2: quality on the factore map
+head(row$cos2)
+# Contributions to the principal components
+head(row$contrib)
+
+fviz_ca_row(res.ca, repel = TRUE)
+
+fviz_ca_row(res.ca, col.row="steelblue", shape.row = 15)
+
+head(row$cos2, 4)
+
+# Color by cos2 values: quality on the factor map
+fviz_ca_row(res.ca, col.row = "cos2",
+            gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), 
+            repel = TRUE)
+
+# Change the transparency by cos2 values
+fviz_ca_row(res.ca, alpha.row="cos2")
+
+library("corrplot")
+corrplot(row$cos2, is.corr=FALSE)
+
+# Cos2 of rows on Dim.1 and Dim.2
+fviz_cos2(res.ca, choice = "row", axes = 1:2)
+
+head(row$contrib)
+
+library("corrplot")
+corrplot(row$contrib, is.corr=FALSE) 
+
+# Contributions of rows to dimension 1
+fviz_contrib(res.ca, choice = "row", axes = 1, top = 10)
+# Contributions of rows to dimension 2
+fviz_contrib(res.ca, choice = "row", axes = 2, top = 10)
+
+# Total contribution to dimension 1 and 2
+fviz_contrib(res.ca, choice = "row", axes = 1:2, top = 10)
+
+fviz_ca_row(res.ca, col.row = "contrib",
+            gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), 
+            repel = TRUE)
+
+# Change the transparency by contrib values
+fviz_ca_row(res.ca, alpha.row="contrib",
+            repel = TRUE)
+
+col <- get_ca_col(res.ca)
+col
+
+# Coordinates of column points
+head(col$coord)
+# Quality of representation
+head(col$cos2)
+# Contributions
+head(col$contrib)
+
+fviz_ca_col(res.ca)
+
+fviz_ca_col(res.ca, col.col = "cos2", 
+            gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+            repel = TRUE)
+
+
+fviz_cos2(res.ca, choice = "col", axes = 1:2)
+
+fviz_contrib(res.ca, choice = "col", axes = 1:2)
+
+fviz_ca_biplot(res.ca, repel = TRUE)
+
+fviz_ca_biplot(res.ca, 
+               map ="rowprincipal", arrow = c(TRUE, TRUE),
+               repel = TRUE)
+
+fviz_ca_biplot(res.ca, map ="colgreen", arrow = c(TRUE, FALSE),
+               repel = TRUE)
+
+# Dimension description
+res.desc <- dimdesc(res.ca, axes = c(1,2))
+
+# Description of dimension 1 by row points
+head(res.desc[[1]]$row, 4)
+
+# Description of dimension 1 by column points
+head(res.desc[[1]]$col, 4)
+
+# Description of dimension 2 by row points
+res.desc[[2]]$row
+# Description of dimension 1 by column points
+res.desc[[2]]$col
+
+
+fviz_ca_biplot(res.ca, col.col = "lightgrey", col.row = "cos2", title = "",
+               map ="rowprincipal", arrow = c(TRUE, TRUE),
+               repel = TRUE)
+
+ca <- res.ca$row$cos2 %>% as.data.frame()
+
+ca$Ethnic <- rownames(ca)
+ca$Ethnicitycolors <- meta[match(row.names(ca), meta$Ethnicity), "Ethnicity_color"]
+ca$Language <- meta[match(row.names(ca), meta$Ethnicity), "Language family"]
+ca$Languagecolors <- meta[match(row.names(ca), meta$Ethnicity), "Language_color"]
+
+color_palette <- c(Thai="#339900", `Banjar, Dayak, Javanese`=	"#9900ff", Hui="#336699", Dayak="#9900ff",`Filipino (or Tagalog)`= "#9900ff", Soa="#fa0f0c", `Batak, Acehnese`="#9900ff", `Tai Lue`="#339900", Semende="#9900ff", Seletar="#9900ff", Abaknon="#9900ff", Tay="#339900", Bidayuh="#9900ff", Batak="#9900ff", Kalueng="#339900", Tompoun="#fa0f0c", `Kadazan-Dusun`="#9900ff", Lun="lightgrey", Manabo="#9900ff", Lisu="#336699", Dai="#339900", Sumbanese="#9900ff", `Non-Malaysian (Chinese, Bajau, Kadazan-Dusun)`="#163566", `Tay Nung`="#339900", Suay="#fa0f0c", Toraja="#9900ff", Ivatan="#9900ff", `Tetum, Mambai, Makasae`="#cc66ff", Moken="#9900ff", Javanese="#9900ff", Paluang="#fa0f0c", Besemah="#9900ff", Chinese="#336699", `Bali Aga, Balinese`="#9900ff", IuMien="#0099ff", `Arakanese (or Rakhine)`="#336699", `The Kalanguya (or Ikalahan)`="#9900ff", `Southern Thai_TK`="#339900", Khamu="#fa0f0c", Banjar="#9900ff", Bugis="#9900ff", Aini="#336699", Kinh="#fa0f0c", Maniq="#fa0f0c", Semelai="#fa0f0c", `Southern Thai_AN`="#9900ff", `Bugkalot (or Ilongot)`="#9900ff", `Cebuano - Filipino`="#9900ff", Taiwan="#163566", Karen="#336699", Mang="#fa0f0c", Khmer="#fa0f0c", Ede="#9900ff", Nyahkur="#fa0f0c", `Cuyunin (or Cuyonon)`="#9900ff", `Malay, Achehnese`="#9900ff", Sasak="#9900ff", Bumiputera="#9900ff", `Batak, Minangkabau, Acehnese, Lampung`="#9900ff", `Khon Mueang`="#339900", Blang="#fa0f0c", Batek="#fa0f0c", Lawa="#fa0f0c", Papuan="#66ccff", LaChi="#339900", Lahu="#336699", `Bamar (or Burman)`="#336699", `Alorese, Alor Malay, Alor-Pantar`="#cc66ff", Jingpo="#336699", Minahasa="#9900ff", `Kinh, Cham, Ede, Giarai`="#996666", `Khmer Loeu`="#996666", HaNhi="#336699", `Kankanaey (or Igorot)`="#9900ff", `Aeta (Agta)`=	"#9900ff", LoLo="#336699", Malay="#9900ff", Mlabri="#fa0f0c", Giarai="#9900ff", Surigaonon="#9900ff", PaThen="#0099ff", Kreung="#fa0f0c", Phnong="#fa0f0c", Jehai="#fa0f0c", Seak="#339900", Minangkabau="#9900ff", `Bruneian Malay`="#9900ff", `Bru (Brao)`="#fa0f0c", Deang="#fa0f0c", Khuen="#fa0f0c", English="lightgrey", `Kinh, Muong, Khmer`="#fa0f0c", Ambonese="#9900ff", `Mel Khaonh`="#fa0f0c", Naga="#336699", `UrakLawoi`="#9900ff", Temuan="#9900ff", Mon="#fa0f0c", Mamanwa="#660000", Ifugao="#9900ff", Jarai="#9900ff", Nung="#339900", Ibaloi="#9900ff", Dawei="#336699", CoLao="#339900", Unknown="lightgrey", `Isan (or Lao)`="#339900", Lao="#339900", Cham="#9900ff", Hmong="#0099ff", SiLa="#336699", `Ancient Thai`="#339900", `H’tin`="#fa0f0c", Chin="#336699", Dao="#0099ff", Stieng="#fa0f0c", Nyaw="#339900", Phuan="#339900", `Tai Yuan`=	"#339900", Phutai="#339900", Maranao="#9900ff", PhuLa="#336699", Tagbanua="#9900ff", Makassarese="#9900ff", Indonesian="#9900ff", Shan="#339900", Kensiu="#fa0f0c", `Black Tai`="#339900", `Central Thai`="#339900", Achang="#336699", `Kinh, Tay, Thai, Muong, Hmong`="#cccc33")
+lcolor_palette <- c(`Tai-Kadai`="#339900", Austronesian="#9900ff", `Sino-Tibetan`="#336699", Austroasiatic="#fa0f0c", `Austroasiatic, Austronesian`="#996666", Unknown="lightgrey", `Austronesian, Sino-Tibetan`="#163566", `Austronesian, Trans–New Guinea`="#cc66ff", `Hmong-Mien`="#0099ff", `Trans–New Guinea`="#66ccff", Mayan="#660000", `Austroasiatic, Tai-Kaidai, Hmong-Mien`="#cccc33")
+
+ca$Combined <- interaction(ca$Ethnic, ca$Language, sep = " - ")
+
+# Verify unique combinations
+unique_combined <- unique(ca$Combined)
+combined_colors <- setNames(rainbow(length(unique_combined)), unique_combined)
+
+# Map colors to the Ethnic and Language columns
+ca$color <- color_palette[match(ca$Ethnic, names(color_palette))]
+ca$lcolor <- lcolor_palette[match(ca$Language, names(lcolor_palette))]
+
+# Ensure all rows have a corresponding color
+ca$color[is.na(ca$color)] <- "lightgrey"  # Default color for any missing entries
+ca$lcolor[is.na(ca$lcolor)] <- "lightgrey"  # Default color for any missing entries
+
+fviz_ca_biplot(res.ca, 
+               col.var = ca$Language,
+               col.row = ca$Language,                   # Custom row colors based on the color column
+               col.col = "lightgrey",                     # Column color
+               title = "",                                # Title of the plot
+               map = "rowprincipal",                      # Principal row coordinates
+               arrow = c(TRUE, TRUE),                     # Show arrows
+               repel = TRUE) +                            # Repel labels
+  scale_color_manual(values = lcolor_palette, name="Language") +            # Custom color palette for rows
+  scale_fill_manual(values = lcolor_palette, name="Language") +              # Custom fill palette for rows
+  theme_bw() +
+  theme(legend.position = "top",
+        legend.text = element_text(colour="black", size=10),
+        legend.title = element_text(colour="black", size=12),
+        axis.text.y = element_text(colour="black", size=10),
+        axis.text.x = element_text(colour="black", size=10),
+        axis.title = element_text(colour="black", size=12))
+
+ggsave(filename = file.path("figures", "ethnic_language_CA_Haplo_no_shape_short_new.png"), width = 16, height = 11)
 
 # theme(axis.text.y = element_text(colour="black", size=18),
 #       axis.text.x = element_text(colour="black", size=18),
