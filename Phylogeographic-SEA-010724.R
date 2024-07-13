@@ -6737,6 +6737,18 @@ ggsave(filename = file.path("figures", "ethnic_language_CA_Haplo_no_shape.png"),
 #       panel.background = element_blank(),
 #       plot.title = element_text(hjust=0.5, size=20)
 
+# Scree plot
+scree.plot <- fviz_eig(res.ca)
+# Biplot of row and column variables
+biplot.ca <- fviz_ca_biplot(res.ca)
+
+library(ggpubr)
+ggexport(plotlist = list(scree.plot, biplot.ca), 
+         filename = "CA.pdf")
+
+# Export into a CSV file
+write.infile(res.ca, "ca.csv", sep = ";")
+
 ## MDS
 
 dat_e <- read_excel("SEA_ethnicity_new.xlsx")
