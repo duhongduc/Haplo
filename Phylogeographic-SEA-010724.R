@@ -5644,7 +5644,7 @@ Haplocolors <- dat[match(sea_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_co
 
 sea <- sea_hap1 %>%
   ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
-  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  geom_bar(stat="identity", width = 1, alpha=1) +
   guides(fill=guide_legend(nrow=1, byrow=TRUE)) +
   geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
                    size = 3.5,
@@ -5666,7 +5666,7 @@ Haplocolors <- dat[match(brunei_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1
 
 brunei <- brunei_hap1 %>%
   ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
-  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  geom_bar(stat="identity", width = 1, alpha=1) +
   guides(fill=guide_legend(nrow=1, byrow=TRUE)) +
   geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
                    size = 3.5,
@@ -5688,7 +5688,7 @@ Haplocolors <- dat[match(cambodia_hap1$haplogroup1, dat$haplogroup1), "Haplogrou
 
 cambodia <- cambodia_hap1 %>%
   ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
-  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  geom_bar(stat="identity", width = 1, alpha=1) +
   guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
   geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
                    size = 3.5,
@@ -5710,7 +5710,7 @@ Haplocolors <- dat[match(indonesia_hap1$haplogroup1, dat$haplogroup1), "Haplogro
 
 indonesia <- indonesia_hap1 %>%
   ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
-  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  geom_bar(stat="identity", width = 1, alpha=1) +
   guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
   geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
                    size = 3.5,
@@ -5732,7 +5732,7 @@ Haplocolors <- dat[match(laos_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_c
 
 laos <- laos_hap1 %>%
   ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
-  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  geom_bar(stat="identity", width = 1, alpha=1) +
   guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
   geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
                    size = 3.5,
@@ -5754,7 +5754,7 @@ Haplocolors <- dat[match(malaysia_hap1$haplogroup1, dat$haplogroup1), "Haplogrou
 
 malaysia <- malaysia_hap1 %>%
   ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
-  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  geom_bar(stat="identity", width = 1, alpha=1) +
   guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
   geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
                    size = 3.5,
@@ -5776,7 +5776,7 @@ Haplocolors <- dat[match(myanmar_hap1$haplogroup1, dat$haplogroup1), "Haplogroup
 
 myanmar <- myanmar_hap1 %>%
   ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
-  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  geom_bar(stat="identity", width = 1, alpha=1) +
   guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
   geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
                    size = 3.5,
@@ -5798,7 +5798,7 @@ Haplocolors <- dat[match(philippines_hap1$haplogroup1, dat$haplogroup1), "Haplog
 
 philippines <- philippines_hap1 %>%
   ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
-  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  geom_bar(stat="identity", width = 1, alpha=1) +
   guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
   geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
                    size = 3.5,
@@ -5820,7 +5820,7 @@ Haplocolors <- dat[match(singapore_hap1$haplogroup1, dat$haplogroup1), "Haplogro
 
 singapore <- singapore_hap1 %>%
   ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
-  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  geom_bar(stat="identity", width = 1, alpha=1) +
   guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
   geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
                    size = 3.5,
@@ -5842,7 +5842,7 @@ Haplocolors <- dat[match(thailand_hap1$haplogroup1, dat$haplogroup1), "Haplogrou
 
 thailand <- thailand_hap1 %>%
   ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
-  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  geom_bar(stat="identity", width = 1, alpha=1) +
   guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
   geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
                    size = 3.5,
@@ -5864,7 +5864,7 @@ Haplocolors <- dat[match(timor_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_
 
 timor <- timor_hap1 %>%
   ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
-  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  geom_bar(stat="identity", width = 1, alpha=1) +
   guides(fill=guide_legend(nrow=1, byrow=TRUE)) +
   geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
                    size = 3.5,
@@ -5886,7 +5886,7 @@ Haplocolors <- dat[match(vietnam_hap1$haplogroup1, dat$haplogroup1), "Haplogroup
 
 vietnam <- vietnam_hap1 %>%
   ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
-  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  geom_bar(stat="identity", width = 1, alpha=1) +
   guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
   geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
              size = 3.5,
@@ -5911,7 +5911,7 @@ ggarrange(sea, brunei, cambodia, indonesia, laos, malaysia, myanmar, philippines
           font.label = list(size = 20, color = "black")) + 
   bgcolor("white") 
 
-ggsave("figures/SEA_Haplo_Pie.png", width = 15, height = 10)
+ggsave("figures/SEA_Haplo_Pie_new.png", width = 15, height = 10)
 
 # Language family
 
