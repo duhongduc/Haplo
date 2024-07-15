@@ -5451,6 +5451,980 @@ ethnic_hap <- ethnic %>% select(-Haplogroup) %>%
 
 ###################################################
 
+# Haplogroup frequency
+
+# Country
+
+dat <- read_excel("CompleteFull.xlsx")
+dat <- as.data.frame(dat)
+
+### MacroM: haplogroup M, haplogroup C, haplogroup Z, haplogroup D, haplogroup E, haplogroup G, haplogroup Q.
+### MacroR: haplogroup R, haplogroup B, haplogroup F, haplogroup H, haplogroup V, haplogroup J, haplogroup T, haplogroup U, haplogroup K.
+### MacroNxR: haplogroup N, haplogroup O, haplogroup A, haplogroup S, haplogroup I, haplogroup W, haplogroup X, haplogroup Y.
+
+dat <- dat %>%
+  mutate(macrohap0="Macro-haplogroup L",
+         macrohap0=ifelse(haplogroup1 %in% c("M", "C", "Z", "D", "E", "G", "Q"), "Macro-haplogroup M",
+                          ifelse(haplogroup1 %in% c("R", "B", "F", "H", "V", "J", "T", "P", "U", "K", "N", "O", "A", "S", "I", "W", "X", "Y"), "Macro-haplogroup N", macrohap0)),
+         macrohap1="Macro-haplogroup L",
+         macrohap1=ifelse(haplogroup1 %in% c("M", "C", "Z", "D", "E", "G", "Q"), "Macro-haplogroup M",
+                          ifelse(haplogroup1 %in% c("R", "B", "F", "H", "V", "J", "T", "P", "U", "K"), "Macro-haplogroup R",
+                                 ifelse(haplogroup1 %in% c("N", "O", "A", "S", "I", "W", "X", "Y"), "Macro-haplogroup N (xR)", macrohap1))),
+         haplogroup2=ifelse(haplogroup2=="A+152"|haplogroup2=="A+152+16362"|haplogroup2=="A+152+16362+200", "A+",
+                            ifelse(haplogroup2=="R+16189", "R+", haplogroup2)),
+         Country_color=NA,
+         Country_color=ifelse(Country=="Brunei", "#ff6633",
+                              ifelse(Country=="Cambodia", "#ffff00",
+                                     ifelse(Country=="Indonesia", "#9900ff",
+                                            ifelse(Country=="Laos", "#0099ff",
+                                                   ifelse(Country=="Malaysia", "#990f80",
+                                                          ifelse(Country=="Myanmar", "#99ff99",
+                                                                 ifelse(Country=="Philippines", "#cc66ff",
+                                                                        ifelse(Country=="Singapore", "#ff9999",
+                                                                               ifelse(Country=="Thailand", "#339900",
+                                                                                      ifelse(Country=="Timor-Leste", "#66ccff",
+                                                                                             ifelse(Country=="Vietnam", "#fa0f0c",
+                                                                                                    ifelse(Country=="RSRS", "black",
+                                                                                                           ifelse(Country=="rCRS", "orange", Country_color))))))))))))),
+         Ethnicity=ifelse(Ethnicity=="Yao", "Dao", 
+                          ifelse(Ethnicity=="Bru", "Bru (Brao)", 
+                                 ifelse(Ethnicity=="Aeta" | Ethnicity=="Agta", "Aeta (Agta)",
+                                        ifelse(Ethnicity=="Filipino" | Ethnicity=="Tagalog", "Filipino (or Tagalog)",
+                                               ifelse(Ethnicity=="Arakanese" | Ethnicity=="Rakhine", "Arakanese (or Rakhine)",
+                                                      ifelse(Ethnicity=="Kankanaey" | Ethnicity=="Igorot", "Kankanaey (or Igorot)",
+                                                             Ethnicity)))))),
+         `Language family`=ifelse(Ethnicity=="Mon", "Austroasiatic",
+                                  ifelse(Ethnicity=="Hmong", "Hmong-Mien",
+                                         ifelse(Ethnicity=="Shan", "Tai-Kadai",
+                                                ifelse(Ethnicity=="Jehai (or Jahai)", "Austroasiatic",
+                                                       ifelse(Ethnicity=="Temuan", "Austronesian",
+                                                              ifelse(Ethnicity=="Maranao", "Austronesian",
+                                                                     ifelse(Ethnicity=="Semelai", "Austroasiatic",
+                                                                            ifelse(Ethnicity=="Bru (Brao)", "Austroasiatic",
+                                                                                   ifelse(Ethnicity=="Jarai", "Austronesian",
+                                                                                          ifelse(Ethnicity=="Kadazan-Dusun", "Austronesian",
+                                                                                                 ifelse(Ethnicity=="Alor", "Austronesian",
+                                                                                                        ifelse(Ethnicity=="Arakanese (or Rakhine)", "Sino-Tibetan",
+                                                                                                               ifelse(Ethnicity=="Timorese", "Austronesian",
+                                                                                                                      ifelse(Ethnicity=="Mang", "Austroasiatic",
+                                                                                                                             ifelse(Ethnicity=="Dao", "Hmong-Mien", 
+                                                                                                                                    ifelse(Ethnicity=="English", "Unknown",
+                                                                                                                                           ifelse(Ethnicity=="Batek", "Austroasiatic",
+                                                                                                                                                  ifelse(Ethnicity=="Orang Asli", "Austroasiatic",`Language family`)))))))))))))))))),
+         Language_color=NA,
+         Language_color=ifelse(`Language family`=="RSRS", "black",
+                               ifelse(`Language family`=="Austroasiatic", "#fa0f0c",
+                                      ifelse(`Language family`=="Austroasiatic, Austronesian", "#996666",
+                                             ifelse(`Language family`=="Austroasiatic, Tai-Kaidai, Hmong-Mien", "#cccc33",
+                                                    ifelse(`Language family`=="Austronesian", "#9900ff",
+                                                           ifelse(`Language family`=="Austronesian, Sino-Tibetan", "#163566",
+                                                                  ifelse(`Language family`=="Austronesian, Trans–New Guinea", "#cc66ff",
+                                                                         ifelse(`Language family`=="rCRS", "orange",
+                                                                                ifelse(`Language family`=="Hmong-Mien", "#0099ff",
+                                                                                       ifelse(`Language family`=="Mayan", "#660000",
+                                                                                              ifelse(`Language family`=="Sino-Tibetan", "#336699",
+                                                                                                     ifelse(`Language family`=="Tai-Kadai", "#339900",
+                                                                                                            ifelse(`Language family`=="Trans–New Guinea", "#66ccff",
+                                                                                                                   ifelse(`Language family`=="Unknown", "lightgrey",
+                                                                                                                          Language_color)))))))))))))),
+         Ethnicity_color=NA,
+         Ethnicity_color=ifelse(Ethnicity %in% c("Abaknon", "Aeta (Agta)", "Ambonese", "Bali Aga, Balinese", "Banjar", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Besemah", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Bumiputera", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Ede", "Filipino (or Tagalog)", "Giarai", "Ibaloi", "Ifugao", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey (or Igorot)", "Makassarese", "Malay", "Malay, Achehnese", "Manabo", "Maranao", "Minahasa", "Minangkabau", "Moken", "Sasak", "Seletar", "Semende", "Southern Thai_AN", "Sumatrans", "Sumbanese", "Sundanese", "Surigaonon", "Tagbanua", "Temuan", "Tengger", "The Kalanguya (or Ikalahan)", "Toraja", "UrakLawoi"), "#9900ff",
+                                ifelse(Ethnicity %in% c("Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chin", "Chinese", "Dawei", "Han", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "Lisu", "LoLo", "Naga", "PhuLa", "SiLa"), "#336699",
+                                       ifelse(Ethnicity=="RSRS", "black",
+                                              ifelse(Ethnicity %in% c("Batek", "Blang", "Bru (Brao)", "Deang", "H’tin", "Jehai", "Kensiu", "Khamu", "Khmer", "Khuen", "Kinh", "Kinh, Muong, Khmer", "Kintaq", "Kreung", "Lawa", "Mang", "Maniq", "Mel Khaonh", "Mlabri", "Mon", "Nyahkur", "Orang Asli", "Paluang", "Phnong", "Semelai", "Soa", "Stieng", "Suay", "Tompoun"), "#fa0f0c",
+                                                     ifelse(Ethnicity %in% c("Jahai, Semang", "Khmer Loeu", "Kinh, Cham, Ede, Giarai"), "#996666",
+                                                            ifelse(Ethnicity %in% c("Papuan"), "#66ccff",
+                                                                   ifelse(Ethnicity %in% c("Ancient Thai", "Black Tai", "Central Thai", "CoLao", "Dai", "Isan (or Lao)", "Kalueng", "Khon Mueang", "LaChi", "Lao", "Nung", "Nyaw", "Phuan", "Phutai", "Seak", "Shan", "Southern Thai_TK", "Tai Lue", "Tai Yuan", "Tay", "Tay Nung", "Thai"), "#339900",
+                                                                          ifelse(Ethnicity %in% c("Dao", "Hmong", "IuMien", "PaThen"), "#0099ff",
+                                                                                 ifelse(Ethnicity %in% c("rCRS"), "orange",
+                                                                                        ifelse(Ethnicity %in% c("Kinh, Tay, Thai, Muong, Hmong"), "#cccc33",
+                                                                                               ifelse(Ethnicity %in% c("Mamanwa"), "#660000",
+                                                                                                      ifelse(Ethnicity %in% c("English", "Lun", "Unknown"), "lightgrey",
+                                                                                                             ifelse(Ethnicity %in% c("Non-Malaysian (Chinese, Bajau, Kadazan-Dusun)", "Taiwan"), "#163566",
+                                                                                                                    ifelse(Ethnicity %in% c("Alorese, Alor Malay, Alor-Pantar", "Tetum, Mambai, Makasae"), "#cc66ff", Ethnicity)))))))))))))),
+         Haplogroup1_color=NA,
+         Haplogroup1_color=ifelse(haplogroup1=="A", "#F8766D",
+                                  ifelse(haplogroup1=="B", "#EA8331",
+                                         ifelse(haplogroup1=="C", "#D89000",
+                                                ifelse(haplogroup1=="D", "#C09B00",
+                                                       ifelse(haplogroup1=="E", "#A3A500",
+                                                              ifelse(haplogroup1=="F", "#39B600",
+                                                                     ifelse(haplogroup1=="G", "#7CAE00",
+                                                                            ifelse(haplogroup1=="H", "yellow",
+                                                                                   ifelse(haplogroup1=="I", "#00BF7D",
+                                                                                          ifelse(haplogroup1=="K", "#00C1A3",
+                                                                                                 ifelse(haplogroup1=="L", "black",
+                                                                                                        ifelse(haplogroup1=="M", "#00BAE0",
+                                                                                                               ifelse(haplogroup1=="N", "#00B0F6",
+                                                                                                                      ifelse(haplogroup1=="P", "#35A2FF",
+                                                                                                                             ifelse(haplogroup1=="Q", "#9590FF",
+                                                                                                                                    ifelse(haplogroup1=="R", "#C77CFF",
+                                                                                                                                           ifelse(haplogroup1=="U", "#E76BF3",
+                                                                                                                                                  ifelse(haplogroup1=="W", "#FA62DB",
+                                                                                                                                                         ifelse(haplogroup1=="Y", "#FF62BC",
+                                                                                                                                                                ifelse(haplogroup1=="Z", "#FF6A98",
+                                                                                                                                                                       Haplogroup1_color)))))))))))))))))))))
+
+country <- dat %>% filter(Country!=c("rCRS", "RSRS")) %>%
+  dplyr::select(name, Country, Location, `Language family`, Ethnicity, haplo, haplogroup1, haplogroup2, haplogroup3, macrohap0, macrohap1, Country_color, Language_color, Ethnicity_color, Haplogroup1_color) %>% setDT()
+
+country_rank <- country[, .N, by = .(Country)] %>% arrange(desc(N))
+
+library(scales)
+
+country_macro0 <- country[, .N, by = .(Country, macrohap0)]
+country_macro0 <- country_macro0 %>%
+  group_by(Country) %>% arrange(macrohap0, .by_group = TRUE) %>% 
+  mutate(percent=round((N*100)/sum(N),1)) %>% ungroup()
+
+country_macro1 <- country[, .N, by = .(Country, macrohap1)]
+country_macro1 <- country_macro1 %>%
+  group_by(Country) %>% arrange(macrohap1, .by_group = TRUE) %>% 
+  mutate(percent=round((N*100)/sum(N),1)) %>% ungroup()
+
+country_hap1 <- country[, .N, by = .(Country, haplogroup1)]
+country_hap1 <- country_hap1 %>%
+  group_by(Country) %>% arrange(haplogroup1, .by_group = TRUE) %>% 
+  mutate(percent=round((N*100)/sum(N),1)) %>% ungroup()
+
+sea <- country
+sea_hap1 <- sea[, .N, by = .(haplogroup1)]
+sea_hap1 <- sea_hap1 %>%
+  arrange(haplogroup1, .by_group = TRUE) %>% 
+  mutate(percent=round((N*100)/sum(N),1))
+
+## All countries
+
+country_hap1$Haplocolors <- dat[match(country_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_color"]
+
+Countrycolors <- unique(dat[match(country_hap1$Country, dat$Country), "Country_color"])
+rev_Countrycolors <- rev(Countrycolors)
+
+g1 <- country_hap1 %>% filter(!Country %in% c("rCRS", "RSRS")) %>%
+  ggplot(aes(x=Country, y=percent, fill=haplogroup1)) +      
+  # Add the stacked bar
+  geom_bar(position = "stack", stat="identity", alpha=1, data = country_hap1 %>% filter(Country == "Brunei")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = country_hap1 %>% filter(Country == "Cambodia")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = country_hap1 %>% filter(Country == "Indonesia")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = country_hap1 %>% filter(Country == "Laos")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = country_hap1 %>% filter(Country == "Malaysia")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = country_hap1 %>% filter(Country == "Myanmar")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = country_hap1 %>% filter(Country == "Philippines")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = country_hap1 %>% filter(Country == "Singapore")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = country_hap1 %>% filter(Country == "Thailand")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = country_hap1 %>% filter(Country == "Timor-Leste")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = country_hap1 %>% filter(Country == "Vietnam")) +
+  ggtitle("Country") +
+  guides(fill=guide_legend("Haplocolors", nrow=2, byrow=TRUE)) +
+  # scale_fill_manual(values = Haplocolors) +
+  scale_x_discrete(name = "Country", limits = rev(unique(country_hap1$Country))) +
+  scale_y_continuous(name = "Percent") +
+  theme_bw() +
+  theme(axis.text.y = element_text(colour = rev_Countrycolors, size=12),
+        axis.title.y = element_text(colour = "black", size=12, face = "bold"),
+        axis.title.x = element_text(colour = "black", size=10, face = "bold"),
+        plot.title = element_text(hjust = 0.5, vjust = 1, face = "bold"),
+        legend.position = "none", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm")) +
+  coord_flip() +
+  geom_label(aes(label = haplogroup1), 
+             size = 4,
+             label.size = NA,
+             position = position_stack(vjust = .5),
+             show.legend = FALSE)
+g1
+
+ggsave(filename = file.path("figures", "country_haplo1_new.png"), width = 15, height = 10)
+
+## SEA
+
+Haplocolors <- dat[match(sea_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_color"]
+
+sea <- sea_hap1 %>%
+  ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
+  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  guides(fill=guide_legend(nrow=1, byrow=TRUE)) +
+  geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
+                   size = 3.5,
+                   position = position_stack(vjust = .3),
+                   show.legend = FALSE) +
+  coord_polar(theta = "y", start = 0) + theme_void() +
+  ggtitle("Southeast Asia (n=4932)") +
+  scale_fill_manual(values = Haplocolors) +
+  theme(plot.title = element_text(hjust = 0.5, vjust = -2, face = "bold"),
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm"))
+
+## Brunei
+
+brunei_hap1 <- country_hap1 %>% filter(Country=="Brunei")
+Haplocolors <- dat[match(brunei_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_color"]
+
+brunei <- brunei_hap1 %>%
+  ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
+  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  guides(fill=guide_legend(nrow=1, byrow=TRUE)) +
+  geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
+                   size = 3.5,
+                   position = position_stack(vjust = .3),
+                   show.legend = FALSE) +
+  coord_polar(theta = "y", start = 0) + theme_void() +
+  ggtitle("Brunei (n=8)") +
+  scale_fill_manual(values = Haplocolors) +
+  theme(plot.title = element_text(hjust = 0.5, vjust = -2, face = "bold"),
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm"))
+
+## Cambodia
+
+cambodia_hap1 <- country_hap1 %>% filter(Country=="Cambodia")
+Haplocolors <- dat[match(cambodia_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_color"]
+
+cambodia <- cambodia_hap1 %>%
+  ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
+  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
+  geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
+                   size = 3.5,
+                   position = position_stack(vjust = .3),
+                   show.legend = FALSE) +
+  coord_polar(theta = "y", start = 0) + theme_void() +
+  ggtitle("Cambodia (n=398)") +
+  scale_fill_manual(values = Haplocolors) +
+  theme(plot.title = element_text(hjust = 0.5, vjust = -2, face = "bold"),
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm"))
+
+## Indonesia
+
+indonesia_hap1 <- country_hap1 %>% filter(Country=="Indonesia")
+Haplocolors <- dat[match(indonesia_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_color"]
+
+indonesia <- indonesia_hap1 %>%
+  ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
+  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
+  geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
+                   size = 3.5,
+                   position = position_stack(vjust = .3),
+                   show.legend = FALSE) +
+  coord_polar(theta = "y", start = 0) + theme_void() +
+  ggtitle("Indonesia (n=656)") +
+  scale_fill_manual(values = Haplocolors) +
+  theme(plot.title = element_text(hjust = 0.5, vjust = -2, face = "bold"),
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm"))
+
+## Laos
+
+laos_hap1 <- country_hap1 %>% filter(Country=="Laos")
+Haplocolors <- dat[match(laos_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_color"]
+
+laos <- laos_hap1 %>%
+  ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
+  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
+  geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
+                   size = 3.5,
+                   position = position_stack(vjust = .3),
+                   show.legend = FALSE) +
+  coord_polar(theta = "y", start = 0) + theme_void() +
+  ggtitle("Laos (n=59)") +
+  scale_fill_manual(values = Haplocolors) +
+  theme(plot.title = element_text(hjust = 0.5, vjust = -2, face = "bold"),
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm"))
+
+## Malaysia
+
+malaysia_hap1 <- country_hap1 %>% filter(Country=="Malaysia")
+Haplocolors <- dat[match(malaysia_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_color"]
+
+malaysia <- malaysia_hap1 %>%
+  ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
+  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
+  geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
+                   size = 3.5,
+                   position = position_stack(vjust = .3),
+                   show.legend = FALSE) +
+  coord_polar(theta = "y", start = 0) + theme_void() +
+  ggtitle("Malaysia (n=151)") +
+  scale_fill_manual(values = Haplocolors) +
+  theme(plot.title = element_text(hjust = 0.5, vjust = -2, face = "bold"),
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm"))
+
+## Myanmar
+
+myanmar_hap1 <- country_hap1 %>% filter(Country=="Myanmar")
+Haplocolors <- dat[match(myanmar_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_color"]
+
+myanmar <- myanmar_hap1 %>%
+  ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
+  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
+  geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
+                   size = 3.5,
+                   position = position_stack(vjust = .4),
+                   show.legend = FALSE) +
+  coord_polar(theta = "y", start = 0) + theme_void() +
+  ggtitle("Myanmar (n=151)") +
+  scale_fill_manual(values = Haplocolors) +
+  theme(plot.title = element_text(hjust = 0.5, vjust = -2, face = "bold"),
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm"))
+
+## Philippines
+
+philippines_hap1 <- country_hap1 %>% filter(Country=="Philippines")
+Haplocolors <- dat[match(philippines_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_color"]
+
+philippines <- philippines_hap1 %>%
+  ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
+  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
+  geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
+                   size = 3.5,
+                   position = position_stack(vjust = .4),
+                   show.legend = FALSE) +
+  coord_polar(theta = "y", start = 0) + theme_void() +
+  ggtitle("Philippines (n=446)") +
+  scale_fill_manual(values = Haplocolors) +
+  theme(plot.title = element_text(hjust = 0.5, vjust = -2, face = "bold"),
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm"))
+
+## Singapore
+
+singapore_hap1 <- country_hap1 %>% filter(Country=="Singapore")
+Haplocolors <- dat[match(singapore_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_color"]
+
+singapore <- singapore_hap1 %>%
+  ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
+  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
+  geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
+                   size = 3.5,
+                   position = position_stack(vjust = .4),
+                   show.legend = FALSE) +
+  coord_polar(theta = "y", start = 0) + theme_void() +
+  ggtitle("Singapore (n=1)") +
+  scale_fill_manual(values = Haplocolors) +
+  theme(plot.title = element_text(hjust = 0.5, vjust = -2, face = "bold"),
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm"))
+
+## Thailand
+
+thailand_hap1 <- country_hap1 %>% filter(Country=="Thailand")
+Haplocolors <- dat[match(thailand_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_color"]
+
+thailand <- thailand_hap1 %>%
+  ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
+  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
+  geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
+                   size = 3.5,
+                   position = position_stack(vjust = .1),
+                   show.legend = FALSE) +
+  coord_polar(theta = "y", start = 0) + theme_void() +
+  ggtitle("Thailand (n=2339)") +
+  scale_fill_manual(values = Haplocolors) +
+  theme(plot.title = element_text(hjust = 0.5, vjust = -2, face = "bold"),
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm"))
+
+## Timor-Leste
+
+timor_hap1 <- country_hap1 %>% filter(Country=="Timor-Leste")
+Haplocolors <- dat[match(timor_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_color"]
+
+timor <- timor_hap1 %>%
+  ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
+  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  guides(fill=guide_legend(nrow=1, byrow=TRUE)) +
+  geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
+                   size = 3.5,
+                   position = position_stack(vjust = .4),
+                   show.legend = FALSE) +
+  coord_polar(theta = "y", start = 0) + theme_void() +
+  ggtitle("Timor-Leste (n=17)") +
+  scale_fill_manual(values = Haplocolors) +
+  theme(plot.title = element_text(hjust = 0.5, vjust = -2, face = "bold"),
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm"))
+
+## Vietnam
+
+vietnam_hap1 <- country_hap1 %>% filter(Country=="Vietnam")
+Haplocolors <- dat[match(vietnam_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_color"]
+
+vietnam <- vietnam_hap1 %>%
+  ggplot(aes(x = "", y = percent, fill = haplogroup1)) +
+  geom_bar(stat="identity", width = 1, alpha=0.5) +
+  guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
+  geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
+             size = 3.5,
+             position = position_stack(vjust = .3),
+             show.legend = FALSE) +
+  coord_polar(theta = "y", start = 0) + theme_void() +
+  ggtitle("Vietnam (n=706)") +
+  scale_fill_manual(values = Haplocolors) +
+  theme(plot.title = element_text(hjust = 0.5, vjust = -2, face = "bold"),
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm"))
+
+library(ggpubr)
+library(gridExtra)
+library(grid)
+
+ggarrange(sea, brunei, cambodia, indonesia, laos, malaysia, myanmar, philippines, singapore, thailand, timor, vietnam, 
+          common.legend = T, 
+          legend = "bottom", 
+          font.label = list(size = 20, color = "black")) + 
+  bgcolor("white") 
+
+ggsave("figures/SEA_Haplo_Pie.png", width = 15, height = 10)
+
+# Language family
+
+lf <- read_excel("CompleteFull.xlsx")
+lf <- as.data.frame(lf)
+
+library(janitor)
+lf2 <- lf %>% filter(!`Language family` %in% c("rCRS", "RSRS")) %>%
+  mutate(macrohap0="Macro-haplogroup L",
+         macrohap0=ifelse(haplogroup1 %in% c("M", "C", "Z", "D", "E", "G", "Q"), "Macro-haplogroup M",
+                          ifelse(haplogroup1 %in% c("R", "B", "F", "H", "V", "J", "T", "P", "U", "K", "N", "O", "A", "S", "I", "W", "X", "Y"), "Macro-haplogroup N", macrohap0)),
+         macrohap1="Macro-haplogroup L",
+         macrohap1=ifelse(haplogroup1 %in% c("M", "C", "Z", "D", "E", "G", "Q"), "Macro-haplogroup M",
+                          ifelse(haplogroup1 %in% c("R", "B", "F", "H", "V", "J", "T", "P", "U", "K"), "Macro-haplogroup R",
+                                 ifelse(haplogroup1 %in% c("N", "O", "A", "S", "I", "W", "X", "Y"), "Macro-haplogroup N (xR)", macrohap1))),
+         haplogroup2=ifelse(haplogroup2=="A+152"|haplogroup2=="A+152+16362"|haplogroup2=="A+152+16362+200", "A+",
+                            ifelse(haplogroup2=="R+16189", "R+", haplogroup2)),
+         `Language family`=ifelse(Ethnicity=="Mon", "Austroasiatic",
+                                  ifelse(Ethnicity=="Hmong", "Hmong-Mien",
+                                         ifelse(Ethnicity=="Shan", "Tai-Kadai",
+                                                ifelse(Ethnicity=="Jehai (or Jahai)", "Austroasiatic",
+                                                       ifelse(Ethnicity=="Temuan", "Austronesian",
+                                                              ifelse(Ethnicity=="Maranao", "Austronesian",
+                                                                     ifelse(Ethnicity=="Semelai", "Austroasiatic",
+                                                                            ifelse(Ethnicity=="Bru (Brao)", "Austroasiatic",
+                                                                                   ifelse(Ethnicity=="Jarai", "Austronesian",
+                                                                                          ifelse(Ethnicity=="Kadazan-Dusun", "Austronesian",
+                                                                                                 ifelse(Ethnicity=="Alor", "Austronesian",
+                                                                                                        ifelse(Ethnicity=="Arakanese (or Rakhine)", "Sino-Tibetan",
+                                                                                                               ifelse(Ethnicity=="Timorese", "Austronesian",
+                                                                                                                      ifelse(Ethnicity=="Mang", "Austroasiatic",
+                                                                                                                             ifelse(Ethnicity=="Dao", "Hmong-Mien", 
+                                                                                                                                    ifelse(Ethnicity=="English", "Unknown",
+                                                                                                                                           ifelse(Ethnicity=="Batek", "Austroasiatic",
+                                                                                                                                                  ifelse(Ethnicity=="Orang Asli", "Austroasiatic",`Language family`)))))))))))))))))),
+         Language_color=NA,
+         Language_color=ifelse(`Language family`=="RSRS", "black",
+                               ifelse(`Language family`=="Austroasiatic", "#fa0f0c",
+                                      ifelse(`Language family`=="Austroasiatic, Austronesian", "#996666",
+                                             ifelse(`Language family`=="Austroasiatic, Tai-Kaidai, Hmong-Mien", "#cccc33",
+                                                    ifelse(`Language family`=="Austronesian", "#9900ff",
+                                                           ifelse(`Language family`=="Austronesian, Sino-Tibetan", "#163566",
+                                                                  ifelse(`Language family`=="Austronesian, Trans–New Guinea", "#cc66ff",
+                                                                         ifelse(`Language family`=="rCRS", "orange",
+                                                                                ifelse(`Language family`=="Hmong-Mien", "#0099ff",
+                                                                                       ifelse(`Language family`=="Mayan", "#660000",
+                                                                                              ifelse(`Language family`=="Sino-Tibetan", "#336699",
+                                                                                                     ifelse(`Language family`=="Tai-Kadai", "#339900",
+                                                                                                            ifelse(`Language family`=="Trans–New Guinea", "#66ccff",
+                                                                                                                   ifelse(`Language family`=="Unknown", "lightgrey",
+                                                                                                                          Language_color)))))))))))))),
+         Haplogroup1_color=NA,
+         Haplogroup1_color=ifelse(haplogroup1=="A", "#F8766D",
+                                  ifelse(haplogroup1=="B", "#EA8331",
+                                         ifelse(haplogroup1=="C", "#D89000",
+                                                ifelse(haplogroup1=="D", "#C09B00",
+                                                       ifelse(haplogroup1=="E", "#A3A500",
+                                                              ifelse(haplogroup1=="F", "#39B600",
+                                                                     ifelse(haplogroup1=="G", "#7CAE00",
+                                                                            ifelse(haplogroup1=="H", "yellow",
+                                                                                   ifelse(haplogroup1=="I", "#00BF7D",
+                                                                                          ifelse(haplogroup1=="K", "#00C1A3",
+                                                                                                 ifelse(haplogroup1=="L", "black",
+                                                                                                        ifelse(haplogroup1=="M", "#00BAE0",
+                                                                                                               ifelse(haplogroup1=="N", "#00B0F6",
+                                                                                                                      ifelse(haplogroup1=="P", "#35A2FF",
+                                                                                                                             ifelse(haplogroup1=="Q", "#9590FF",
+                                                                                                                                    ifelse(haplogroup1=="R", "#C77CFF",
+                                                                                                                                           ifelse(haplogroup1=="U", "#E76BF3",
+                                                                                                                                                  ifelse(haplogroup1=="W", "#FA62DB",
+                                                                                                                                                         ifelse(haplogroup1=="Y", "#FF62BC",
+                                                                                                                                                                ifelse(haplogroup1=="Z", "#FF6A98",
+                                                                                                                                                                       Haplogroup1_color))))))))))))))))))))) %>%
+  dplyr::select(name, `Language family`, haplo, haplogroup1, haplogroup2, haplogroup3, macrohap0, macrohap1, Language_color, Haplogroup1_color) %>% setDT()
+
+lf_rank <- lf2[, .N, by = .(`Language family`)]
+
+lf_hap <- lf2[, .N, by = .(`Language family`, haplo)]
+lf_hap <- lf_hap %>%
+  group_by(`Language family`) %>% arrange(haplo, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+lf_hap3 <- lf2[, .N, by = .(`Language family`, haplogroup3)]
+lf_hap3 <- lf_hap3 %>%
+  group_by(`Language family`) %>% arrange(haplogroup3, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+lf_macro0 <- lf2[, .N, by = .(`Language family`, macrohap0)]
+lf_macro0 <- lf_macro0 %>%
+  group_by(`Language family`) %>% arrange(macrohap0, .by_group = TRUE) %>% 
+  mutate(percent=round((N*100)/sum(N),1)) %>% ungroup()
+
+lf_macro1 <- lf2[, .N, by = .(`Language family`, macrohap1)]
+lf_macro1 <- lf_macro1 %>%
+  group_by(`Language family`) %>% arrange(macrohap1, .by_group = TRUE) %>% 
+  mutate(percent=round((N*100)/sum(N),1)) %>% ungroup()
+
+lf_hap1 <- lf2[, .N, by = .(`Language family`, haplogroup1)]
+lf_hap1 <- lf_hap1 %>%
+  group_by(`Language family`) %>% arrange(haplogroup1, .by_group = TRUE) %>% 
+  mutate(percent=round((N*100)/sum(N),1)) %>% ungroup()
+
+lf_hap1$Haplocolors <- dat[match(lf_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_color"]
+
+Languagecolors <- unique(dat[match(lf_hap1$`Language family`, dat$`Language family`), "Language_color"])
+rev_Languagecolors <- rev(Languagecolors)
+
+g2 <- lf_hap1 %>%
+  ggplot(aes(x=`Language family`, y=percent, fill=haplogroup1)) +      
+  # Add the stacked bar
+  geom_bar(position = "stack", stat="identity", alpha=1, data = lf_hap1 %>% filter(`Language family` == "Austroasiatic")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = lf_hap1 %>% filter(`Language family` == "Austroasiatic, Austronesian")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = lf_hap1 %>% filter(`Language family` == "Austroasiatic, Tai-Kaidai, Hmong-Mien")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = lf_hap1 %>% filter(`Language family` == "Austronesian")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = lf_hap1 %>% filter(`Language family` == "Austronesian, Sino-Tibetan")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = lf_hap1 %>% filter(`Language family` == "Austronesian, Trans–New Guinea")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = lf_hap1 %>% filter(`Language family` == "Hmong-Mien")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = lf_hap1 %>% filter(`Language family` == "Mayan")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = lf_hap1 %>% filter(`Language family` == "Sino-Tibetan")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = lf_hap1 %>% filter(`Language family` == "Tai-Kadai")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = lf_hap1 %>% filter(`Language family` == "Trans–New Guinea")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = lf_hap1 %>% filter(`Language family` == "Unknown")) +
+  ggtitle("Language family") +
+  guides(fill=guide_legend("Haplocolors", nrow=2, byrow=TRUE)) +
+  # scale_fill_manual(values = Haplocolors) +
+  scale_x_discrete(name = "Language family", limits = rev(unique(lf_hap1$`Language family`))) +
+  scale_y_continuous(name = "Percent") +
+  theme_bw() +
+  theme(axis.text.y = element_text(colour = rev_Languagecolors, size=12),
+        axis.title.y = element_text(colour = "black", size=12, face = "bold"),
+        axis.title.x = element_text(colour = "black", size=10, face = "bold"),
+        plot.title = element_text(hjust = 0.5, vjust = 1, face = "bold"),
+        legend.position = "none", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm")) +
+  coord_flip() +
+  geom_label(aes(label = haplogroup1), 
+             size = 4,
+             label.size = NA,
+             position = position_stack(vjust = .5),
+             show.legend = FALSE)
+g2
+
+ggsave(filename = file.path("figures", "language_haplo1_new.png"), width = 15, height = 10)
+
+# Ethnicity
+
+ethnic <- read_excel("CompleteFull.xlsx")
+ethnic <- as.data.frame(ethnic)
+
+library(janitor)
+ethnic <- ethnic %>% filter(!`Language family` %in% c("rCRS", "RSRS")) %>%
+  mutate(macrohap0="Macro-haplogroup L",
+         macrohap0=ifelse(haplogroup1 %in% c("M", "C", "Z", "D", "E", "G", "Q"), "Macro-haplogroup M",
+                          ifelse(haplogroup1 %in% c("R", "B", "F", "H", "V", "J", "T", "P", "U", "K", "N", "O", "A", "S", "I", "W", "X", "Y"), "Macro-haplogroup N", macrohap0)),
+         macrohap1="Macro-haplogroup L",
+         macrohap1=ifelse(haplogroup1 %in% c("M", "C", "Z", "D", "E", "G", "Q"), "Macro-haplogroup M",
+                          ifelse(haplogroup1 %in% c("R", "B", "F", "H", "V", "J", "T", "P", "U", "K"), "Macro-haplogroup R",
+                                 ifelse(haplogroup1 %in% c("N", "O", "A", "S", "I", "W", "X", "Y"), "Macro-haplogroup N (xR)", macrohap1))),
+         haplogroup2=ifelse(haplogroup2=="A+152"|haplogroup2=="A+152+16362"|haplogroup2=="A+152+16362+200", "A+",
+                            ifelse(haplogroup2=="R+16189", "R+", haplogroup2)),
+         Country_color=NA,
+         Country_color=ifelse(Country=="Brunei", "#ff6633",
+                              ifelse(Country=="Cambodia", "#ffff00",
+                                     ifelse(Country=="Indonesia", "#9900ff",
+                                            ifelse(Country=="Laos", "#0099ff",
+                                                   ifelse(Country=="Malaysia", "#990f80",
+                                                          ifelse(Country=="Myanmar", "#99ff99",
+                                                                 ifelse(Country=="Philippines", "#cc66ff",
+                                                                        ifelse(Country=="Singapore", "#ff9999",
+                                                                               ifelse(Country=="Thailand", "#339900",
+                                                                                      ifelse(Country=="Timor-Leste", "#66ccff",
+                                                                                             ifelse(Country=="Vietnam", "#fa0f0c",
+                                                                                                    ifelse(Country=="RSRS", "black",
+                                                                                                           ifelse(Country=="rCRS", "orange", Country_color))))))))))))),
+         Ethnicity=ifelse(Ethnicity=="Yao", "Dao", 
+                          ifelse(Ethnicity=="Bru", "Bru (Brao)", 
+                                 ifelse(Ethnicity=="Aeta" | Ethnicity=="Agta", "Aeta (Agta)",
+                                        ifelse(Ethnicity=="Filipino" | Ethnicity=="Tagalog", "Filipino (or Tagalog)",
+                                               ifelse(Ethnicity=="Arakanese" | Ethnicity=="Rakhine", "Arakanese (or Rakhine)",
+                                                      ifelse(Ethnicity=="Kankanaey" | Ethnicity=="Igorot", "Kankanaey (or Igorot)",
+                                                             Ethnicity)))))),
+         `Language family`=ifelse(Ethnicity=="Mon", "Austroasiatic",
+                                  ifelse(Ethnicity=="Hmong", "Hmong-Mien",
+                                         ifelse(Ethnicity=="Shan", "Tai-Kadai",
+                                                ifelse(Ethnicity=="Jehai (or Jahai)", "Austroasiatic",
+                                                       ifelse(Ethnicity=="Temuan", "Austronesian",
+                                                              ifelse(Ethnicity=="Maranao", "Austronesian",
+                                                                     ifelse(Ethnicity=="Semelai", "Austroasiatic",
+                                                                            ifelse(Ethnicity=="Bru (Brao)", "Austroasiatic",
+                                                                                   ifelse(Ethnicity=="Jarai", "Austronesian",
+                                                                                          ifelse(Ethnicity=="Kadazan-Dusun", "Austronesian",
+                                                                                                 ifelse(Ethnicity=="Alor", "Austronesian",
+                                                                                                        ifelse(Ethnicity=="Arakanese (or Rakhine)", "Sino-Tibetan",
+                                                                                                               ifelse(Ethnicity=="Timorese", "Austronesian",
+                                                                                                                      ifelse(Ethnicity=="Mang", "Austroasiatic",
+                                                                                                                             ifelse(Ethnicity=="Dao", "Hmong-Mien", 
+                                                                                                                                    ifelse(Ethnicity=="English", "Unknown",
+                                                                                                                                           ifelse(Ethnicity=="Batek", "Austroasiatic",
+                                                                                                                                                  ifelse(Ethnicity=="Orang Asli", "Austroasiatic",`Language family`)))))))))))))))))),
+         Language_color=NA,
+         Language_color=ifelse(`Language family`=="RSRS", "black",
+                               ifelse(`Language family`=="Austroasiatic", "#fa0f0c",
+                                      ifelse(`Language family`=="Austroasiatic, Austronesian", "#996666",
+                                             ifelse(`Language family`=="Austroasiatic, Tai-Kaidai, Hmong-Mien", "#cccc33",
+                                                    ifelse(`Language family`=="Austronesian", "#9900ff",
+                                                           ifelse(`Language family`=="Austronesian, Sino-Tibetan", "#163566",
+                                                                  ifelse(`Language family`=="Austronesian, Trans–New Guinea", "#cc66ff",
+                                                                         ifelse(`Language family`=="rCRS", "orange",
+                                                                                ifelse(`Language family`=="Hmong-Mien", "#0099ff",
+                                                                                       ifelse(`Language family`=="Mayan", "#660000",
+                                                                                              ifelse(`Language family`=="Sino-Tibetan", "#336699",
+                                                                                                     ifelse(`Language family`=="Tai-Kadai", "#339900",
+                                                                                                            ifelse(`Language family`=="Trans–New Guinea", "#66ccff",
+                                                                                                                   ifelse(`Language family`=="Unknown", "lightgrey",
+                                                                                                                          Language_color)))))))))))))),
+         Ethnicity_color=NA,
+         Ethnicity_color=ifelse(Ethnicity %in% c("Abaknon", "Aeta (Agta)", "Ambonese", "Bali Aga, Balinese", "Banjar", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Besemah", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Bumiputera", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Ede", "Filipino (or Tagalog)", "Giarai", "Ibaloi", "Ifugao", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey (or Igorot)", "Makassarese", "Malay", "Malay, Achehnese", "Manabo", "Maranao", "Minahasa", "Minangkabau", "Moken", "Sasak", "Seletar", "Semende", "Southern Thai_AN", "Sumatrans", "Sumbanese", "Sundanese", "Surigaonon", "Tagbanua", "Temuan", "Tengger", "The Kalanguya (or Ikalahan)", "Toraja", "UrakLawoi"), "#9900ff",
+                                ifelse(Ethnicity %in% c("Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chin", "Chinese", "Dawei", "Han", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "Lisu", "LoLo", "Naga", "PhuLa", "SiLa"), "#336699",
+                                       ifelse(Ethnicity=="RSRS", "black",
+                                              ifelse(Ethnicity %in% c("Batek", "Blang", "Bru (Brao)", "Deang", "H’tin", "Jehai", "Kensiu", "Khamu", "Khmer", "Khuen", "Kinh", "Kinh, Muong, Khmer", "Kintaq", "Kreung", "Lawa", "Mang", "Maniq", "Mel Khaonh", "Mlabri", "Mon", "Nyahkur", "Orang Asli", "Paluang", "Phnong", "Semelai", "Soa", "Stieng", "Suay", "Tompoun"), "#fa0f0c",
+                                                     ifelse(Ethnicity %in% c("Jahai, Semang", "Khmer Loeu", "Kinh, Cham, Ede, Giarai"), "#996666",
+                                                            ifelse(Ethnicity %in% c("Papuan"), "#66ccff",
+                                                                   ifelse(Ethnicity %in% c("Ancient Thai", "Black Tai", "Central Thai", "CoLao", "Dai", "Isan (or Lao)", "Kalueng", "Khon Mueang", "LaChi", "Lao", "Nung", "Nyaw", "Phuan", "Phutai", "Seak", "Shan", "Southern Thai_TK", "Tai Lue", "Tai Yuan", "Tay", "Tay Nung", "Thai"), "#339900",
+                                                                          ifelse(Ethnicity %in% c("Dao", "Hmong", "IuMien", "PaThen"), "#0099ff",
+                                                                                 ifelse(Ethnicity %in% c("rCRS"), "orange",
+                                                                                        ifelse(Ethnicity %in% c("Kinh, Tay, Thai, Muong, Hmong"), "#cccc33",
+                                                                                               ifelse(Ethnicity %in% c("Mamanwa"), "#660000",
+                                                                                                      ifelse(Ethnicity %in% c("English", "Lun", "Unknown"), "lightgrey",
+                                                                                                             ifelse(Ethnicity %in% c("Non-Malaysian (Chinese, Bajau, Kadazan-Dusun)", "Taiwan"), "#163566",
+                                                                                                                    ifelse(Ethnicity %in% c("Alorese, Alor Malay, Alor-Pantar", "Tetum, Mambai, Makasae"), "#cc66ff", Ethnicity)))))))))))))),
+         Haplogroup1_color=NA,
+         Haplogroup1_color=ifelse(haplogroup1=="A", "#F8766D",
+                                  ifelse(haplogroup1=="B", "#EA8331",
+                                         ifelse(haplogroup1=="C", "#D89000",
+                                                ifelse(haplogroup1=="D", "#C09B00",
+                                                       ifelse(haplogroup1=="E", "#A3A500",
+                                                              ifelse(haplogroup1=="F", "#39B600",
+                                                                     ifelse(haplogroup1=="G", "#7CAE00",
+                                                                            ifelse(haplogroup1=="H", "yellow",
+                                                                                   ifelse(haplogroup1=="I", "#00BF7D",
+                                                                                          ifelse(haplogroup1=="K", "#00C1A3",
+                                                                                                 ifelse(haplogroup1=="L", "black",
+                                                                                                        ifelse(haplogroup1=="M", "#00BAE0",
+                                                                                                               ifelse(haplogroup1=="N", "#00B0F6",
+                                                                                                                      ifelse(haplogroup1=="P", "#35A2FF",
+                                                                                                                             ifelse(haplogroup1=="Q", "#9590FF",
+                                                                                                                                    ifelse(haplogroup1=="R", "#C77CFF",
+                                                                                                                                           ifelse(haplogroup1=="U", "#E76BF3",
+                                                                                                                                                  ifelse(haplogroup1=="W", "#FA62DB",
+                                                                                                                                                         ifelse(haplogroup1=="Y", "#FF62BC",
+                                                                                                                                                                ifelse(haplogroup1=="Z", "#FF6A98",
+                                                                                                                                                                       Haplogroup1_color))))))))))))))))))))) %>%
+  dplyr::select(name, Ethnicity, haplo, haplogroup1, haplogroup2, haplogroup3, macrohap0, macrohap1, Ethnicity_color, Haplogroup1_color) %>% setDT()
+
+ethnics1 <- c("Blang", "Bru (Brao)", "Deang", "H'tin", "Jehai", "Kensiu", "Khamu", "Khmer", "Khuen", "Kinh", "Kinh, Muong, Khmer", "Kintaq", "Kreung", "Lawa", "Mang", "Maniq", "Mel Khaonh", "Mlabri", "Mon", "Nyahkur", "Orang Asli", "Paluang", "Phnong", "Semelai", "Soa", "Stieng", "Suay", "Tompoun", "Jahai, Semang", "Khmer Loeu", "Kinh, Cham, Ede, Giarai", "Kinh, Tay, Thai, Muong, Hmong", "Abaknon", "Aeta (Agta)", "Ambonese", "Bali Aga, Balinese", "Banjar", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Besemah", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Bumiputera", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Ede", "Filipino (or Tagalog)", "Giarai", "Ibaloi", "Ifugao", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey (or Igorot)", "Makassarese", "Malay", "Malay, Achehnese", "Manabo", "Maranao", "Minahasa", "Minangkabau", "Moken", "Sasak", "Seletar", "Semende", "Southern Thai_AN", "Sumatrans", "Sumbanese", "Sundanese", "Surigaonon", "Tagbanua", "Temuan", "Tengger", "The Kalanguya (or Ikalahan)", "Toraja", "UrakLawoi", "Non-Malaysian (Chinese, Bajau, Kadazan-Dusun)", "Taiwan", "Alorese, Alor Malay, Alor-Pantar", "Tetum, Mambai, Makasae", "Dao", "Hmong", "IuMien", "PaThen", "Mamanwa", "RSRS", "Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chin", "Chinese", "Dawei", "Han", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "Lisu", "LoLo", "Naga", "PhuLa", "SiLa", "Ancient Thai", "Black Tai", "Central Thai", "CoLao", "Dai", "Isan (or Lao)", "Kalueng", "Khon Mueang", "LaChi", "Lao", "Nung", "Nyaw", "Phuan", "Phutai", "Seak", "Shan", "Southern Thai_TK", "Tai Lue", "Tai Yuan", "Tay", "Tay Nung", "Thai", "Papuan", "English", "Lun", "Unknown")
+# dat2 <- !ethnics1 %in% unique(ethnic_hap1$Ethnicity)
+
+ethnic <- ethnic %>%
+  mutate(Ethnicity=factor(Ethnicity, levels = c("Blang", "Bru (Brao)", "Deang", "H’tin", "Jehai", "Kensiu", "Khamu", "Khmer", "Khuen", "Kinh", "Kinh, Muong, Khmer", "Kintaq", "Kreung", "Lawa", "Mang", "Maniq", "Mel Khaonh", "Mlabri", "Mon", "Nyahkur", "Orang Asli", "Paluang", "Phnong", "Semelai", "Soa", "Stieng", "Suay", "Tompoun", "Jahai, Semang", "Khmer Loeu", "Kinh, Cham, Ede, Giarai", "Kinh, Tay, Thai, Muong, Hmong", "Abaknon", "Aeta (Agta)", "Ambonese", "Bali Aga, Balinese", "Banjar", "Banjar, Dayak, Javanese", "Batak", "Batak, Acehnese", "Batak, Minangkabau, Acehnese, Lampung", "Besemah", "Bidayuh", "Bruneian Malay", "Bugis", "Bugkalot (or Ilongot)", "Bumiputera", "Cebuano - Filipino", "Cham", "Cuyunin (or Cuyonon)", "Dayak", "Ede", "Filipino (or Tagalog)", "Giarai", "Ibaloi", "Ifugao", "Indonesian", "Ivatan", "Jarai", "Javanese", "Kadazan-Dusun", "Kankanaey (or Igorot)", "Makassarese", "Malay", "Malay, Achehnese", "Manabo", "Maranao", "Minahasa", "Minangkabau", "Moken", "Sasak", "Seletar", "Semende", "Southern Thai_AN", "Sumatrans", "Sumbanese", "Sundanese", "Surigaonon", "Tagbanua", "Temuan", "Tengger", "The Kalanguya (or Ikalahan)", "Toraja", "UrakLawoi", "Non-Malaysian (Chinese, Bajau, Kadazan-Dusun)", "Taiwan", "Alorese, Alor Malay, Alor-Pantar", "Tetum, Mambai, Makasae", "Dao", "Hmong", "IuMien", "PaThen", "Mamanwa", "RSRS", "Achang", "Aini", "Arakanese (or Rakhine)", "Bamar (or Burman)", "Chin", "Chinese", "Dawei", "Han", "HaNhi", "Hui", "Jingpo", "Karen", "Lahu", "Lisu", "LoLo", "Naga", "PhuLa", "SiLa", "Ancient Thai", "Black Tai", "Central Thai", "CoLao", "Dai", "Isan (or Lao)", "Kalueng", "Khon Mueang", "LaChi", "Lao", "Nung", "Nyaw", "Phuan", "Phutai", "Seak", "Shan", "Southern Thai_TK", "Tai Lue", "Tai Yuan", "Tay", "Tay Nung", "Thai", "Papuan", "English", "Lun", "Unknown")))
+
+ethnic_rank <- ethnic[, .N, by = .(Ethnicity)]
+
+ethnic_hap <- ethnic[, .N, by = .(Ethnicity, haplo)]
+ethnic_hap <- ethnic_hap %>%
+  group_by(Ethnicity) %>% arrange(haplo, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+ethnic_hap3 <- ethnic[, .N, by = .(Ethnicity, haplogroup3)]
+ethnic_hap3 <- ethnic_hap3 %>%
+  group_by(Ethnicity) %>% arrange(haplogroup3, .by_group = TRUE) %>% 
+  mutate(percent=(N*100)/sum(N)) %>% ungroup()
+
+ethnic_macro0 <- ethnic[, .N, by = .(Ethnicity, macrohap0)]
+ethnic_macro0 <- ethnic_macro0 %>%
+  group_by(Ethnicity) %>% arrange(macrohap0, .by_group = TRUE) %>% 
+  mutate(percent=round((N*100)/sum(N),1)) %>% ungroup()
+
+ethnic_macro1 <- ethnic[, .N, by = .(Ethnicity, macrohap1)]
+ethnic_macro1 <- ethnic_macro1 %>%
+  group_by(Ethnicity) %>% arrange(macrohap1, .by_group = TRUE) %>% 
+  mutate(percent=round((N*100)/sum(N),1)) %>% ungroup()
+
+ethnic_hap1 <- ethnic[, .N, by = .(Ethnicity, haplogroup1)]
+ethnic_hap1 <- ethnic_hap1 %>%
+  group_by(Ethnicity) %>% arrange(haplogroup1, .by_group = TRUE) %>% 
+  mutate(percent=round((N*100)/sum(N),1)) %>% ungroup()
+
+ethnic_hap1$Haplocolors <- dat[match(ethnic_hap1$haplogroup1, dat$haplogroup1), "Haplogroup1_color"]
+Ethnicitycolors <- dat[match(ethnics1, dat$Ethnicity), "Ethnicity_color"]
+rev_Ethinicitycolors <- rev(Ethnicitycolors)
+
+g3 <- ethnic_hap1 %>%
+  ggplot(aes(x=Ethnicity, y=percent, fill=haplogroup1)) +      
+  # Add the stacked bar
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Blang")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Bru (Brao)")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Deang")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "H’tin")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Jehai")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Kensiu")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Khamu")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Khmer")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Khuen")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Kinh")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Kinh, Muong, Khmer")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Kintaq")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Kreung")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Lawa")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Mang")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Maniq")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Mel Khaonh")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Mlabri")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Mon")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Nyahkur")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Orang Asli")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Paluang")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Phnong")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Semelai")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Soa")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Stieng")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Suay")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Tompoun")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Jahai, Semang")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Khmer Loeu")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Kinh, Cham, Ede, Giarai")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Kinh, Tay, Thai, Muong, Hmong")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Abaknon")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Aeta (Agta)")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Ambonese")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Bali Aga, Balinese")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Banjar")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Banjar, Dayak, Javanese")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Batak")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Batak, Acehnese")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Batak, Minangkabau, Acehnese, Lampung")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Besemah")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Bidayuh")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Bruneian Malay")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Bugis")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Bugkalot (or Ilongot)")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Bumiputera")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Cebuano - Filipino")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Cham")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Cuyunin (or Cuyonon)")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Dayak")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Ede")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Filipino (or Tagalog)")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Giarai")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Ibaloi")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Ifugao")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Indonesian")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Ivatan")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Jarai")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Javanese")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Kadazan-Dusun")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Kankanaey (or Igorot)")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Makassarese")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Malay")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Malay, Achehnese")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Manabo")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Maranao")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Minahasa")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Minangkabau")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Moken")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Sasak")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Seletar")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Semende")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Southern Thai_AN")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Sumatrans")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Sumbanese")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Sundanese")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Surigaonon")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Tagbanua")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Temuan")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Tengger")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "The Kalanguya (or Ikalahan)")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Toraja")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "UrakLawoi")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Non-Malaysian (Chinese, Bajau, Kadazan-Dusun)")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Taiwan")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Alorese, Alor Malay, Alor-Pantar")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Tetum, Mambai, Makasae")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Dao")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Hmong")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "IuMien")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "PaThen")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Mamanwa")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Achang")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Aini")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Arakanese (or Rakhine)")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Bamar (or Burman)")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Chin")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Chinese")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Dawei")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Han")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "HaNhi")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Hui")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Jingpo")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Karen")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Lahu")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Lisu")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "LoLo")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Naga")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "PhuLa")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "SiLa")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Ancient Thai")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Black Tai")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Central Thai")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "CoLao")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Dai")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Isan (or Lao)")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Kalueng")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Khon Mueang")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "LaChi")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Lao")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Nung")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Nyaw")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Phuan")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Phutai")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Seak")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Shan")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Southern Thai_TK")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Tai Lue")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Tai Yuan")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Tay")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Tay Nung")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Thai")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Papuan")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "English")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Lun")) +
+  geom_bar(position = "stack", stat="identity", alpha=1, data = ethnic_hap1 %>% filter(Ethnicity == "Unknown")) +
+  ggtitle("Ethnicity") +
+  guides(fill=guide_legend("Haplocolors", nrow=2, byrow=TRUE)) +
+  # scale_fill_manual(values = Haplocolors) +
+  scale_x_discrete(name = "Ethnicity", limits = rev(unique(ethnic_hap1$Ethnicity))) +
+  scale_y_continuous(name = "Percent") +
+  theme_bw() +
+  theme(axis.text.y = element_text(colour = rev_Ethinicitycolors, size=9),
+        axis.title.y = element_text(colour = "black", size=12, face = "bold"),
+        axis.title.x = element_text(colour = "black", size=12, face = "bold"),
+        plot.title = element_text(hjust = 0.5, vjust = 1, face = "bold"),
+        legend.position = "none", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.5, "cm")) +
+  coord_flip() +
+  geom_label(aes(label = haplogroup1), 
+             size = 2,
+             label.size = NA,
+             position = position_stack(vjust = .5),
+             show.legend = FALSE)
+g3
+
+# ggsave(filename = file.path("figures", "ethnic_haplo1_new.png"), width = 10, height = 20)
+# 
+# ggarrange(ggarrange(g1, g2, nrow = 2, labels = c("A", "B"), heights = c(0.05, 0.05, 10)), # Second row with box and dot plots
+#           g3,
+#           ncol = 2, 
+#           labels = "C"                                        # Labels of the scatter plot
+# ) + bgcolor("white")
+
+library(cowplot)   # get_legend() & plot_grid() functions
+library(patchwork) # blank plot: plot_spacer()
+
+plot_grid(plot_grid(g1, NULL, g2, 
+                    nrow = 3, 
+                    labels = c("A", "", "B"), 
+                    rel_heights = c(1, 0.1, 1.2)), 
+          g3, labels = "C", ncol = 2, 
+          align = "h", 
+          axis = "r", 
+          rel_widths = c(1,1)) + 
+  bgcolor("white") +
+  theme(plot.background = element_rect(fill = "white", colour = NA))
+
+ggsave("figures/SEA_Country_Language_Ethnic_Haplo.png", width = 15, height = 16)
+
+# g3 <- ethnic_hap1 %>%
+#   ggplot(aes(x=Ethnicity, y=percent, fill=haplogroup1)) +      
+#   # Add the stacked bar
+#   geom_bar(position = "stack", stat="identity", alpha=0.5) +
+#   ggtitle("Language family") +
+#   guides(fill=guide_legend("Haplocolors", nrow=5, byrow=TRUE)) +
+#   # scale_fill_manual(values = Haplocolors) +
+#   scale_x_discrete(name = "Ethnicity", limits = rev(unique(ethnic_hap1$Ethnicity))) +
+#   scale_y_continuous(name = "Percent") +
+#   theme_bw() +
+#   theme(axis.text.y = element_text(colour = rev_Ethnicitycolors, size=12),
+#         axis.title.y = element_text(colour = "black", size=12, face = "bold"),
+#         axis.title.x = element_text(colour = "black", size=10, face = "bold"),
+#         plot.title = element_text(hjust = 0.5, vjust = 1, face = "bold"),
+#         legend.position = "none", 
+#         legend.title = element_blank(), 
+#         legend.text = element_text(size = 10),
+#         legend.key.size = unit(0.5, "cm")) +
+#   coord_polar() +
+#   geom_label(aes(label = haplogroup1), 
+#              size = 4,
+#              label.size = NA,
+#              position = position_stack(vjust = .5),
+#              show.legend = FALSE)
+# g3
+# 
+# ggsave(filename = file.path("figures", "ethnic_haplo1_new.png"), width = 20, height = 15)
+# 
+# options(ignore.negative.edge=TRUE)
+
+###################################################
+
+# Diversity
+
 # Country
 
 # dat <- read_excel("IsolateExplanation.xlsx")
