@@ -6382,7 +6382,7 @@ plot_grid(plot_grid(g1, NULL, g2,
                     nrow = 3, 
                     labels = c("A", "", "B"), 
                     rel_heights = c(1, 0.1, 1.2)), 
-          g3, labels = "C", ncol = 2, 
+          g3, labels = c("", "C"), ncol = 2, 
           align = "h", 
           axis = "r", 
           rel_widths = c(1,1)) + 
