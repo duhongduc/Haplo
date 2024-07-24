@@ -12278,7 +12278,7 @@ e_mya <- ggplot() + geom_sf(data=MYA_sf, aes(fill="white"), alpha=0.001) +
   geom_sf_text(data=ethnicity_MYA_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
   geom_scatterpie(aes(x=x, y=y, r=0.6), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
   annotate(geom = "table", x = 106, y = 20, label = list(ethnicity_MYA_max), size = 3) +
-  guides(fill=guide_legend(nrow = 3, byrow=TRUE)) +
+  guides(fill=guide_legend(nrow = 6, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
   theme(plot.title = element_text(size=20, face = "bold"),
