@@ -55,6 +55,9 @@ library(BiocManager)
 # BiocManager::install("ggtree")
 library(ggtree)
 library(ggplot2)
+library(sf)
+library(scatterpie)
+library(ggpmisc)
 library(stats)
 library(ips)
 # BiocManager::install("msa")
@@ -5568,9 +5571,10 @@ dat <- dat %>%
 country <- dat %>% filter(Country!=c("rCRS", "RSRS")) %>%
   dplyr::select(name, Country, Location, `Language family`, Ethnicity, haplo, haplogroup1, haplogroup2, haplogroup3, macrohap0, macrohap1, Country_color, Language_color, Ethnicity_color, Haplogroup1_color) %>% setDT()
 
-country_rank <- country[, .N, by = .(Country)] %>% arrange(desc(N))
-
 library(scales)
+library(data.table)
+
+country_rank <- country[, .N, by = .(Country)] %>% arrange(desc(N))
 
 country_macro0 <- country[, .N, by = .(Country, macrohap0)]
 country_macro0 <- country_macro0 %>%
@@ -5585,6 +5589,16 @@ country_macro1 <- country_macro1 %>%
 country_hap1 <- country[, .N, by = .(Country, haplogroup1)]
 country_hap1 <- country_hap1 %>%
   group_by(Country) %>% arrange(haplogroup1, .by_group = TRUE) %>% 
+  mutate(percent=round((N*100)/sum(N),1)) %>% ungroup()
+
+country_hap2 <- country[, .N, by = .(Country, haplogroup2)]
+country_hap2 <- country_hap2 %>%
+  group_by(Country) %>% arrange(haplogroup2, .by_group = TRUE) %>% 
+  mutate(percent=round((N*100)/sum(N),1)) %>% ungroup()
+
+country_hap3 <- country[, .N, by = .(Country, haplogroup3)]
+country_hap3 <- country_hap3 %>%
+  group_by(Country) %>% arrange(haplogroup3, .by_group = TRUE) %>% 
   mutate(percent=round((N*100)/sum(N),1)) %>% ungroup()
 
 sea <- country
@@ -5607,6 +5621,11 @@ sea_hap1 <- sea_hap1 %>%
 sea_hap2 <- sea[, .N, by = .(haplogroup2)]
 sea_hap2 <- sea_hap2 %>%
   arrange(haplogroup2, .by_group = TRUE) %>% 
+  mutate(percent=round((N*100)/sum(N),1))
+
+sea_hap3 <- sea[, .N, by = .(haplogroup3)]
+sea_hap3 <- sea_hap3 %>%
+  arrange(haplogroup3, .by_group = TRUE) %>% 
   mutate(percent=round((N*100)/sum(N),1))
 
 ## All countries
@@ -10598,7 +10617,7 @@ dt_x <- dt %>% dplyr::select(-c(location, ID))
 g_bru <- ggplot() + geom_sf(data=BRU_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_BRU_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
   geom_sf_text(data=ethnicity_BRU_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
-  geom_scatterpie(aes(x=x, y=y, r=0.1), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.5) +
+  geom_scatterpie(aes(x=x, y=y, r=0.1), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
   guides(fill=guide_legend(nrow = 1, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
@@ -10606,14 +10625,3003 @@ g_bru <- ggplot() + geom_sf(data=BRU_sf, aes(fill="white"), alpha=0.001) +
         text = element_text(size=12), 
         axis.text.x = element_text(size=10), 
         axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=15), 
-        legend.key.size = unit(1, "cm"),
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Brunei")
 
 g_bru
 
-ggsave(filename = file.path("figures", "Haplo_location_Brunei.png"), width = 10, height = 15)
+ggsave(filename = file.path("figures", "Haplo_location_Brunei.png"), width = 10, height = 10)
+
+ethnicity_BRU_plot_max <- ethnicity_BRU_plot %>% group_by(ethnicity) %>% slice(1)
+ethnicity_BRU_max <- ethnicity_BRU_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
+
+e_bru <- ggplot() + geom_sf(data=BRU_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_BRU_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_BRU_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.1), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  annotate(geom = "table", x = 114, y = 4.9, label = list(ethnicity_BRU_max), size = 3) +
+  guides(fill=guide_legend(nrow = 1, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Brunei")
+
+e_bru
+
+ggsave(filename = file.path("figures", "Haplo_ethnic_Brunei.png"), width = 10, height = 10)
+
+## Cambodia
+
+# SEA1_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1_sf, file = "data/SEA1_sf.RData")
+
+# SEA1p_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, china_CHN1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, taiwan_TWN1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1p_sf, file = "data/SEA1p_sf.RData")
+
+# load("data/SEA1_sf.RData")
+load("data/SEA1p_sf.RData")
+CAM_sf <- SEA1p_sf %>% dplyr::rename(country=NAME_0, location=NAME_1, type=ENGTYPE_1) %>% dplyr::filter(country=="Cambodia")
+CAM_sf$location <- stri_trans_general(CAM_sf$location, "Latin-ASCII")
+CAM_sf$location <- trimws(gsub("\\s+", " ", CAM_sf$location))
+CAM_sf <- CAM_sf %>% dplyr::select(country, location, type, geometry)
+
+library(readxl)
+# SEA <- read_excel("Changed_SEA_haplogroups.xlsx")
+SEA <- read_excel("Changed_SEA_haplogroups_new.xlsx") %>%
+  mutate(Ethnicity=ifelse(Ethnicity=="Yao", "Dao", 
+                          ifelse(Ethnicity=="Bru", "Bru (Brao)", 
+                                 ifelse(Ethnicity=="Aeta" | Ethnicity=="Agta", "Aeta (Agta)",
+                                        ifelse(Ethnicity=="Filipino" | Ethnicity=="Tagalog", "Filipino (or Tagalog)",
+                                               ifelse(Ethnicity=="Arakanese" | Ethnicity=="Rakhine", "Arakanese (or Rakhine)",
+                                                      ifelse(Ethnicity=="Kankanaey" | Ethnicity=="Igorot", "Kankanaey (or Igorot)",
+                                                             Ethnicity)))))))
+CAM <- SEA %>% filter(Country=="Cambodia")
+
+ethnic_CAM <- CAM[,-c(1,3,4,7,8)] %>% dplyr::rename(country=Country, ethnicity=Ethnicity, location=Location, sum=`Sample size`)
+ethnic_CAM <- ethnic_CAM %>% 
+  mutate(across(where(is.character), ~na_if(., "-"))) %>%
+  mutate_at(c(4:609), as.numeric) %>%
+  mutate(across(where(is.numeric), ~replace_na(., 0))) %>% dplyr::select(-sum) %>% setDT()
+
+ethnic_CAM <- gather(ethnic_CAM, haplo, N, -country, -ethnicity, -location, factor_key=TRUE) %>% setDT()
+
+dat_ethnic_CAM <- ethnic_CAM %>%
+  mutate(haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", " A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
+         haplo1=ifelse(is.na(haplo1), haplo, haplo1),
+         haplo1=case_when(haplo1 %in% c("135", "156", "159", "167", "172", "175", "182", "187", "197", "246", "261", "263", "264", "266", "272", "299", "316", "318", "349", "372", "377", "422", "430", "436", "481", "487", "494", "499", "562", "566", "595", "604", "168", "30", "32", "50", "51", "53", "530", "62", "73", "78", "90", "563") ~ haplo, 
+                          TRUE ~ haplo1),
+         haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
+         haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         location=case_when(location=="Akar" ~ "Bengkulu",
+                            location=="Akar Jambat" ~ "Bengkulu",
+                            location=="Alor Island" ~ "Nusa Tenggara Timur",
+                            location=="Andaman Sea coast" ~ "Krabi",
+                            location=="Bangkok" ~ "Bangkok Metropolis",
+                            location=="Borneo" ~ "Kalimantan Timur",
+                            location=="Capul's island in Northern Samar" ~ "Northern Samar",
+                            location=="Columbio" ~ "Sultan Kudarat",
+                            location=="Dulag" ~ "Leyte",
+                            location=="East Malaysia on the island of Borneo" ~ "Sarawak",
+                            location=="Ibabao, Cordova, Cebu City" ~ "Cebu",
+                            location=="Jangkar" ~ "Jawa Timur",
+                            location=="Jemaring" ~ "Sumatera Selatan",
+                            location=="Kachin State" ~ "Kachin",
+                            location=="Kayin State" ~ "Kachin",
+                            location=="Kota Kinabalu" ~ "Sabah",
+                            location=="Lipa" ~ "Batangas",
+                            location=="Luzon, Visayas, Mindanao" ~ "Quezon",
+                            location=="Mataran (or Mataram)" ~ "Nusa Tenggara Barat",
+                            location=="Merpayang Pauna" ~ "Sumatera Selatan",
+                            location=="Mindanao" ~ "Davao del Sur",
+                            location=="Mon, Kayin State" ~ "Kachin",
+                            location=="North Thailand, Central Thailand (Kanchanaburi and Ratchaburi)" ~ "Ratchaburi",
+                            location=="Northern Mindanao" ~ "Bukidnon",
+                            location=="Nothern Luzon" ~ "Cagayan",
+                            location=="Pelagaran" ~ "Sumatera Selatan",
+                            location=="Pelagaran Jambat" ~ "Sumatera Selatan",
+                            location=="Palembang" ~ "Sumatera Selatan",
+                            location=="Pang Mapha" ~ "Mae Hong Son",
+                            location=="Papua New Guinea" ~ "Papua",
+                            location=="Peninsular Malaysia" ~ "Pahang",
+                            location=="Philippines" ~ "Metropolitan Manila",
+                            location=="President Quirino" ~ "Sultan Kudarat",
+                            location=="Ratanakiri" ~ "Rotanokiri",
+                            location=="Salak" ~ "Sumatera Utara",
+                            location=="Semende" ~ "Sumatera Selatan",
+                            location=="Singapore" ~ "Central",
+                            location=="Southern Mindanao" ~ "Davao del Sur",
+                            location=="Southern Thailand" & (ethnicity =="Maniq" | ethnicity == "Southern Thai_AN") ~ "Narathiwat",
+                            location=="Southern Thailand" & ethnicity == "Southern Thai_TK" ~ "Surat Thani",
+                            location=="Stung Treng" ~ "Stoeng Treng",
+                            location=="Tak, Mae Hong Son, and Kanchanaburi" ~ "Mae Hong Son",
+                            location=="Thailand" & ethnicity == "Taiwan" ~ "Taiwan",
+                            location=="Vietnam" & ethnicity == "Kinh, Cham, Ede, Giarai" ~ "Ninh Thuan",
+                            location=="Vietnam" & ethnicity == "Kinh, Muong, Khmer" ~ "Ho Chi Minh",
+                            location=="Vietnam" & ethnicity == "Kinh, Tay, Thai, Muong, Hmong" ~ "Hoa Binh",
+                            location=="Wallacea" ~ "Sulawesi Tengah",
+                            location=="China" ~ "Yunnan",
+                            location=="Lancang, China" ~ "Yunnan",
+                            location=="Dehong, China" ~ "Yunnan",
+                            location=="Yunnan, China" ~ "Yunnan",
+                            location=="Brunei (Borneo)" ~ "Brunei and Muara",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Prey Veng" ~ "Prey Veng",
+                            location=="Banteay Meanchey" ~ "Banteay Meanchey",
+                            location=="Kampong Thom" ~ "Kampong Thum",
+                            location=="Kampong Cham" ~ "Kampong Cham",
+                            location=="Kratie" ~ "Kracheh",
+                            location=="Takeo" ~ "Takev",
+                            location=="Battanbang" ~ "Batdambang",
+                            location=="Kampong Chahnang" ~ "Kampong Chhnang",
+                            location=="Pursat" ~ "Pouthisat",
+                            location=="Phnom Penh" ~ "Phnom Penh",
+                            location=="Kampot" ~ "Kampot",
+                            location=="Kandal" ~ "Kandal",
+                            location=="Oddar Meanchey" ~ "Otdar Mean Chey",
+                            location=="Koh Kong" ~ "Kaoh Kong",
+                            location=="Svay Rieng" ~ "Svay Rieng",
+                            location=="Alor" ~ "Nusa Tenggara Timur",
+                            location=="Ambon" ~ "Maluku",
+                            location=="Bali" ~ "Bali",
+                            location=="South Kalimantan" ~ "Kalimantan Selatan",
+                            location=="Padang" ~ "Sumatera Barat",
+                            location=="Sumatra" ~ "Sumatera Barat",
+                            location=="Java, Demak" ~ "Jawa Tengah",
+                            location=="Sumatra, Kutaradja" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="West New Guinea" ~ "Papua Barat",
+                            location=="Manado" ~ "Sulawesi Utara",
+                            location=="Sulawesi" ~ "Sulawesi Tengah",
+                            location=="Sulawesi, Manado" ~ "Sulawesi Utara",
+                            location=="Sumatra, Padang" ~ "Sumatera Barat",
+                            location=="Sumatra, Palembang" ~ "Sumatera Selatan",
+                            location=="Palangkaraya" ~ "Kalimantan Tengah",
+                            location=="South Borneo" ~ "Kalimantan Selatan",
+                            location=="Pagaralam" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="Toraja" ~ "Sulawesi Selatan",
+                            location=="Ujung Pandang" ~ "Sulawesi Selatan",
+                            location=="Waigapu (Sumba)" ~ "Nusa Tenggara Timur",
+                            location=="Sumba" ~ "Nusa Tenggara Timur",
+                            location=="Banjarmasin (Borneo)" ~ "Kalimantan Selatan",
+                            location=="Palangkaraya (Borneo)" ~ "Kalimantan Tengah",
+                            location=="North Laos" ~ "Louangphrabang",
+                            location=="Central Laos" ~ "Vientiane",
+                            location=="Kedah" ~ "Kedah",
+                            location=="Acheh-Kedah Yan" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor" ~ "Johor",
+                            location=="Johor Pontian" ~ "Johor",
+                            location=="Banjar Perak Kuala Kurau" ~ "Kedah",
+                            location=="Perak, Banjar Malay" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor Semerah Jawa" ~ "Johor",
+                            location=="Johor Muar Jawa" ~ "Johor",
+                            location=="Sabah" ~ "Johor",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Kelantan Kota Bahru" ~ "Kelantan",
+                            location=="Negeri Sembilan" ~ "Negeri Sembilan",
+                            location=="Minangkabau-Negeri Sembilan Lenggeng" ~ "Negeri Sembilan",
+                            location=="Kelantan RantauPanjang" ~ "Kelantan",
+                            location=="Perak, Rawa Malay" ~ "Perak",
+                            location=="Kota Kinabalu (Borneo)" ~ "Sabah",
+                            location=="Yangon" ~ "Yangon",
+                            location=="Pakokku" ~ "Mon",
+                            location=="Bataan" ~ "Bataan",
+                            location=="Zambales" ~ "Zambales",
+                            location=="Iriga" ~ "Camarines Sur",
+                            location=="Batan Archipelago" ~ "Bataan",
+                            location=="Cebu" ~ "Cebu",
+                            location=="Philippines Bohol" ~ "Bohol",
+                            location=="Luzon" ~ "Bulacan",
+                            location=="North Thailand" ~ "Chiang Mai",
+                            location=="Northeast Thailand" ~ "Samut Prakan",
+                            location=="Northern Thailand" ~ "Chiang Mai",
+                            location=="Central Thailand" ~ "Bangkok Metropolis",
+                            location=="Mergui Archipelago" ~ "Tanintharyi",
+                            location=="West Thailand" ~ "Surat Thani",
+                            location=="Baucau" ~ "Baucau",
+                            location=="Liquica" ~ "Liquica",
+                            location=="Cova Lima" ~ "Covalima",
+                            location=="Viqueque" ~ "Viqueque",
+                            location=="Aileu" ~ "Aileu",
+                            location=="Ermera" ~ "Ermera",
+                            location=="Dili" ~ "Dili",
+                            location=="Manufahi" ~ "Manufahi",
+                            ethnicity=="Cham" ~ "Ninh Thuan",
+                            ethnicity=="CoLao" ~ "Ha Giang",
+                            ethnicity=="Dao" ~ "Ha Giang",
+                            ethnicity=="Kinh" ~ "Ha Noi",
+                            ethnicity=="Stieng" ~ "Binh Phuoc",
+                            ethnicity=="Ede" ~ "Dak Lak",
+                            ethnicity=="Giarai" ~ "Gia Lai",
+                            ethnicity=="HaNhi" ~ "Lai Chau",
+                            ethnicity=="Hmong" ~ "Dien Bien",
+                            ethnicity=="Hui" ~ "Ha Giang",
+                            ethnicity=="LaChi" ~ "Ha Giang",
+                            ethnicity=="LaHu" ~ "Lai Chau",
+                            ethnicity=="LoLo" ~ "Ha Giang",
+                            ethnicity=="Mang" ~ "Lai Chau",
+                            ethnicity=="Nung" ~ "Lang Son",
+                            ethnicity=="PaThen" ~ "Ha Giang",
+                            ethnicity=="PhuLa" ~ "Lao Cai",
+                            ethnicity=="SiLa" ~ "Lai Chau",
+                            ethnicity=="Tay" ~ "Lang Son",
+                            ethnicity=="Thai" ~ "Son La",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Yao" ~ "Ha Giang",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Tay Nung" ~ "Lao Cai",
+                            TRUE ~ location),) %>% setDT()
+
+hap_ethnic_CAM <- dat_ethnic_CAM[, .N, by = .(haplo1, ethnicity, location)] %>% arrange(desc(N))
+hap_ethnic_CAM1 <- dat_ethnic_CAM[, .N, by = .(haplo1)] %>% arrange(desc(N))
+
+pre_ethnic_CAM <- dat_ethnic_CAM %>% 
+  group_by(ethnicity, haplo1) %>% 
+  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(ethnicity, haplo1, N1) %>%
+  group_by(ethnicity, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(ethnicity) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup()
+
+ethnicity_CAM <- dat_ethnic_CAM %>% 
+  mutate(haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1)) %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(country, ethnicity, location, haplo1, N1) %>%
+  group_by(country, ethnicity, location, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(country, ethnicity, location) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup() %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(sum=sum(N1), max=max(sum)) %>%
+  group_by(country, ethnicity, location) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo1_max=haplo1[order==1]) %>% ungroup %>%
+  dplyr::select(-country)
+
+ethnicity_CAM_sf <- merge(ethnicity_CAM, CAM_sf, by=c("location"))
+ethnicity_CAM_plot <- ethnicity_CAM_sf %>% st_as_sf(crs = 4326)
+
+# Convert your dataset to an sf object
+CAM_sf <- st_as_sf(CAM_sf)
+
+# Check for empty geometries
+CAM_sf <- CAM_sf[!st_is_empty(CAM_sf), ]
+
+locations <- CAM_sf
+locations_coords <- st_coordinates(st_centroid(CAM_sf)) %>%
+  data.frame(stringsAsFactors = FALSE) %>%
+  mutate(ID = locations$location)
+
+table(dat_ethnic_CAM$location %in% locations$location)
+
+dat2 <- dat_ethnic_CAM %>% filter(!location %in% locations$location)
+
+res <- ethnicity_CAM %>%
+  dplyr::rename(ID=location) %>%
+  dplyr::rename(key=haplo1, value=N1) %>%
+  arrange(key)
+
+res <- res %>% left_join(locations_coords) %>% filter(!is.na(ID))
+
+# dt_res <- spread(res, key = key, value = value) %>% replace(is.na(.), 0)
+
+dt_res <- res %>% 
+  group_by(ethnicity, ID) %>% 
+  mutate(Var = paste0("Val", row_number())) %>% 
+  spread(key, value) %>% replace(is.na(.), 0) %>%
+  ungroup()
+
+DT <- dt_res %>% dplyr::select(-c(1:10))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+location <- dt_res$ID
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(location=order(ID)) %>% left_join(locations_coords) %>% dplyr::rename(x=X, y=Y)
+dt_x <- dt %>% dplyr::select(-c(location, ID))
+
+g_cam <- ggplot() + geom_sf(data=CAM_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_CAM_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_CAM_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.2), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  guides(fill=guide_legend(nrow = 6, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Cambodia")
+
+g_cam
+
+ggsave(filename = file.path("figures", "Haplo_location_Cambodia.png"), width = 10, height = 12)
+
+ethnicity_CAM_plot_max <- ethnicity_CAM_plot %>% group_by(ethnicity) %>% slice(1)
+ethnicity_CAM_max <- ethnicity_CAM_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
+
+e_cam <- ggplot() + geom_sf(data=CAM_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_CAM_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_CAM_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.2), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  annotate(geom = "table", x = 108, y = 9.5, label = list(ethnicity_CAM_max), size = 3) +
+  guides(fill=guide_legend(nrow = 6, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Cambodia")
+
+e_cam
+
+ggsave(filename = file.path("figures", "Haplo_ethnic_Cambodia.png"), width = 10, height = 12)
+
+## Indonesia
+
+# SEA1_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1_sf, file = "data/SEA1_sf.RData")
+
+# SEA1p_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, china_CHN1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, taiwan_TWN1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1p_sf, file = "data/SEA1p_sf.RData")
+
+# load("data/SEA1_sf.RData")
+load("data/SEA1p_sf.RData")
+IND_sf <- SEA1p_sf %>% dplyr::rename(country=NAME_0, location=NAME_1, type=ENGTYPE_1) %>% dplyr::filter(country=="Indonesia")
+IND_sf$location <- stri_trans_general(IND_sf$location, "Latin-ASCII")
+IND_sf$location <- trimws(gsub("\\s+", " ", IND_sf$location))
+IND_sf <- IND_sf %>% dplyr::select(country, location, type, geometry)
+
+library(readxl)
+# SEA <- read_excel("Changed_SEA_haplogroups.xlsx")
+SEA <- read_excel("Changed_SEA_haplogroups_new.xlsx") %>%
+  mutate(Ethnicity=ifelse(Ethnicity=="Yao", "Dao", 
+                          ifelse(Ethnicity=="Bru", "Bru (Brao)", 
+                                 ifelse(Ethnicity=="Aeta" | Ethnicity=="Agta", "Aeta (Agta)",
+                                        ifelse(Ethnicity=="Filipino" | Ethnicity=="Tagalog", "Filipino (or Tagalog)",
+                                               ifelse(Ethnicity=="Arakanese" | Ethnicity=="Rakhine", "Arakanese (or Rakhine)",
+                                                      ifelse(Ethnicity=="Kankanaey" | Ethnicity=="Igorot", "Kankanaey (or Igorot)",
+                                                             Ethnicity)))))))
+IND <- SEA %>% filter(Country=="Indonesia")
+
+ethnic_IND <- IND[,-c(1,3,4,7,8)] %>% dplyr::rename(country=Country, ethnicity=Ethnicity, location=Location, sum=`Sample size`)
+ethnic_IND <- ethnic_IND %>% 
+  mutate(across(where(is.character), ~na_if(., "-"))) %>%
+  mutate_at(c(4:609), as.numeric) %>%
+  mutate(across(where(is.numeric), ~replace_na(., 0))) %>% dplyr::select(-sum) %>% setDT()
+
+ethnic_IND <- gather(ethnic_IND, haplo, N, -country, -ethnicity, -location, factor_key=TRUE) %>% setDT()
+
+dat_ethnic_IND <- ethnic_IND %>%
+  mutate(haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", " A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
+         haplo1=ifelse(is.na(haplo1), haplo, haplo1),
+         haplo1=case_when(haplo1 %in% c("135", "156", "159", "167", "172", "175", "182", "187", "197", "246", "261", "263", "264", "266", "272", "299", "316", "318", "349", "372", "377", "422", "430", "436", "481", "487", "494", "499", "562", "566", "595", "604", "168", "30", "32", "50", "51", "53", "530", "62", "73", "78", "90", "563") ~ haplo, 
+                          TRUE ~ haplo1),
+         haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
+         haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("F1+16189"), "F1+", haplo1),
+         haplo1=ifelse(haplo %in% c("HV12b1"), "HV12", haplo1),
+         haplo1=ifelse(haplo %in% c("M1'20'51"), "M1'", haplo1),
+         haplo1=ifelse(haplo %in% c("M4''67"), "M4'", haplo1),
+         haplo1=ifelse(haplo %in% c("P1+152"), "P1+", haplo1),
+         haplo1=ifelse(haplo %in% c("P2*1", "P2*1a", "P2*2"), "P2*", haplo1),
+         haplo1=ifelse(haplo %in% c("Q1+@16223"), "Q1+", haplo1),
+         haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         haplo1=ifelse(haplo %in% c("R2+13500"), "R2+", haplo1),
+         haplo1=ifelse(haplo %in% c("R6+16129*"), "R6+", haplo1),
+         location=case_when(location=="Akar" ~ "Bengkulu",
+                            location=="Akar Jambat" ~ "Bengkulu",
+                            location=="Alor Island" ~ "Nusa Tenggara Timur",
+                            location=="Andaman Sea coast" ~ "Krabi",
+                            location=="Bangkok" ~ "Bangkok Metropolis",
+                            location=="Borneo" ~ "Kalimantan Timur",
+                            location=="Capul's island in Northern Samar" ~ "Northern Samar",
+                            location=="Columbio" ~ "Sultan Kudarat",
+                            location=="Dulag" ~ "Leyte",
+                            location=="East Malaysia on the island of Borneo" ~ "Sarawak",
+                            location=="Ibabao, Cordova, Cebu City" ~ "Cebu",
+                            location=="Jangkar" ~ "Jawa Timur",
+                            location=="Jemaring" ~ "Sumatera Selatan",
+                            location=="Kachin State" ~ "Kachin",
+                            location=="Kayin State" ~ "Kachin",
+                            location=="Kota Kinabalu" ~ "Sabah",
+                            location=="Lipa" ~ "Batangas",
+                            location=="Luzon, Visayas, Mindanao" ~ "Quezon",
+                            location=="Mataran (or Mataram)" ~ "Nusa Tenggara Barat",
+                            location=="Merpayang Pauna" ~ "Sumatera Selatan",
+                            location=="Mindanao" ~ "Davao del Sur",
+                            location=="Mon, Kayin State" ~ "Kachin",
+                            location=="North Thailand, Central Thailand (Kanchanaburi and Ratchaburi)" ~ "Ratchaburi",
+                            location=="Northern Mindanao" ~ "Bukidnon",
+                            location=="Nothern Luzon" ~ "Cagayan",
+                            location=="Pelagaran" ~ "Sumatera Selatan",
+                            location=="Pelagaran Jambat" ~ "Sumatera Selatan",
+                            location=="Palembang" ~ "Sumatera Selatan",
+                            location=="Pang Mapha" ~ "Mae Hong Son",
+                            location=="Papua New Guinea" ~ "Papua",
+                            location=="Peninsular Malaysia" ~ "Pahang",
+                            location=="Philippines" ~ "Metropolitan Manila",
+                            location=="President Quirino" ~ "Sultan Kudarat",
+                            location=="Ratanakiri" ~ "Rotanokiri",
+                            location=="Salak" ~ "Sumatera Utara",
+                            location=="Semende" ~ "Sumatera Selatan",
+                            location=="Singapore" ~ "Central",
+                            location=="Southern Mindanao" ~ "Davao del Sur",
+                            location=="Southern Thailand" & (ethnicity =="Maniq" | ethnicity == "Southern Thai_AN") ~ "Narathiwat",
+                            location=="Southern Thailand" & ethnicity == "Southern Thai_TK" ~ "Surat Thani",
+                            location=="Stung Treng" ~ "Stoeng Treng",
+                            location=="Tak, Mae Hong Son, and Kanchanaburi" ~ "Mae Hong Son",
+                            location=="Thailand" & ethnicity == "Taiwan" ~ "Taiwan",
+                            location=="Vietnam" & ethnicity == "Kinh, Cham, Ede, Giarai" ~ "Ninh Thuan",
+                            location=="Vietnam" & ethnicity == "Kinh, Muong, Khmer" ~ "Ho Chi Minh",
+                            location=="Vietnam" & ethnicity == "Kinh, Tay, Thai, Muong, Hmong" ~ "Hoa Binh",
+                            location=="Wallacea" ~ "Sulawesi Tengah",
+                            location=="China" ~ "Yunnan",
+                            location=="Lancang, China" ~ "Yunnan",
+                            location=="Dehong, China" ~ "Yunnan",
+                            location=="Yunnan, China" ~ "Yunnan",
+                            location=="Brunei (Borneo)" ~ "Brunei and Muara",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Prey Veng" ~ "Prey Veng",
+                            location=="Banteay Meanchey" ~ "Banteay Meanchey",
+                            location=="Kampong Thom" ~ "Kampong Thum",
+                            location=="Kampong Cham" ~ "Kampong Cham",
+                            location=="Kratie" ~ "Kracheh",
+                            location=="Takeo" ~ "Takev",
+                            location=="Battanbang" ~ "Batdambang",
+                            location=="Kampong Chahnang" ~ "Kampong Chhnang",
+                            location=="Pursat" ~ "Pouthisat",
+                            location=="Phnom Penh" ~ "Phnom Penh",
+                            location=="Kampot" ~ "Kampot",
+                            location=="Kandal" ~ "Kandal",
+                            location=="Oddar Meanchey" ~ "Otdar Mean Chey",
+                            location=="Koh Kong" ~ "Kaoh Kong",
+                            location=="Svay Rieng" ~ "Svay Rieng",
+                            location=="Alor" ~ "Nusa Tenggara Timur",
+                            location=="Ambon" ~ "Maluku",
+                            location=="Bali" ~ "Bali",
+                            location=="South Kalimantan" ~ "Kalimantan Selatan",
+                            location=="Padang" ~ "Sumatera Barat",
+                            location=="Sumatra" ~ "Sumatera Barat",
+                            location=="Java, Demak" ~ "Jawa Tengah",
+                            location=="Sumatra, Kutaradja" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="West New Guinea" ~ "Papua Barat",
+                            location=="Manado" ~ "Sulawesi Utara",
+                            location=="Sulawesi" ~ "Sulawesi Tengah",
+                            location=="Sulawesi, Manado" ~ "Sulawesi Utara",
+                            location=="Sumatra, Padang" ~ "Sumatera Barat",
+                            location=="Sumatra, Palembang" ~ "Sumatera Selatan",
+                            location=="Palangkaraya" ~ "Kalimantan Tengah",
+                            location=="South Borneo" ~ "Kalimantan Selatan",
+                            location=="Pagaralam" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="Toraja" ~ "Sulawesi Selatan",
+                            location=="Ujung Pandang" ~ "Sulawesi Selatan",
+                            location=="Waigapu (Sumba)" ~ "Nusa Tenggara Timur",
+                            location=="Sumba" ~ "Nusa Tenggara Timur",
+                            location=="Banjarmasin (Borneo)" ~ "Kalimantan Selatan",
+                            location=="Palangkaraya (Borneo)" ~ "Kalimantan Tengah",
+                            location=="North Laos" ~ "Louangphrabang",
+                            location=="Central Laos" ~ "Vientiane",
+                            location=="Kedah" ~ "Kedah",
+                            location=="Acheh-Kedah Yan" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor" ~ "Johor",
+                            location=="Johor Pontian" ~ "Johor",
+                            location=="Banjar Perak Kuala Kurau" ~ "Kedah",
+                            location=="Perak, Banjar Malay" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor Semerah Jawa" ~ "Johor",
+                            location=="Johor Muar Jawa" ~ "Johor",
+                            location=="Sabah" ~ "Johor",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Kelantan Kota Bahru" ~ "Kelantan",
+                            location=="Negeri Sembilan" ~ "Negeri Sembilan",
+                            location=="Minangkabau-Negeri Sembilan Lenggeng" ~ "Negeri Sembilan",
+                            location=="Kelantan RantauPanjang" ~ "Kelantan",
+                            location=="Perak, Rawa Malay" ~ "Perak",
+                            location=="Kota Kinabalu (Borneo)" ~ "Sabah",
+                            location=="Yangon" ~ "Yangon",
+                            location=="Pakokku" ~ "Mon",
+                            location=="Bataan" ~ "Bataan",
+                            location=="Zambales" ~ "Zambales",
+                            location=="Iriga" ~ "Camarines Sur",
+                            location=="Batan Archipelago" ~ "Bataan",
+                            location=="Cebu" ~ "Cebu",
+                            location=="Philippines Bohol" ~ "Bohol",
+                            location=="Luzon" ~ "Bulacan",
+                            location=="North Thailand" ~ "Chiang Mai",
+                            location=="Northeast Thailand" ~ "Samut Prakan",
+                            location=="Northern Thailand" ~ "Chiang Mai",
+                            location=="Central Thailand" ~ "Bangkok Metropolis",
+                            location=="Mergui Archipelago" ~ "Tanintharyi",
+                            location=="West Thailand" ~ "Surat Thani",
+                            location=="Baucau" ~ "Baucau",
+                            location=="Liquica" ~ "Liquica",
+                            location=="Cova Lima" ~ "Covalima",
+                            location=="Viqueque" ~ "Viqueque",
+                            location=="Aileu" ~ "Aileu",
+                            location=="Ermera" ~ "Ermera",
+                            location=="Dili" ~ "Dili",
+                            location=="Manufahi" ~ "Manufahi",
+                            ethnicity=="Cham" ~ "Ninh Thuan",
+                            ethnicity=="CoLao" ~ "Ha Giang",
+                            ethnicity=="Dao" ~ "Ha Giang",
+                            ethnicity=="Kinh" ~ "Ha Noi",
+                            ethnicity=="Stieng" ~ "Binh Phuoc",
+                            ethnicity=="Ede" ~ "Dak Lak",
+                            ethnicity=="Giarai" ~ "Gia Lai",
+                            ethnicity=="HaNhi" ~ "Lai Chau",
+                            ethnicity=="Hmong" ~ "Dien Bien",
+                            ethnicity=="Hui" ~ "Ha Giang",
+                            ethnicity=="LaChi" ~ "Ha Giang",
+                            ethnicity=="LaHu" ~ "Lai Chau",
+                            ethnicity=="LoLo" ~ "Ha Giang",
+                            ethnicity=="Mang" ~ "Lai Chau",
+                            ethnicity=="Nung" ~ "Lang Son",
+                            ethnicity=="PaThen" ~ "Ha Giang",
+                            ethnicity=="PhuLa" ~ "Lao Cai",
+                            ethnicity=="SiLa" ~ "Lai Chau",
+                            ethnicity=="Tay" ~ "Lang Son",
+                            ethnicity=="Thai" ~ "Son La",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Yao" ~ "Ha Giang",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Tay Nung" ~ "Lao Cai",
+                            TRUE ~ location),) %>% setDT()
+
+hap_ethnic_IND <- dat_ethnic_IND[, .N, by = .(haplo1, ethnicity, location)] %>% arrange(desc(N))
+hap_ethnic_IND1 <- dat_ethnic_IND[, .N, by = .(haplo1)] %>% arrange(desc(N))
+
+pre_ethnic_IND <- dat_ethnic_IND %>% 
+  group_by(ethnicity, haplo1) %>% 
+  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(ethnicity, haplo1, N1) %>%
+  group_by(ethnicity, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(ethnicity) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup()
+
+ethnicity_IND <- dat_ethnic_IND %>% 
+  mutate(haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1)) %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(country, ethnicity, location, haplo1, N1) %>%
+  group_by(country, ethnicity, location, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(country, ethnicity, location) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup() %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(sum=sum(N1), max=max(sum)) %>%
+  group_by(country, ethnicity, location) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo1_max=haplo1[order==1]) %>% ungroup %>%
+  dplyr::select(-country)
+
+ethnicity_IND_sf <- merge(ethnicity_IND, IND_sf, by=c("location"))
+ethnicity_IND_plot <- ethnicity_IND_sf %>% st_as_sf(crs = 4326)
+
+# Convert your dataset to an sf object
+IND_sf <- st_as_sf(IND_sf)
+
+# Check for empty geometries
+IND_sf <- IND_sf[!st_is_empty(IND_sf), ]
+
+locations <- IND_sf
+locations_coords <- st_coordinates(st_centroid(IND_sf)) %>%
+  data.frame(stringsAsFactors = FALSE) %>%
+  mutate(ID = locations$location)
+
+table(dat_ethnic_IND$location %in% locations$location)
+
+dat2 <- dat_ethnic_IND %>% filter(!location %in% locations$location)
+
+res <- ethnicity_IND %>%
+  dplyr::rename(ID=location) %>%
+  dplyr::rename(key=haplo1, value=N1) %>%
+  arrange(key)
+
+res <- res %>% left_join(locations_coords) %>% filter(!is.na(ID))
+
+# dt_res <- spread(res, key = key, value = value) %>% replace(is.na(.), 0)
+
+dt_res <- res %>% 
+  group_by(ethnicity, ID) %>% 
+  mutate(Var = paste0("Val", row_number())) %>% 
+  spread(key, value) %>% replace(is.na(.), 0) %>%
+  ungroup()
+
+DT <- dt_res %>% dplyr::select(-c(1:10))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+location <- dt_res$ID
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(location=order(ID)) %>% left_join(locations_coords) %>% dplyr::rename(x=X, y=Y)
+dt_x <- dt %>% dplyr::select(-c(location, ID))
+
+g_ind <- ggplot() + geom_sf(data=IND_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_IND_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_IND_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  guides(fill=guide_legend(nrow = 4, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Indonesia")
+
+g_ind
+
+ggsave(filename = file.path("figures", "Haplo_location_Indonesia.png"), width = 15, height = 10)
+
+ethnicity_IND_plot_max <- ethnicity_IND_plot %>% group_by(ethnicity) %>% slice(1)
+ethnicity_IND_max <- ethnicity_IND_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
+
+e_ind <- ggplot() + geom_sf(data=IND_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_IND_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_IND_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  annotate(geom = "table", x = 90, y = -20, label = list(ethnicity_IND_max), size = 2) +
+  guides(fill=guide_legend(nrow = 4, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Indonesia")
+
+e_ind
+
+ggsave(filename = file.path("figures", "Haplo_ethnic_Indonesia.png"), width = 15, height = 10)
+
+## Laos
+
+# SEA1_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1_sf, file = "data/SEA1_sf.RData")
+
+# SEA1p_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, china_CHN1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, taiwan_TWN1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1p_sf, file = "data/SEA1p_sf.RData")
+
+# load("data/SEA1_sf.RData")
+load("data/SEA1p_sf.RData")
+LAO_sf <- SEA1p_sf %>% dplyr::rename(country=NAME_0, location=NAME_1, type=ENGTYPE_1) %>% dplyr::filter(country=="Laos")
+LAO_sf$location <- stri_trans_general(LAO_sf$location, "Latin-ASCII")
+LAO_sf$location <- trimws(gsub("\\s+", " ", LAO_sf$location))
+LAO_sf <- LAO_sf %>% dplyr::select(country, location, type, geometry)
+
+library(readxl)
+# SEA <- read_excel("Changed_SEA_haplogroups.xlsx")
+SEA <- read_excel("Changed_SEA_haplogroups_new.xlsx") %>%
+  mutate(Ethnicity=ifelse(Ethnicity=="Yao", "Dao", 
+                          ifelse(Ethnicity=="Bru", "Bru (Brao)", 
+                                 ifelse(Ethnicity=="Aeta" | Ethnicity=="Agta", "Aeta (Agta)",
+                                        ifelse(Ethnicity=="Filipino" | Ethnicity=="Tagalog", "Filipino (or Tagalog)",
+                                               ifelse(Ethnicity=="Arakanese" | Ethnicity=="Rakhine", "Arakanese (or Rakhine)",
+                                                      ifelse(Ethnicity=="Kankanaey" | Ethnicity=="Igorot", "Kankanaey (or Igorot)",
+                                                             Ethnicity)))))))
+LAO <- SEA %>% filter(Country=="Laos")
+
+ethnic_LAO <- LAO[,-c(1,3,4,7,8)] %>% dplyr::rename(country=Country, ethnicity=Ethnicity, location=Location, sum=`Sample size`)
+ethnic_LAO <- ethnic_LAO %>% 
+  mutate(across(where(is.character), ~na_if(., "-"))) %>%
+  mutate_at(c(4:609), as.numeric) %>%
+  mutate(across(where(is.numeric), ~replace_na(., 0))) %>% dplyr::select(-sum) %>% setDT()
+
+ethnic_LAO <- gather(ethnic_LAO, haplo, N, -country, -ethnicity, -location, factor_key=TRUE) %>% setDT()
+
+dat_ethnic_LAO <- ethnic_LAO %>%
+  mutate(haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", " A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
+         haplo1=ifelse(is.na(haplo1), haplo, haplo1),
+         haplo1=case_when(haplo1 %in% c("135", "156", "159", "167", "172", "175", "182", "187", "197", "246", "261", "263", "264", "266", "272", "299", "316", "318", "349", "372", "377", "422", "430", "436", "481", "487", "494", "499", "562", "566", "595", "604", "168", "30", "32", "50", "51", "53", "530", "62", "73", "78", "90", "563") ~ haplo, 
+                          TRUE ~ haplo1),
+         haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
+         haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         location=case_when(location=="Akar" ~ "Bengkulu",
+                            location=="Akar Jambat" ~ "Bengkulu",
+                            location=="Alor Island" ~ "Nusa Tenggara Timur",
+                            location=="Andaman Sea coast" ~ "Krabi",
+                            location=="Bangkok" ~ "Bangkok Metropolis",
+                            location=="Borneo" ~ "Kalimantan Timur",
+                            location=="Capul's island in Northern Samar" ~ "Northern Samar",
+                            location=="Columbio" ~ "Sultan Kudarat",
+                            location=="Dulag" ~ "Leyte",
+                            location=="East Malaysia on the island of Borneo" ~ "Sarawak",
+                            location=="Ibabao, Cordova, Cebu City" ~ "Cebu",
+                            location=="Jangkar" ~ "Jawa Timur",
+                            location=="Jemaring" ~ "Sumatera Selatan",
+                            location=="Kachin State" ~ "Kachin",
+                            location=="Kayin State" ~ "Kachin",
+                            location=="Kota Kinabalu" ~ "Sabah",
+                            location=="Lipa" ~ "Batangas",
+                            location=="Luzon, Visayas, Mindanao" ~ "Quezon",
+                            location=="Mataran (or Mataram)" ~ "Nusa Tenggara Barat",
+                            location=="Merpayang Pauna" ~ "Sumatera Selatan",
+                            location=="Mindanao" ~ "Davao del Sur",
+                            location=="Mon, Kayin State" ~ "Kachin",
+                            location=="North Thailand, Central Thailand (Kanchanaburi and Ratchaburi)" ~ "Ratchaburi",
+                            location=="Northern Mindanao" ~ "Bukidnon",
+                            location=="Nothern Luzon" ~ "Cagayan",
+                            location=="Pelagaran" ~ "Sumatera Selatan",
+                            location=="Pelagaran Jambat" ~ "Sumatera Selatan",
+                            location=="Palembang" ~ "Sumatera Selatan",
+                            location=="Pang Mapha" ~ "Mae Hong Son",
+                            location=="Papua New Guinea" ~ "Papua",
+                            location=="Peninsular Malaysia" ~ "Pahang",
+                            location=="Philippines" ~ "Metropolitan Manila",
+                            location=="President Quirino" ~ "Sultan Kudarat",
+                            location=="Ratanakiri" ~ "Rotanokiri",
+                            location=="Salak" ~ "Sumatera Utara",
+                            location=="Semende" ~ "Sumatera Selatan",
+                            location=="Singapore" ~ "Central",
+                            location=="Southern Mindanao" ~ "Davao del Sur",
+                            location=="Southern Thailand" & (ethnicity =="Maniq" | ethnicity == "Southern Thai_AN") ~ "Narathiwat",
+                            location=="Southern Thailand" & ethnicity == "Southern Thai_TK" ~ "Surat Thani",
+                            location=="Stung Treng" ~ "Stoeng Treng",
+                            location=="Tak, Mae Hong Son, and Kanchanaburi" ~ "Mae Hong Son",
+                            location=="Thailand" & ethnicity == "Taiwan" ~ "Taiwan",
+                            location=="Vietnam" & ethnicity == "Kinh, Cham, Ede, Giarai" ~ "Ninh Thuan",
+                            location=="Vietnam" & ethnicity == "Kinh, Muong, Khmer" ~ "Ho Chi Minh",
+                            location=="Vietnam" & ethnicity == "Kinh, Tay, Thai, Muong, Hmong" ~ "Hoa Binh",
+                            location=="Wallacea" ~ "Sulawesi Tengah",
+                            location=="China" ~ "Yunnan",
+                            location=="Lancang, China" ~ "Yunnan",
+                            location=="Dehong, China" ~ "Yunnan",
+                            location=="Yunnan, China" ~ "Yunnan",
+                            location=="Brunei (Borneo)" ~ "Brunei and Muara",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Prey Veng" ~ "Prey Veng",
+                            location=="Banteay Meanchey" ~ "Banteay Meanchey",
+                            location=="Kampong Thom" ~ "Kampong Thum",
+                            location=="Kampong Cham" ~ "Kampong Cham",
+                            location=="Kratie" ~ "Kracheh",
+                            location=="Takeo" ~ "Takev",
+                            location=="Battanbang" ~ "Batdambang",
+                            location=="Kampong Chahnang" ~ "Kampong Chhnang",
+                            location=="Pursat" ~ "Pouthisat",
+                            location=="Phnom Penh" ~ "Phnom Penh",
+                            location=="Kampot" ~ "Kampot",
+                            location=="Kandal" ~ "Kandal",
+                            location=="Oddar Meanchey" ~ "Otdar Mean Chey",
+                            location=="Koh Kong" ~ "Kaoh Kong",
+                            location=="Svay Rieng" ~ "Svay Rieng",
+                            location=="Alor" ~ "Nusa Tenggara Timur",
+                            location=="Ambon" ~ "Maluku",
+                            location=="Bali" ~ "Bali",
+                            location=="South Kalimantan" ~ "Kalimantan Selatan",
+                            location=="Padang" ~ "Sumatera Barat",
+                            location=="Sumatra" ~ "Sumatera Barat",
+                            location=="Java, Demak" ~ "Jawa Tengah",
+                            location=="Sumatra, Kutaradja" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="West New Guinea" ~ "Papua Barat",
+                            location=="Manado" ~ "Sulawesi Utara",
+                            location=="Sulawesi" ~ "Sulawesi Tengah",
+                            location=="Sulawesi, Manado" ~ "Sulawesi Utara",
+                            location=="Sumatra, Padang" ~ "Sumatera Barat",
+                            location=="Sumatra, Palembang" ~ "Sumatera Selatan",
+                            location=="Palangkaraya" ~ "Kalimantan Tengah",
+                            location=="South Borneo" ~ "Kalimantan Selatan",
+                            location=="Pagaralam" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="Toraja" ~ "Sulawesi Selatan",
+                            location=="Ujung Pandang" ~ "Sulawesi Selatan",
+                            location=="Waigapu (Sumba)" ~ "Nusa Tenggara Timur",
+                            location=="Sumba" ~ "Nusa Tenggara Timur",
+                            location=="Banjarmasin (Borneo)" ~ "Kalimantan Selatan",
+                            location=="Palangkaraya (Borneo)" ~ "Kalimantan Tengah",
+                            location=="North Laos" ~ "Louangphrabang",
+                            location=="Central Laos" ~ "Vientiane",
+                            location=="Kedah" ~ "Kedah",
+                            location=="Acheh-Kedah Yan" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor" ~ "Johor",
+                            location=="Johor Pontian" ~ "Johor",
+                            location=="Banjar Perak Kuala Kurau" ~ "Kedah",
+                            location=="Perak, Banjar Malay" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor Semerah Jawa" ~ "Johor",
+                            location=="Johor Muar Jawa" ~ "Johor",
+                            location=="Sabah" ~ "Johor",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Kelantan Kota Bahru" ~ "Kelantan",
+                            location=="Negeri Sembilan" ~ "Negeri Sembilan",
+                            location=="Minangkabau-Negeri Sembilan Lenggeng" ~ "Negeri Sembilan",
+                            location=="Kelantan RantauPanjang" ~ "Kelantan",
+                            location=="Perak, Rawa Malay" ~ "Perak",
+                            location=="Kota Kinabalu (Borneo)" ~ "Sabah",
+                            location=="Yangon" ~ "Yangon",
+                            location=="Pakokku" ~ "Mon",
+                            location=="Bataan" ~ "Bataan",
+                            location=="Zambales" ~ "Zambales",
+                            location=="Iriga" ~ "Camarines Sur",
+                            location=="Batan Archipelago" ~ "Bataan",
+                            location=="Cebu" ~ "Cebu",
+                            location=="Philippines Bohol" ~ "Bohol",
+                            location=="Luzon" ~ "Bulacan",
+                            location=="North Thailand" ~ "Chiang Mai",
+                            location=="Northeast Thailand" ~ "Samut Prakan",
+                            location=="Northern Thailand" ~ "Chiang Mai",
+                            location=="Central Thailand" ~ "Bangkok Metropolis",
+                            location=="Mergui Archipelago" ~ "Tanintharyi",
+                            location=="West Thailand" ~ "Surat Thani",
+                            location=="Baucau" ~ "Baucau",
+                            location=="Liquica" ~ "Liquica",
+                            location=="Cova Lima" ~ "Covalima",
+                            location=="Viqueque" ~ "Viqueque",
+                            location=="Aileu" ~ "Aileu",
+                            location=="Ermera" ~ "Ermera",
+                            location=="Dili" ~ "Dili",
+                            location=="Manufahi" ~ "Manufahi",
+                            ethnicity=="Cham" ~ "Ninh Thuan",
+                            ethnicity=="CoLao" ~ "Ha Giang",
+                            ethnicity=="Dao" ~ "Ha Giang",
+                            ethnicity=="Kinh" ~ "Ha Noi",
+                            ethnicity=="Stieng" ~ "Binh Phuoc",
+                            ethnicity=="Ede" ~ "Dak Lak",
+                            ethnicity=="Giarai" ~ "Gia Lai",
+                            ethnicity=="HaNhi" ~ "Lai Chau",
+                            ethnicity=="Hmong" ~ "Dien Bien",
+                            ethnicity=="Hui" ~ "Ha Giang",
+                            ethnicity=="LaChi" ~ "Ha Giang",
+                            ethnicity=="LaHu" ~ "Lai Chau",
+                            ethnicity=="LoLo" ~ "Ha Giang",
+                            ethnicity=="Mang" ~ "Lai Chau",
+                            ethnicity=="Nung" ~ "Lang Son",
+                            ethnicity=="PaThen" ~ "Ha Giang",
+                            ethnicity=="PhuLa" ~ "Lao Cai",
+                            ethnicity=="SiLa" ~ "Lai Chau",
+                            ethnicity=="Tay" ~ "Lang Son",
+                            ethnicity=="Thai" ~ "Son La",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Yao" ~ "Ha Giang",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Tay Nung" ~ "Lao Cai",
+                            TRUE ~ location),) %>% setDT()
+
+hap_ethnic_LAO <- dat_ethnic_LAO[, .N, by = .(haplo1, ethnicity, location)] %>% arrange(desc(N))
+hap_ethnic_LAO1 <- dat_ethnic_LAO[, .N, by = .(haplo1)] %>% arrange(desc(N))
+
+pre_ethnic_LAO <- dat_ethnic_LAO %>% 
+  group_by(ethnicity, haplo1) %>% 
+  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(ethnicity, haplo1, N1) %>%
+  group_by(ethnicity, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(ethnicity) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup()
+
+ethnicity_LAO <- dat_ethnic_LAO %>% 
+  mutate(haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1)) %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(country, ethnicity, location, haplo1, N1) %>%
+  group_by(country, ethnicity, location, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(country, ethnicity, location) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup() %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(sum=sum(N1), max=max(sum)) %>%
+  group_by(country, ethnicity, location) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo1_max=haplo1[order==1]) %>% ungroup %>%
+  dplyr::select(-country)
+
+ethnicity_LAO_sf <- merge(ethnicity_LAO, LAO_sf, by=c("location"))
+ethnicity_LAO_plot <- ethnicity_LAO_sf %>% st_as_sf(crs = 4326)
+
+# Convert your dataset to an sf object
+LAO_sf <- st_as_sf(LAO_sf)
+
+# Check for empty geometries
+LAO_sf <- LAO_sf[!st_is_empty(LAO_sf), ]
+
+locations <- LAO_sf
+locations_coords <- st_coordinates(st_centroid(LAO_sf)) %>%
+  data.frame(stringsAsFactors = FALSE) %>%
+  mutate(ID = locations$location)
+
+table(dat_ethnic_LAO$location %in% locations$location)
+
+dat2 <- dat_ethnic_LAO %>% filter(!location %in% locations$location)
+
+res <- ethnicity_LAO %>%
+  dplyr::rename(ID=location) %>%
+  dplyr::rename(key=haplo1, value=N1) %>%
+  arrange(key)
+
+res <- res %>% left_join(locations_coords) %>% filter(!is.na(ID))
+
+# dt_res <- spread(res, key = key, value = value) %>% replace(is.na(.), 0)
+
+dt_res <- res %>% 
+  group_by(ethnicity, ID) %>% 
+  mutate(Var = paste0("Val", row_number())) %>% 
+  spread(key, value) %>% replace(is.na(.), 0) %>%
+  ungroup()
+
+DT <- dt_res %>% dplyr::select(-c(1:10))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+location <- dt_res$ID
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(location=order(ID)) %>% left_join(locations_coords) %>% dplyr::rename(x=X, y=Y)
+dt_x <- dt %>% dplyr::select(-c(location, ID))
+
+g_lao <- ggplot() + geom_sf(data=LAO_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_LAO_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_LAO_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Laos")
+
+g_lao
+
+ggsave(filename = file.path("figures", "Haplo_location_Laos.png"), width = 10, height = 12)
+
+ethnicity_LAO_plot_max <- ethnicity_LAO_plot %>% group_by(ethnicity) %>% slice(1)
+ethnicity_LAO_max <- ethnicity_LAO_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
+
+e_lao <- ggplot() + geom_sf(data=LAO_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_LAO_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_LAO_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  annotate(geom = "table", x = 101, y = 16, label = list(ethnicity_LAO_max), size = 3) +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Laos")
+
+e_lao
+
+ggsave(filename = file.path("figures", "Haplo_ethnic_Laos.png"), width = 10, height = 12)
+
+## Malaysia
+
+# SEA1_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1_sf, file = "data/SEA1_sf.RData")
+
+# SEA1p_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, china_CHN1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, taiwan_TWN1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1p_sf, file = "data/SEA1p_sf.RData")
+
+# load("data/SEA1_sf.RData")
+load("data/SEA1p_sf.RData")
+MAL_sf <- SEA1p_sf %>% dplyr::rename(country=NAME_0, location=NAME_1, type=ENGTYPE_1) %>% dplyr::filter(country=="Malaysia")
+MAL_sf$location <- stri_trans_general(MAL_sf$location, "Latin-ASCII")
+MAL_sf$location <- trimws(gsub("\\s+", " ", MAL_sf$location))
+MAL_sf <- MAL_sf %>% dplyr::select(country, location, type, geometry)
+
+library(readxl)
+# SEA <- read_excel("Changed_SEA_haplogroups.xlsx")
+SEA <- read_excel("Changed_SEA_haplogroups_new.xlsx") %>%
+  mutate(Ethnicity=ifelse(Ethnicity=="Yao", "Dao", 
+                          ifelse(Ethnicity=="Bru", "Bru (Brao)", 
+                                 ifelse(Ethnicity=="Aeta" | Ethnicity=="Agta", "Aeta (Agta)",
+                                        ifelse(Ethnicity=="Filipino" | Ethnicity=="Tagalog", "Filipino (or Tagalog)",
+                                               ifelse(Ethnicity=="Arakanese" | Ethnicity=="Rakhine", "Arakanese (or Rakhine)",
+                                                      ifelse(Ethnicity=="Kankanaey" | Ethnicity=="Igorot", "Kankanaey (or Igorot)",
+                                                             Ethnicity)))))))
+MAL <- SEA %>% filter(Country=="Malaysia")
+
+ethnic_MAL <- MAL[,-c(1,3,4,7,8)] %>% dplyr::rename(country=Country, ethnicity=Ethnicity, location=Location, sum=`Sample size`)
+ethnic_MAL <- ethnic_MAL %>% 
+  mutate(across(where(is.character), ~na_if(., "-"))) %>%
+  mutate_at(c(4:609), as.numeric) %>%
+  mutate(across(where(is.numeric), ~replace_na(., 0))) %>% dplyr::select(-sum) %>% setDT()
+
+ethnic_MAL <- gather(ethnic_MAL, haplo, N, -country, -ethnicity, -location, factor_key=TRUE) %>% setDT()
+
+dat_ethnic_MAL <- ethnic_MAL %>%
+  mutate(haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", " A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
+         haplo1=ifelse(is.na(haplo1), haplo, haplo1),
+         haplo1=case_when(haplo1 %in% c("135", "156", "159", "167", "172", "175", "182", "187", "197", "246", "261", "263", "264", "266", "272", "299", "316", "318", "349", "372", "377", "422", "430", "436", "481", "487", "494", "499", "562", "566", "595", "604", "168", "30", "32", "50", "51", "53", "530", "62", "73", "78", "90", "563") ~ haplo, 
+                          TRUE ~ haplo1),
+         haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
+         haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         location=case_when(location=="Akar" ~ "Bengkulu",
+                            location=="Akar Jambat" ~ "Bengkulu",
+                            location=="Alor Island" ~ "Nusa Tenggara Timur",
+                            location=="Andaman Sea coast" ~ "Krabi",
+                            location=="Bangkok" ~ "Bangkok Metropolis",
+                            location=="Borneo" ~ "Kalimantan Timur",
+                            location=="Capul's island in Northern Samar" ~ "Northern Samar",
+                            location=="Columbio" ~ "Sultan Kudarat",
+                            location=="Dulag" ~ "Leyte",
+                            location=="East Malaysia on the island of Borneo" ~ "Sarawak",
+                            location=="Ibabao, Cordova, Cebu City" ~ "Cebu",
+                            location=="Jangkar" ~ "Jawa Timur",
+                            location=="Jemaring" ~ "Sumatera Selatan",
+                            location=="Kachin State" ~ "Kachin",
+                            location=="Kayin State" ~ "Kachin",
+                            location=="Kota Kinabalu" ~ "Sabah",
+                            location=="Lipa" ~ "Batangas",
+                            location=="Luzon, Visayas, Mindanao" ~ "Quezon",
+                            location=="Mataran (or Mataram)" ~ "Nusa Tenggara Barat",
+                            location=="Merpayang Pauna" ~ "Sumatera Selatan",
+                            location=="Mindanao" ~ "Davao del Sur",
+                            location=="Mon, Kayin State" ~ "Kachin",
+                            location=="North Thailand, Central Thailand (Kanchanaburi and Ratchaburi)" ~ "Ratchaburi",
+                            location=="Northern Mindanao" ~ "Bukidnon",
+                            location=="Nothern Luzon" ~ "Cagayan",
+                            location=="Pelagaran" ~ "Sumatera Selatan",
+                            location=="Pelagaran Jambat" ~ "Sumatera Selatan",
+                            location=="Palembang" ~ "Sumatera Selatan",
+                            location=="Pang Mapha" ~ "Mae Hong Son",
+                            location=="Papua New Guinea" ~ "Papua",
+                            location=="Peninsular Malaysia" ~ "Pahang",
+                            location=="Philippines" ~ "Metropolitan Manila",
+                            location=="President Quirino" ~ "Sultan Kudarat",
+                            location=="Ratanakiri" ~ "Rotanokiri",
+                            location=="Salak" ~ "Sumatera Utara",
+                            location=="Semende" ~ "Sumatera Selatan",
+                            location=="Singapore" ~ "Central",
+                            location=="Southern Mindanao" ~ "Davao del Sur",
+                            location=="Southern Thailand" & (ethnicity =="Maniq" | ethnicity == "Southern Thai_AN") ~ "Narathiwat",
+                            location=="Southern Thailand" & ethnicity == "Southern Thai_TK" ~ "Surat Thani",
+                            location=="Stung Treng" ~ "Stoeng Treng",
+                            location=="Tak, Mae Hong Son, and Kanchanaburi" ~ "Mae Hong Son",
+                            location=="Thailand" & ethnicity == "Taiwan" ~ "Taiwan",
+                            location=="Vietnam" & ethnicity == "Kinh, Cham, Ede, Giarai" ~ "Ninh Thuan",
+                            location=="Vietnam" & ethnicity == "Kinh, Muong, Khmer" ~ "Ho Chi Minh",
+                            location=="Vietnam" & ethnicity == "Kinh, Tay, Thai, Muong, Hmong" ~ "Hoa Binh",
+                            location=="Wallacea" ~ "Sulawesi Tengah",
+                            location=="China" ~ "Yunnan",
+                            location=="Lancang, China" ~ "Yunnan",
+                            location=="Dehong, China" ~ "Yunnan",
+                            location=="Yunnan, China" ~ "Yunnan",
+                            location=="Brunei (Borneo)" ~ "Brunei and Muara",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Prey Veng" ~ "Prey Veng",
+                            location=="Banteay Meanchey" ~ "Banteay Meanchey",
+                            location=="Kampong Thom" ~ "Kampong Thum",
+                            location=="Kampong Cham" ~ "Kampong Cham",
+                            location=="Kratie" ~ "Kracheh",
+                            location=="Takeo" ~ "Takev",
+                            location=="Battanbang" ~ "Batdambang",
+                            location=="Kampong Chahnang" ~ "Kampong Chhnang",
+                            location=="Pursat" ~ "Pouthisat",
+                            location=="Phnom Penh" ~ "Phnom Penh",
+                            location=="Kampot" ~ "Kampot",
+                            location=="Kandal" ~ "Kandal",
+                            location=="Oddar Meanchey" ~ "Otdar Mean Chey",
+                            location=="Koh Kong" ~ "Kaoh Kong",
+                            location=="Svay Rieng" ~ "Svay Rieng",
+                            location=="Alor" ~ "Nusa Tenggara Timur",
+                            location=="Ambon" ~ "Maluku",
+                            location=="Bali" ~ "Bali",
+                            location=="South Kalimantan" ~ "Kalimantan Selatan",
+                            location=="Padang" ~ "Sumatera Barat",
+                            location=="Sumatra" ~ "Sumatera Barat",
+                            location=="Java, Demak" ~ "Jawa Tengah",
+                            location=="Sumatra, Kutaradja" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="West New Guinea" ~ "Papua Barat",
+                            location=="Manado" ~ "Sulawesi Utara",
+                            location=="Sulawesi" ~ "Sulawesi Tengah",
+                            location=="Sulawesi, Manado" ~ "Sulawesi Utara",
+                            location=="Sumatra, Padang" ~ "Sumatera Barat",
+                            location=="Sumatra, Palembang" ~ "Sumatera Selatan",
+                            location=="Palangkaraya" ~ "Kalimantan Tengah",
+                            location=="South Borneo" ~ "Kalimantan Selatan",
+                            location=="Pagaralam" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="Toraja" ~ "Sulawesi Selatan",
+                            location=="Ujung Pandang" ~ "Sulawesi Selatan",
+                            location=="Waigapu (Sumba)" ~ "Nusa Tenggara Timur",
+                            location=="Sumba" ~ "Nusa Tenggara Timur",
+                            location=="Banjarmasin (Borneo)" ~ "Kalimantan Selatan",
+                            location=="Palangkaraya (Borneo)" ~ "Kalimantan Tengah",
+                            location=="North Laos" ~ "Louangphrabang",
+                            location=="Central Laos" ~ "Vientiane",
+                            location=="Kedah" ~ "Kedah",
+                            location=="Acheh-Kedah Yan" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor" ~ "Johor",
+                            location=="Johor Pontian" ~ "Johor",
+                            location=="Banjar Perak Kuala Kurau" ~ "Kedah",
+                            location=="Perak, Banjar Malay" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor Semerah Jawa" ~ "Johor",
+                            location=="Johor Muar Jawa" ~ "Johor",
+                            location=="Sabah" ~ "Johor",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Kelantan Kota Bahru" ~ "Kelantan",
+                            location=="Negeri Sembilan" ~ "Negeri Sembilan",
+                            location=="Minangkabau-Negeri Sembilan Lenggeng" ~ "Negeri Sembilan",
+                            location=="Kelantan RantauPanjang" ~ "Kelantan",
+                            location=="Perak, Rawa Malay" ~ "Perak",
+                            location=="Kota Kinabalu (Borneo)" ~ "Sabah",
+                            location=="Yangon" ~ "Yangon",
+                            location=="Pakokku" ~ "Mon",
+                            location=="Bataan" ~ "Bataan",
+                            location=="Zambales" ~ "Zambales",
+                            location=="Iriga" ~ "Camarines Sur",
+                            location=="Batan Archipelago" ~ "Bataan",
+                            location=="Cebu" ~ "Cebu",
+                            location=="Philippines Bohol" ~ "Bohol",
+                            location=="Luzon" ~ "Bulacan",
+                            location=="North Thailand" ~ "Chiang Mai",
+                            location=="Northeast Thailand" ~ "Samut Prakan",
+                            location=="Northern Thailand" ~ "Chiang Mai",
+                            location=="Central Thailand" ~ "Bangkok Metropolis",
+                            location=="Mergui Archipelago" ~ "Tanintharyi",
+                            location=="West Thailand" ~ "Surat Thani",
+                            location=="Baucau" ~ "Baucau",
+                            location=="Liquica" ~ "Liquica",
+                            location=="Cova Lima" ~ "Covalima",
+                            location=="Viqueque" ~ "Viqueque",
+                            location=="Aileu" ~ "Aileu",
+                            location=="Ermera" ~ "Ermera",
+                            location=="Dili" ~ "Dili",
+                            location=="Manufahi" ~ "Manufahi",
+                            ethnicity=="Cham" ~ "Ninh Thuan",
+                            ethnicity=="CoLao" ~ "Ha Giang",
+                            ethnicity=="Dao" ~ "Ha Giang",
+                            ethnicity=="Kinh" ~ "Ha Noi",
+                            ethnicity=="Stieng" ~ "Binh Phuoc",
+                            ethnicity=="Ede" ~ "Dak Lak",
+                            ethnicity=="Giarai" ~ "Gia Lai",
+                            ethnicity=="HaNhi" ~ "Lai Chau",
+                            ethnicity=="Hmong" ~ "Dien Bien",
+                            ethnicity=="Hui" ~ "Ha Giang",
+                            ethnicity=="LaChi" ~ "Ha Giang",
+                            ethnicity=="LaHu" ~ "Lai Chau",
+                            ethnicity=="LoLo" ~ "Ha Giang",
+                            ethnicity=="Mang" ~ "Lai Chau",
+                            ethnicity=="Nung" ~ "Lang Son",
+                            ethnicity=="PaThen" ~ "Ha Giang",
+                            ethnicity=="PhuLa" ~ "Lao Cai",
+                            ethnicity=="SiLa" ~ "Lai Chau",
+                            ethnicity=="Tay" ~ "Lang Son",
+                            ethnicity=="Thai" ~ "Son La",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Yao" ~ "Ha Giang",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Tay Nung" ~ "Lao Cai",
+                            TRUE ~ location),) %>% setDT()
+
+hap_ethnic_MAL <- dat_ethnic_MAL[, .N, by = .(haplo1, ethnicity, location)] %>% arrange(desc(N))
+hap_ethnic_MAL1 <- dat_ethnic_MAL[, .N, by = .(haplo1)] %>% arrange(desc(N))
+
+pre_ethnic_MAL <- dat_ethnic_MAL %>% 
+  group_by(ethnicity, haplo1) %>% 
+  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(ethnicity, haplo1, N1) %>%
+  group_by(ethnicity, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(ethnicity) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup()
+
+ethnicity_MAL <- dat_ethnic_MAL %>% 
+  mutate(haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1)) %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(country, ethnicity, location, haplo1, N1) %>%
+  group_by(country, ethnicity, location, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(country, ethnicity, location) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup() %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(sum=sum(N1), max=max(sum)) %>%
+  group_by(country, ethnicity, location) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo1_max=haplo1[order==1]) %>% ungroup %>%
+  dplyr::select(-country)
+
+ethnicity_MAL_sf <- merge(ethnicity_MAL, MAL_sf, by=c("location"))
+ethnicity_MAL_plot <- ethnicity_MAL_sf %>% st_as_sf(crs = 4326)
+
+# Convert your dataset to an sf object
+MAL_sf <- st_as_sf(MAL_sf)
+
+# Check for empty geometries
+MAL_sf <- MAL_sf[!st_is_empty(MAL_sf), ]
+
+locations <- MAL_sf
+locations_coords <- st_coordinates(st_centroid(MAL_sf)) %>%
+  data.frame(stringsAsFactors = FALSE) %>%
+  mutate(ID = locations$location)
+
+table(dat_ethnic_MAL$location %in% locations$location)
+
+dat2 <- dat_ethnic_MAL %>% filter(!location %in% locations$location)
+
+res <- ethnicity_MAL %>%
+  dplyr::rename(ID=location) %>%
+  dplyr::rename(key=haplo1, value=N1) %>%
+  arrange(key)
+
+res <- res %>% left_join(locations_coords) %>% filter(!is.na(ID))
+
+# dt_res <- spread(res, key = key, value = value) %>% replace(is.na(.), 0)
+
+dt_res <- res %>% 
+  group_by(ethnicity, ID) %>% 
+  mutate(Var = paste0("Val", row_number())) %>% 
+  spread(key, value) %>% replace(is.na(.), 0) %>%
+  ungroup()
+
+DT <- dt_res %>% dplyr::select(-c(1:10))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+location <- dt_res$ID
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(location=order(ID)) %>% left_join(locations_coords) %>% dplyr::rename(x=X, y=Y)
+dt_x <- dt %>% dplyr::select(-c(location, ID))
+
+g_mal <- ggplot() + geom_sf(data=MAL_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_MAL_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_MAL_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Malaysia")
+
+g_mal
+
+ggsave(filename = file.path("figures", "Haplo_location_Malaysia.png"), width = 15, height = 10)
+
+ethnicity_MAL_plot_max <- ethnicity_MAL_plot %>% group_by(ethnicity) %>% slice(1)
+ethnicity_MAL_max <- ethnicity_MAL_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
+
+e_mal <- ggplot() + geom_sf(data=MAL_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_MAL_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_MAL_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  annotate(geom = "table", x = 110.5, y = 7, label = list(ethnicity_MAL_max), size = 2.5) +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Malaysia")
+
+e_mal
+
+ggsave(filename = file.path("figures", "Haplo_ethnic_Malaysia.png"), width = 15, height = 10)
+
+## Myanmar
+
+# SEA1_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1_sf, file = "data/SEA1_sf.RData")
+
+# SEA1p_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, china_CHN1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, taiwan_TWN1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1p_sf, file = "data/SEA1p_sf.RData")
+
+# load("data/SEA1_sf.RData")
+load("data/SEA1p_sf.RData")
+MYA_sf <- SEA1p_sf %>% dplyr::rename(country=NAME_0, location=NAME_1, type=ENGTYPE_1) %>% dplyr::filter(country=="Myanmar" | (country=="China" & location=="Yunnan")) %>%
+  mutate(country=ifelse(country=="China", "Myanmar", country))
+MYA_sf$location <- stri_trans_general(MYA_sf$location, "Latin-ASCII")
+MYA_sf$location <- trimws(gsub("\\s+", " ", MYA_sf$location))
+MYA_sf <- MYA_sf %>% dplyr::select(country, location, type, geometry)
+
+library(readxl)
+# SEA <- read_excel("Changed_SEA_haplogroups.xlsx")
+SEA <- read_excel("Changed_SEA_haplogroups_new.xlsx") %>%
+  mutate(Ethnicity=ifelse(Ethnicity=="Yao", "Dao", 
+                          ifelse(Ethnicity=="Bru", "Bru (Brao)", 
+                                 ifelse(Ethnicity=="Aeta" | Ethnicity=="Agta", "Aeta (Agta)",
+                                        ifelse(Ethnicity=="Filipino" | Ethnicity=="Tagalog", "Filipino (or Tagalog)",
+                                               ifelse(Ethnicity=="Arakanese" | Ethnicity=="Rakhine", "Arakanese (or Rakhine)",
+                                                      ifelse(Ethnicity=="Kankanaey" | Ethnicity=="Igorot", "Kankanaey (or Igorot)",
+                                                             Ethnicity)))))))
+MYA <- SEA %>% filter(Country=="Myanmar") %>%
+  mutate(Location=ifelse(Location=="Yunnan, China", "Yunnan", Location))
+  
+ethnic_MYA <- MYA[,-c(1,3,4,7,8)] %>% dplyr::rename(country=Country, ethnicity=Ethnicity, location=Location, sum=`Sample size`)
+ethnic_MYA <- ethnic_MYA %>% 
+  mutate(across(where(is.character), ~na_if(., "-"))) %>%
+  mutate_at(c(4:609), as.numeric) %>%
+  mutate(across(where(is.numeric), ~replace_na(., 0))) %>% dplyr::select(-sum) %>% setDT()
+
+ethnic_MYA <- gather(ethnic_MYA, haplo, N, -country, -ethnicity, -location, factor_key=TRUE) %>% setDT()
+
+dat_ethnic_MYA <- ethnic_MYA %>%
+  mutate(haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", " A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
+         haplo1=ifelse(is.na(haplo1), haplo, haplo1),
+         haplo1=case_when(haplo1 %in% c("135", "156", "159", "167", "172", "175", "182", "187", "197", "246", "261", "263", "264", "266", "272", "299", "316", "318", "349", "372", "377", "422", "430", "436", "481", "487", "494", "499", "562", "566", "595", "604", "168", "30", "32", "50", "51", "53", "530", "62", "73", "78", "90", "563") ~ haplo, 
+                          TRUE ~ haplo1),
+         haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
+         haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         location=case_when(location=="Akar" ~ "Bengkulu",
+                            location=="Akar Jambat" ~ "Bengkulu",
+                            location=="Alor Island" ~ "Nusa Tenggara Timur",
+                            location=="Andaman Sea coast" ~ "Krabi",
+                            location=="Bangkok" ~ "Bangkok Metropolis",
+                            location=="Borneo" ~ "Kalimantan Timur",
+                            location=="Capul's island in Northern Samar" ~ "Northern Samar",
+                            location=="Columbio" ~ "Sultan Kudarat",
+                            location=="Dulag" ~ "Leyte",
+                            location=="East Malaysia on the island of Borneo" ~ "Sarawak",
+                            location=="Ibabao, Cordova, Cebu City" ~ "Cebu",
+                            location=="Jangkar" ~ "Jawa Timur",
+                            location=="Jemaring" ~ "Sumatera Selatan",
+                            location=="Kachin State" ~ "Kachin",
+                            location=="Kayin State" ~ "Kachin",
+                            location=="Kota Kinabalu" ~ "Sabah",
+                            location=="Lipa" ~ "Batangas",
+                            location=="Luzon, Visayas, Mindanao" ~ "Quezon",
+                            location=="Mataran (or Mataram)" ~ "Nusa Tenggara Barat",
+                            location=="Merpayang Pauna" ~ "Sumatera Selatan",
+                            location=="Mindanao" ~ "Davao del Sur",
+                            location=="Mon, Kayin State" ~ "Kachin",
+                            location=="North Thailand, Central Thailand (Kanchanaburi and Ratchaburi)" ~ "Ratchaburi",
+                            location=="Northern Mindanao" ~ "Bukidnon",
+                            location=="Nothern Luzon" ~ "Cagayan",
+                            location=="Pelagaran" ~ "Sumatera Selatan",
+                            location=="Pelagaran Jambat" ~ "Sumatera Selatan",
+                            location=="Palembang" ~ "Sumatera Selatan",
+                            location=="Pang Mapha" ~ "Mae Hong Son",
+                            location=="Papua New Guinea" ~ "Papua",
+                            location=="Peninsular Malaysia" ~ "Pahang",
+                            location=="Philippines" ~ "Metropolitan Manila",
+                            location=="President Quirino" ~ "Sultan Kudarat",
+                            location=="Ratanakiri" ~ "Rotanokiri",
+                            location=="Salak" ~ "Sumatera Utara",
+                            location=="Semende" ~ "Sumatera Selatan",
+                            location=="Singapore" ~ "Central",
+                            location=="Southern Mindanao" ~ "Davao del Sur",
+                            location=="Southern Thailand" & (ethnicity =="Maniq" | ethnicity == "Southern Thai_AN") ~ "Narathiwat",
+                            location=="Southern Thailand" & ethnicity == "Southern Thai_TK" ~ "Surat Thani",
+                            location=="Stung Treng" ~ "Stoeng Treng",
+                            location=="Tak, Mae Hong Son, and Kanchanaburi" ~ "Mae Hong Son",
+                            location=="Thailand" & ethnicity == "Taiwan" ~ "Taiwan",
+                            location=="Vietnam" & ethnicity == "Kinh, Cham, Ede, Giarai" ~ "Ninh Thuan",
+                            location=="Vietnam" & ethnicity == "Kinh, Muong, Khmer" ~ "Ho Chi Minh",
+                            location=="Vietnam" & ethnicity == "Kinh, Tay, Thai, Muong, Hmong" ~ "Hoa Binh",
+                            location=="Wallacea" ~ "Sulawesi Tengah",
+                            location=="China" ~ "Yunnan",
+                            location=="Lancang, China" ~ "Yunnan",
+                            location=="Dehong, China" ~ "Yunnan",
+                            location=="Yunnan, China" ~ "Yunnan",
+                            location=="Brunei (Borneo)" ~ "Brunei and Muara",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Prey Veng" ~ "Prey Veng",
+                            location=="Banteay Meanchey" ~ "Banteay Meanchey",
+                            location=="Kampong Thom" ~ "Kampong Thum",
+                            location=="Kampong Cham" ~ "Kampong Cham",
+                            location=="Kratie" ~ "Kracheh",
+                            location=="Takeo" ~ "Takev",
+                            location=="Battanbang" ~ "Batdambang",
+                            location=="Kampong Chahnang" ~ "Kampong Chhnang",
+                            location=="Pursat" ~ "Pouthisat",
+                            location=="Phnom Penh" ~ "Phnom Penh",
+                            location=="Kampot" ~ "Kampot",
+                            location=="Kandal" ~ "Kandal",
+                            location=="Oddar Meanchey" ~ "Otdar Mean Chey",
+                            location=="Koh Kong" ~ "Kaoh Kong",
+                            location=="Svay Rieng" ~ "Svay Rieng",
+                            location=="Alor" ~ "Nusa Tenggara Timur",
+                            location=="Ambon" ~ "Maluku",
+                            location=="Bali" ~ "Bali",
+                            location=="South Kalimantan" ~ "Kalimantan Selatan",
+                            location=="Padang" ~ "Sumatera Barat",
+                            location=="Sumatra" ~ "Sumatera Barat",
+                            location=="Java, Demak" ~ "Jawa Tengah",
+                            location=="Sumatra, Kutaradja" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="West New Guinea" ~ "Papua Barat",
+                            location=="Manado" ~ "Sulawesi Utara",
+                            location=="Sulawesi" ~ "Sulawesi Tengah",
+                            location=="Sulawesi, Manado" ~ "Sulawesi Utara",
+                            location=="Sumatra, Padang" ~ "Sumatera Barat",
+                            location=="Sumatra, Palembang" ~ "Sumatera Selatan",
+                            location=="Palangkaraya" ~ "Kalimantan Tengah",
+                            location=="South Borneo" ~ "Kalimantan Selatan",
+                            location=="Pagaralam" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="Toraja" ~ "Sulawesi Selatan",
+                            location=="Ujung Pandang" ~ "Sulawesi Selatan",
+                            location=="Waigapu (Sumba)" ~ "Nusa Tenggara Timur",
+                            location=="Sumba" ~ "Nusa Tenggara Timur",
+                            location=="Banjarmasin (Borneo)" ~ "Kalimantan Selatan",
+                            location=="Palangkaraya (Borneo)" ~ "Kalimantan Tengah",
+                            location=="North Laos" ~ "Louangphrabang",
+                            location=="Central Laos" ~ "Vientiane",
+                            location=="Kedah" ~ "Kedah",
+                            location=="Acheh-Kedah Yan" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor" ~ "Johor",
+                            location=="Johor Pontian" ~ "Johor",
+                            location=="Banjar Perak Kuala Kurau" ~ "Kedah",
+                            location=="Perak, Banjar Malay" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor Semerah Jawa" ~ "Johor",
+                            location=="Johor Muar Jawa" ~ "Johor",
+                            location=="Sabah" ~ "Johor",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Kelantan Kota Bahru" ~ "Kelantan",
+                            location=="Negeri Sembilan" ~ "Negeri Sembilan",
+                            location=="Minangkabau-Negeri Sembilan Lenggeng" ~ "Negeri Sembilan",
+                            location=="Kelantan RantauPanjang" ~ "Kelantan",
+                            location=="Perak, Rawa Malay" ~ "Perak",
+                            location=="Kota Kinabalu (Borneo)" ~ "Sabah",
+                            location=="Yangon" ~ "Yangon",
+                            location=="Pakokku" ~ "Mon",
+                            location=="Bataan" ~ "Bataan",
+                            location=="Zambales" ~ "Zambales",
+                            location=="Iriga" ~ "Camarines Sur",
+                            location=="Batan Archipelago" ~ "Bataan",
+                            location=="Cebu" ~ "Cebu",
+                            location=="Philippines Bohol" ~ "Bohol",
+                            location=="Luzon" ~ "Bulacan",
+                            location=="North Thailand" ~ "Chiang Mai",
+                            location=="Northeast Thailand" ~ "Samut Prakan",
+                            location=="Northern Thailand" ~ "Chiang Mai",
+                            location=="Central Thailand" ~ "Bangkok Metropolis",
+                            location=="Mergui Archipelago" ~ "Tanintharyi",
+                            location=="West Thailand" ~ "Surat Thani",
+                            location=="Baucau" ~ "Baucau",
+                            location=="Liquica" ~ "Liquica",
+                            location=="Cova Lima" ~ "Covalima",
+                            location=="Viqueque" ~ "Viqueque",
+                            location=="Aileu" ~ "Aileu",
+                            location=="Ermera" ~ "Ermera",
+                            location=="Dili" ~ "Dili",
+                            location=="Manufahi" ~ "Manufahi",
+                            ethnicity=="Cham" ~ "Ninh Thuan",
+                            ethnicity=="CoLao" ~ "Ha Giang",
+                            ethnicity=="Dao" ~ "Ha Giang",
+                            ethnicity=="Kinh" ~ "Ha Noi",
+                            ethnicity=="Stieng" ~ "Binh Phuoc",
+                            ethnicity=="Ede" ~ "Dak Lak",
+                            ethnicity=="Giarai" ~ "Gia Lai",
+                            ethnicity=="HaNhi" ~ "Lai Chau",
+                            ethnicity=="Hmong" ~ "Dien Bien",
+                            ethnicity=="Hui" ~ "Ha Giang",
+                            ethnicity=="LaChi" ~ "Ha Giang",
+                            ethnicity=="LaHu" ~ "Lai Chau",
+                            ethnicity=="LoLo" ~ "Ha Giang",
+                            ethnicity=="Mang" ~ "Lai Chau",
+                            ethnicity=="Nung" ~ "Lang Son",
+                            ethnicity=="PaThen" ~ "Ha Giang",
+                            ethnicity=="PhuLa" ~ "Lao Cai",
+                            ethnicity=="SiLa" ~ "Lai Chau",
+                            ethnicity=="Tay" ~ "Lang Son",
+                            ethnicity=="Thai" ~ "Son La",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Yao" ~ "Ha Giang",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Tay Nung" ~ "Lao Cai",
+                            TRUE ~ location),) %>% setDT()
+
+hap_ethnic_MYA <- dat_ethnic_MYA[, .N, by = .(haplo1, ethnicity, location)] %>% arrange(desc(N))
+hap_ethnic_MYA1 <- dat_ethnic_MYA[, .N, by = .(haplo1)] %>% arrange(desc(N))
+
+pre_ethnic_MYA <- dat_ethnic_MYA %>% 
+  group_by(ethnicity, haplo1) %>% 
+  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(ethnicity, haplo1, N1) %>%
+  group_by(ethnicity, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(ethnicity) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup()
+
+ethnicity_MYA <- dat_ethnic_MYA %>% 
+  mutate(haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1)) %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(country, ethnicity, location, haplo1, N1) %>%
+  group_by(country, ethnicity, location, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(country, ethnicity, location) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup() %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(sum=sum(N1), max=max(sum)) %>%
+  group_by(country, ethnicity, location) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo1_max=haplo1[order==1]) %>% ungroup %>%
+  dplyr::select(-country)
+
+ethnicity_MYA_sf <- merge(ethnicity_MYA, MYA_sf, by=c("location"))
+ethnicity_MYA_plot <- ethnicity_MYA_sf %>% st_as_sf(crs = 4326)
+
+# Convert your dataset to an sf object
+MYA_sf <- st_as_sf(MYA_sf)
+
+# Check for empty geometries
+MYA_sf <- MYA_sf[!st_is_empty(MYA_sf), ]
+
+locations <- MYA_sf
+locations_coords <- st_coordinates(st_centroid(MYA_sf)) %>%
+  data.frame(stringsAsFactors = FALSE) %>%
+  mutate(ID = locations$location)
+
+table(dat_ethnic_MYA$location %in% locations$location)
+
+dat2 <- dat_ethnic_MYA %>% filter(!location %in% locations$location)
+
+res <- ethnicity_MYA %>%
+  dplyr::rename(ID=location) %>%
+  dplyr::rename(key=haplo1, value=N1) %>%
+  arrange(key)
+
+res <- res %>% left_join(locations_coords) %>% filter(!is.na(ID))
+
+# dt_res <- spread(res, key = key, value = value) %>% replace(is.na(.), 0)
+
+dt_res <- res %>% 
+  group_by(ethnicity, ID) %>% 
+  mutate(Var = paste0("Val", row_number())) %>% 
+  spread(key, value) %>% replace(is.na(.), 0) %>%
+  ungroup()
+
+DT <- dt_res %>% dplyr::select(-c(1:10))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+location <- dt_res$ID
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(location=order(ID)) %>% left_join(locations_coords) %>% dplyr::rename(x=X, y=Y)
+dt_x <- dt %>% dplyr::select(-c(location, ID))
+
+g_mya <- ggplot() + geom_sf(data=MYA_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_MYA_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_MYA_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.6), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  guides(fill=guide_legend(nrow = 6, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Myanmar")
+
+g_mya
+
+ggsave(filename = file.path("figures", "Haplo_location_Myanmar.png"), width = 10, height = 15)
+
+ethnicity_MYA_plot_max <- ethnicity_MYA_plot %>% group_by(ethnicity) %>% slice(1)
+ethnicity_MYA_max <- ethnicity_MYA_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
+
+e_mya <- ggplot() + geom_sf(data=MYA_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_MYA_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_MYA_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.6), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  annotate(geom = "table", x = 106, y = 20, label = list(ethnicity_MYA_max), size = 3) +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Myanmar")
+
+e_mya
+
+ggsave(filename = file.path("figures", "Haplo_ethnic_Myanmar.png"), width = 10, height = 15)
+
+
+## Philippines
+
+# SEA1_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1_sf, file = "data/SEA1_sf.RData")
+
+# SEA1p_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, china_CHN1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, taiwan_TWN1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1p_sf, file = "data/SEA1p_sf.RData")
+
+# load("data/SEA1_sf.RData")
+load("data/SEA1p_sf.RData")
+PHI_sf <- SEA1p_sf %>% dplyr::rename(country=NAME_0, location=NAME_1, type=ENGTYPE_1) %>% dplyr::filter(country=="Philippines")
+PHI_sf$location <- stri_trans_general(PHI_sf$location, "Latin-ASCII")
+PHI_sf$location <- trimws(gsub("\\s+", " ", PHI_sf$location))
+PHI_sf <- PHI_sf %>% dplyr::select(country, location, type, geometry)
+
+library(readxl)
+# SEA <- read_excel("Changed_SEA_haplogroups.xlsx")
+SEA <- read_excel("Changed_SEA_haplogroups_new.xlsx") %>%
+  mutate(Ethnicity=ifelse(Ethnicity=="Yao", "Dao", 
+                          ifelse(Ethnicity=="Bru", "Bru (Brao)", 
+                                 ifelse(Ethnicity=="Aeta" | Ethnicity=="Agta", "Aeta (Agta)",
+                                        ifelse(Ethnicity=="Filipino" | Ethnicity=="Tagalog", "Filipino (or Tagalog)",
+                                               ifelse(Ethnicity=="Arakanese" | Ethnicity=="Rakhine", "Arakanese (or Rakhine)",
+                                                      ifelse(Ethnicity=="Kankanaey" | Ethnicity=="Igorot", "Kankanaey (or Igorot)",
+                                                             Ethnicity)))))))
+PHI <- SEA %>% filter(Country=="Philippines")
+
+ethnic_PHI <- PHI[,-c(1,3,4,7,8)] %>% dplyr::rename(country=Country, ethnicity=Ethnicity, location=Location, sum=`Sample size`)
+ethnic_PHI <- ethnic_PHI %>% 
+  mutate(across(where(is.character), ~na_if(., "-"))) %>%
+  mutate_at(c(4:609), as.numeric) %>%
+  mutate(across(where(is.numeric), ~replace_na(., 0))) %>% dplyr::select(-sum) %>% setDT()
+
+ethnic_PHI <- gather(ethnic_PHI, haplo, N, -country, -ethnicity, -location, factor_key=TRUE) %>% setDT()
+
+dat_ethnic_PHI <- ethnic_PHI %>%
+  mutate(haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", " A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
+         haplo1=ifelse(is.na(haplo1), haplo, haplo1),
+         haplo1=case_when(haplo1 %in% c("135", "156", "159", "167", "172", "175", "182", "187", "197", "246", "261", "263", "264", "266", "272", "299", "316", "318", "349", "372", "377", "422", "430", "436", "481", "487", "494", "499", "562", "566", "595", "604", "168", "30", "32", "50", "51", "53", "530", "62", "73", "78", "90", "563") ~ haplo, 
+                          TRUE ~ haplo1),
+         haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
+         haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         location=case_when(location=="Akar" ~ "Bengkulu",
+                            location=="Akar Jambat" ~ "Bengkulu",
+                            location=="Alor Island" ~ "Nusa Tenggara Timur",
+                            location=="Andaman Sea coast" ~ "Krabi",
+                            location=="Bangkok" ~ "Bangkok Metropolis",
+                            location=="Borneo" ~ "Kalimantan Timur",
+                            location=="Capul's island in Northern Samar" ~ "Northern Samar",
+                            location=="Columbio" ~ "Sultan Kudarat",
+                            location=="Dulag" ~ "Leyte",
+                            location=="East Malaysia on the island of Borneo" ~ "Sarawak",
+                            location=="Ibabao, Cordova, Cebu City" ~ "Cebu",
+                            location=="Jangkar" ~ "Jawa Timur",
+                            location=="Jemaring" ~ "Sumatera Selatan",
+                            location=="Kachin State" ~ "Kachin",
+                            location=="Kayin State" ~ "Kachin",
+                            location=="Kota Kinabalu" ~ "Sabah",
+                            location=="Lipa" ~ "Batangas",
+                            location=="Luzon, Visayas, Mindanao" ~ "Quezon",
+                            location=="Mataran (or Mataram)" ~ "Nusa Tenggara Barat",
+                            location=="Merpayang Pauna" ~ "Sumatera Selatan",
+                            location=="Mindanao" ~ "Davao del Sur",
+                            location=="Mon, Kayin State" ~ "Kachin",
+                            location=="North Thailand, Central Thailand (Kanchanaburi and Ratchaburi)" ~ "Ratchaburi",
+                            location=="Northern Mindanao" ~ "Bukidnon",
+                            location=="Nothern Luzon" ~ "Cagayan",
+                            location=="Pelagaran" ~ "Sumatera Selatan",
+                            location=="Pelagaran Jambat" ~ "Sumatera Selatan",
+                            location=="Palembang" ~ "Sumatera Selatan",
+                            location=="Pang Mapha" ~ "Mae Hong Son",
+                            location=="Papua New Guinea" ~ "Papua",
+                            location=="Peninsular Malaysia" ~ "Pahang",
+                            location=="Philippines" ~ "Metropolitan Manila",
+                            location=="President Quirino" ~ "Sultan Kudarat",
+                            location=="Ratanakiri" ~ "Rotanokiri",
+                            location=="Salak" ~ "Sumatera Utara",
+                            location=="Semende" ~ "Sumatera Selatan",
+                            location=="Singapore" ~ "Central",
+                            location=="Southern Mindanao" ~ "Davao del Sur",
+                            location=="Southern Thailand" & (ethnicity =="Maniq" | ethnicity == "Southern Thai_AN") ~ "Narathiwat",
+                            location=="Southern Thailand" & ethnicity == "Southern Thai_TK" ~ "Surat Thani",
+                            location=="Stung Treng" ~ "Stoeng Treng",
+                            location=="Tak, Mae Hong Son, and Kanchanaburi" ~ "Mae Hong Son",
+                            location=="Thailand" & ethnicity == "Taiwan" ~ "Taiwan",
+                            location=="Vietnam" & ethnicity == "Kinh, Cham, Ede, Giarai" ~ "Ninh Thuan",
+                            location=="Vietnam" & ethnicity == "Kinh, Muong, Khmer" ~ "Ho Chi Minh",
+                            location=="Vietnam" & ethnicity == "Kinh, Tay, Thai, Muong, Hmong" ~ "Hoa Binh",
+                            location=="Wallacea" ~ "Sulawesi Tengah",
+                            location=="China" ~ "Yunnan",
+                            location=="Lancang, China" ~ "Yunnan",
+                            location=="Dehong, China" ~ "Yunnan",
+                            location=="Yunnan, China" ~ "Yunnan",
+                            location=="Brunei (Borneo)" ~ "Brunei and Muara",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Prey Veng" ~ "Prey Veng",
+                            location=="Banteay Meanchey" ~ "Banteay Meanchey",
+                            location=="Kampong Thom" ~ "Kampong Thum",
+                            location=="Kampong Cham" ~ "Kampong Cham",
+                            location=="Kratie" ~ "Kracheh",
+                            location=="Takeo" ~ "Takev",
+                            location=="Battanbang" ~ "Batdambang",
+                            location=="Kampong Chahnang" ~ "Kampong Chhnang",
+                            location=="Pursat" ~ "Pouthisat",
+                            location=="Phnom Penh" ~ "Phnom Penh",
+                            location=="Kampot" ~ "Kampot",
+                            location=="Kandal" ~ "Kandal",
+                            location=="Oddar Meanchey" ~ "Otdar Mean Chey",
+                            location=="Koh Kong" ~ "Kaoh Kong",
+                            location=="Svay Rieng" ~ "Svay Rieng",
+                            location=="Alor" ~ "Nusa Tenggara Timur",
+                            location=="Ambon" ~ "Maluku",
+                            location=="Bali" ~ "Bali",
+                            location=="South Kalimantan" ~ "Kalimantan Selatan",
+                            location=="Padang" ~ "Sumatera Barat",
+                            location=="Sumatra" ~ "Sumatera Barat",
+                            location=="Java, Demak" ~ "Jawa Tengah",
+                            location=="Sumatra, Kutaradja" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="West New Guinea" ~ "Papua Barat",
+                            location=="Manado" ~ "Sulawesi Utara",
+                            location=="Sulawesi" ~ "Sulawesi Tengah",
+                            location=="Sulawesi, Manado" ~ "Sulawesi Utara",
+                            location=="Sumatra, Padang" ~ "Sumatera Barat",
+                            location=="Sumatra, Palembang" ~ "Sumatera Selatan",
+                            location=="Palangkaraya" ~ "Kalimantan Tengah",
+                            location=="South Borneo" ~ "Kalimantan Selatan",
+                            location=="Pagaralam" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="Toraja" ~ "Sulawesi Selatan",
+                            location=="Ujung Pandang" ~ "Sulawesi Selatan",
+                            location=="Waigapu (Sumba)" ~ "Nusa Tenggara Timur",
+                            location=="Sumba" ~ "Nusa Tenggara Timur",
+                            location=="Banjarmasin (Borneo)" ~ "Kalimantan Selatan",
+                            location=="Palangkaraya (Borneo)" ~ "Kalimantan Tengah",
+                            location=="North Laos" ~ "Louangphrabang",
+                            location=="Central Laos" ~ "Vientiane",
+                            location=="Kedah" ~ "Kedah",
+                            location=="Acheh-Kedah Yan" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor" ~ "Johor",
+                            location=="Johor Pontian" ~ "Johor",
+                            location=="Banjar Perak Kuala Kurau" ~ "Kedah",
+                            location=="Perak, Banjar Malay" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor Semerah Jawa" ~ "Johor",
+                            location=="Johor Muar Jawa" ~ "Johor",
+                            location=="Sabah" ~ "Johor",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Kelantan Kota Bahru" ~ "Kelantan",
+                            location=="Negeri Sembilan" ~ "Negeri Sembilan",
+                            location=="Minangkabau-Negeri Sembilan Lenggeng" ~ "Negeri Sembilan",
+                            location=="Kelantan RantauPanjang" ~ "Kelantan",
+                            location=="Perak, Rawa Malay" ~ "Perak",
+                            location=="Kota Kinabalu (Borneo)" ~ "Sabah",
+                            location=="Yangon" ~ "Yangon",
+                            location=="Pakokku" ~ "Mon",
+                            location=="Bataan" ~ "Bataan",
+                            location=="Zambales" ~ "Zambales",
+                            location=="Iriga" ~ "Camarines Sur",
+                            location=="Batan Archipelago" ~ "Bataan",
+                            location=="Cebu" ~ "Cebu",
+                            location=="Philippines Bohol" ~ "Bohol",
+                            location=="Luzon" ~ "Bulacan",
+                            location=="North Thailand" ~ "Chiang Mai",
+                            location=="Northeast Thailand" ~ "Samut Prakan",
+                            location=="Northern Thailand" ~ "Chiang Mai",
+                            location=="Central Thailand" ~ "Bangkok Metropolis",
+                            location=="Mergui Archipelago" ~ "Tanintharyi",
+                            location=="West Thailand" ~ "Surat Thani",
+                            location=="Baucau" ~ "Baucau",
+                            location=="Liquica" ~ "Liquica",
+                            location=="Cova Lima" ~ "Covalima",
+                            location=="Viqueque" ~ "Viqueque",
+                            location=="Aileu" ~ "Aileu",
+                            location=="Ermera" ~ "Ermera",
+                            location=="Dili" ~ "Dili",
+                            location=="Manufahi" ~ "Manufahi",
+                            ethnicity=="Cham" ~ "Ninh Thuan",
+                            ethnicity=="CoLao" ~ "Ha Giang",
+                            ethnicity=="Dao" ~ "Ha Giang",
+                            ethnicity=="Kinh" ~ "Ha Noi",
+                            ethnicity=="Stieng" ~ "Binh Phuoc",
+                            ethnicity=="Ede" ~ "Dak Lak",
+                            ethnicity=="Giarai" ~ "Gia Lai",
+                            ethnicity=="HaNhi" ~ "Lai Chau",
+                            ethnicity=="Hmong" ~ "Dien Bien",
+                            ethnicity=="Hui" ~ "Ha Giang",
+                            ethnicity=="LaChi" ~ "Ha Giang",
+                            ethnicity=="LaHu" ~ "Lai Chau",
+                            ethnicity=="LoLo" ~ "Ha Giang",
+                            ethnicity=="Mang" ~ "Lai Chau",
+                            ethnicity=="Nung" ~ "Lang Son",
+                            ethnicity=="PaThen" ~ "Ha Giang",
+                            ethnicity=="PhuLa" ~ "Lao Cai",
+                            ethnicity=="SiLa" ~ "Lai Chau",
+                            ethnicity=="Tay" ~ "Lang Son",
+                            ethnicity=="Thai" ~ "Son La",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Yao" ~ "Ha Giang",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Tay Nung" ~ "Lao Cai",
+                            TRUE ~ location),) %>% setDT()
+
+hap_ethnic_PHI <- dat_ethnic_PHI[, .N, by = .(haplo1, ethnicity, location)] %>% arrange(desc(N))
+hap_ethnic_PHI1 <- dat_ethnic_PHI[, .N, by = .(haplo1)] %>% arrange(desc(N))
+
+pre_ethnic_PHI <- dat_ethnic_PHI %>% 
+  group_by(ethnicity, haplo1) %>% 
+  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(ethnicity, haplo1, N1) %>%
+  group_by(ethnicity, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(ethnicity) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup()
+
+ethnicity_PHI <- dat_ethnic_PHI %>% 
+  mutate(haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1)) %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(country, ethnicity, location, haplo1, N1) %>%
+  group_by(country, ethnicity, location, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(country, ethnicity, location) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup() %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(sum=sum(N1), max=max(sum)) %>%
+  group_by(country, ethnicity, location) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo1_max=haplo1[order==1]) %>% ungroup %>%
+  dplyr::select(-country)
+
+ethnicity_PHI_sf <- merge(ethnicity_PHI, PHI_sf, by=c("location"))
+ethnicity_PHI_plot <- ethnicity_PHI_sf %>% st_as_sf(crs = 4326)
+
+# Convert your dataset to an sf object
+PHI_sf <- st_as_sf(PHI_sf)
+
+# Check for empty geometries
+PHI_sf <- PHI_sf[!st_is_empty(PHI_sf), ]
+
+locations <- PHI_sf
+locations_coords <- st_coordinates(st_centroid(PHI_sf)) %>%
+  data.frame(stringsAsFactors = FALSE) %>%
+  mutate(ID = locations$location)
+
+table(dat_ethnic_PHI$location %in% locations$location)
+
+dat2 <- dat_ethnic_PHI %>% filter(!location %in% locations$location)
+
+res <- ethnicity_PHI %>%
+  dplyr::rename(ID=location) %>%
+  dplyr::rename(key=haplo1, value=N1) %>%
+  arrange(key)
+
+res <- res %>% left_join(locations_coords) %>% filter(!is.na(ID))
+
+# dt_res <- spread(res, key = key, value = value) %>% replace(is.na(.), 0)
+
+dt_res <- res %>% 
+  group_by(ethnicity, ID) %>% 
+  mutate(Var = paste0("Val", row_number())) %>% 
+  spread(key, value) %>% replace(is.na(.), 0) %>%
+  ungroup()
+
+DT <- dt_res %>% dplyr::select(-c(1:10))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+location <- dt_res$ID
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(location=order(ID)) %>% left_join(locations_coords) %>% dplyr::rename(x=X, y=Y)
+dt_x <- dt %>% dplyr::select(-c(location, ID))
+
+g_phi <- ggplot() + geom_sf(data=PHI_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_PHI_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_PHI_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  guides(fill=guide_legend(nrow = 5, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Philippines")
+
+g_phi
+
+ggsave(filename = file.path("figures", "Haplo_location_Philippines.png"), width = 10, height = 15)
+
+ethnicity_PHI_plot_max <- ethnicity_PHI_plot %>% group_by(ethnicity) %>% slice(1)
+ethnicity_PHI_max <- ethnicity_PHI_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
+
+e_phi <- ggplot() + geom_sf(data=PHI_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_PHI_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_PHI_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  annotate(geom = "table", x = 126.5, y = 20, label = list(ethnicity_PHI_max), size = 2) +
+  guides(fill=guide_legend(nrow = 5, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Philippines")
+
+e_phi
+
+ggsave(filename = file.path("figures", "Haplo_ethnic_Philippines.png"), width = 10, height = 15)
+
+
+## Thailand
+
+# SEA1_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1_sf, file = "data/SEA1_sf.RData")
+
+# SEA1p_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, china_CHN1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, taiwan_TWN1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1p_sf, file = "data/SEA1p_sf.RData")
+
+# load("data/SEA1_sf.RData")
+load("data/SEA1p_sf.RData")
+THA_sf <- SEA1p_sf %>% dplyr::rename(country=NAME_0, location=NAME_1, type=ENGTYPE_1) %>% dplyr::filter(country=="Thailand")
+THA_sf$location <- stri_trans_general(THA_sf$location, "Latin-ASCII")
+THA_sf$location <- trimws(gsub("\\s+", " ", THA_sf$location))
+THA_sf <- THA_sf %>% dplyr::select(country, location, type, geometry)
+
+library(readxl)
+# SEA <- read_excel("Changed_SEA_haplogroups.xlsx")
+SEA <- read_excel("Changed_SEA_haplogroups_new.xlsx") %>%
+  mutate(Ethnicity=ifelse(Ethnicity=="Yao", "Dao", 
+                          ifelse(Ethnicity=="Bru", "Bru (Brao)", 
+                                 ifelse(Ethnicity=="Aeta" | Ethnicity=="Agta", "Aeta (Agta)",
+                                        ifelse(Ethnicity=="Filipino" | Ethnicity=="Tagalog", "Filipino (or Tagalog)",
+                                               ifelse(Ethnicity=="Arakanese" | Ethnicity=="Rakhine", "Arakanese (or Rakhine)",
+                                                      ifelse(Ethnicity=="Kankanaey" | Ethnicity=="Igorot", "Kankanaey (or Igorot)",
+                                                             Ethnicity)))))))
+THA <- SEA %>% filter(Country=="Thailand")
+
+ethnic_THA <- THA[,-c(1,3,4,7,8)] %>% dplyr::rename(country=Country, ethnicity=Ethnicity, location=Location, sum=`Sample size`)
+ethnic_THA <- ethnic_THA %>% 
+  mutate(across(where(is.character), ~na_if(., "-"))) %>%
+  mutate_at(c(4:609), as.numeric) %>%
+  mutate(across(where(is.numeric), ~replace_na(., 0))) %>% dplyr::select(-sum) %>% setDT()
+
+ethnic_THA <- gather(ethnic_THA, haplo, N, -country, -ethnicity, -location, factor_key=TRUE) %>% setDT()
+
+dat_ethnic_THA <- ethnic_THA %>%
+  mutate(haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", " A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
+         haplo1=ifelse(is.na(haplo1), haplo, haplo1),
+         haplo1=case_when(haplo1 %in% c("135", "156", "159", "167", "172", "175", "182", "187", "197", "246", "261", "263", "264", "266", "272", "299", "316", "318", "349", "372", "377", "422", "430", "436", "481", "487", "494", "499", "562", "566", "595", "604", "168", "30", "32", "50", "51", "53", "530", "62", "73", "78", "90", "563") ~ haplo, 
+                          TRUE ~ haplo1),
+         haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
+         haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("F1+16189"), "F1+", haplo1),
+         haplo1=ifelse(haplo %in% c("HV12b1"), "HV12", haplo1),
+         haplo1=ifelse(haplo %in% c("M1'20'51"), "M1'", haplo1),
+         haplo1=ifelse(haplo %in% c("M4''67"), "M4'", haplo1),
+         haplo1=ifelse(haplo %in% c("P1+152"), "P1+", haplo1),
+         haplo1=ifelse(haplo %in% c("P2*1", "P2*1a", "P2*2"), "P2*", haplo1),
+         haplo1=ifelse(haplo %in% c("Q1+@16223"), "Q1+", haplo1),
+         haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         haplo1=ifelse(haplo %in% c("R2+13500"), "R2+", haplo1),
+         haplo1=ifelse(haplo %in% c("R6+16129*"), "R6+", haplo1),
+         location=case_when(location=="Akar" ~ "Bengkulu",
+                            location=="Akar Jambat" ~ "Bengkulu",
+                            location=="Alor Island" ~ "Nusa Tenggara Timur",
+                            location=="Andaman Sea coast" ~ "Krabi",
+                            location=="Bangkok" ~ "Bangkok Metropolis",
+                            location=="Borneo" ~ "Kalimantan Timur",
+                            location=="Capul's island in Northern Samar" ~ "Northern Samar",
+                            location=="Columbio" ~ "Sultan Kudarat",
+                            location=="Dulag" ~ "Leyte",
+                            location=="East Malaysia on the island of Borneo" ~ "Sarawak",
+                            location=="Ibabao, Cordova, Cebu City" ~ "Cebu",
+                            location=="Jangkar" ~ "Jawa Timur",
+                            location=="Jemaring" ~ "Sumatera Selatan",
+                            location=="Kachin State" ~ "Kachin",
+                            location=="Kayin State" ~ "Kachin",
+                            location=="Kota Kinabalu" ~ "Sabah",
+                            location=="Lipa" ~ "Batangas",
+                            location=="Luzon, Visayas, Mindanao" ~ "Quezon",
+                            location=="Mataran (or Mataram)" ~ "Nusa Tenggara Barat",
+                            location=="Merpayang Pauna" ~ "Sumatera Selatan",
+                            location=="Mindanao" ~ "Davao del Sur",
+                            location=="Mon, Kayin State" ~ "Kachin",
+                            location=="North Thailand, Central Thailand (Kanchanaburi and Ratchaburi)" ~ "Ratchaburi",
+                            location=="Northern Mindanao" ~ "Bukidnon",
+                            location=="Nothern Luzon" ~ "Cagayan",
+                            location=="Pelagaran" ~ "Sumatera Selatan",
+                            location=="Pelagaran Jambat" ~ "Sumatera Selatan",
+                            location=="Palembang" ~ "Sumatera Selatan",
+                            location=="Pang Mapha" ~ "Mae Hong Son",
+                            location=="Papua New Guinea" ~ "Papua",
+                            location=="Peninsular Malaysia" ~ "Pahang",
+                            location=="Philippines" ~ "Metropolitan Manila",
+                            location=="President Quirino" ~ "Sultan Kudarat",
+                            location=="Ratanakiri" ~ "Rotanokiri",
+                            location=="Salak" ~ "Sumatera Utara",
+                            location=="Semende" ~ "Sumatera Selatan",
+                            location=="Singapore" ~ "Central",
+                            location=="Southern Mindanao" ~ "Davao del Sur",
+                            location=="Southern Thailand" & (ethnicity =="Maniq" | ethnicity == "Southern Thai_AN") ~ "Narathiwat",
+                            location=="Southern Thailand" & ethnicity == "Southern Thai_TK" ~ "Surat Thani",
+                            location=="Stung Treng" ~ "Stoeng Treng",
+                            location=="Tak, Mae Hong Son, and Kanchanaburi" ~ "Mae Hong Son",
+                            location=="Thailand" & ethnicity == "Taiwan" ~ "Taiwan",
+                            location=="Vietnam" & ethnicity == "Kinh, Cham, Ede, Giarai" ~ "Ninh Thuan",
+                            location=="Vietnam" & ethnicity == "Kinh, Muong, Khmer" ~ "Ho Chi Minh",
+                            location=="Vietnam" & ethnicity == "Kinh, Tay, Thai, Muong, Hmong" ~ "Hoa Binh",
+                            location=="Wallacea" ~ "Sulawesi Tengah",
+                            location=="China" ~ "Yunnan",
+                            location=="Lancang, China" ~ "Yunnan",
+                            location=="Dehong, China" ~ "Yunnan",
+                            location=="Yunnan, China" ~ "Yunnan",
+                            location=="Brunei (Borneo)" ~ "Brunei and Muara",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Prey Veng" ~ "Prey Veng",
+                            location=="Banteay Meanchey" ~ "Banteay Meanchey",
+                            location=="Kampong Thom" ~ "Kampong Thum",
+                            location=="Kampong Cham" ~ "Kampong Cham",
+                            location=="Kratie" ~ "Kracheh",
+                            location=="Takeo" ~ "Takev",
+                            location=="Battanbang" ~ "Batdambang",
+                            location=="Kampong Chahnang" ~ "Kampong Chhnang",
+                            location=="Pursat" ~ "Pouthisat",
+                            location=="Phnom Penh" ~ "Phnom Penh",
+                            location=="Kampot" ~ "Kampot",
+                            location=="Kandal" ~ "Kandal",
+                            location=="Oddar Meanchey" ~ "Otdar Mean Chey",
+                            location=="Koh Kong" ~ "Kaoh Kong",
+                            location=="Svay Rieng" ~ "Svay Rieng",
+                            location=="Alor" ~ "Nusa Tenggara Timur",
+                            location=="Ambon" ~ "Maluku",
+                            location=="Bali" ~ "Bali",
+                            location=="South Kalimantan" ~ "Kalimantan Selatan",
+                            location=="Padang" ~ "Sumatera Barat",
+                            location=="Sumatra" ~ "Sumatera Barat",
+                            location=="Java, Demak" ~ "Jawa Tengah",
+                            location=="Sumatra, Kutaradja" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="West New Guinea" ~ "Papua Barat",
+                            location=="Manado" ~ "Sulawesi Utara",
+                            location=="Sulawesi" ~ "Sulawesi Tengah",
+                            location=="Sulawesi, Manado" ~ "Sulawesi Utara",
+                            location=="Sumatra, Padang" ~ "Sumatera Barat",
+                            location=="Sumatra, Palembang" ~ "Sumatera Selatan",
+                            location=="Palangkaraya" ~ "Kalimantan Tengah",
+                            location=="South Borneo" ~ "Kalimantan Selatan",
+                            location=="Pagaralam" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="Toraja" ~ "Sulawesi Selatan",
+                            location=="Ujung Pandang" ~ "Sulawesi Selatan",
+                            location=="Waigapu (Sumba)" ~ "Nusa Tenggara Timur",
+                            location=="Sumba" ~ "Nusa Tenggara Timur",
+                            location=="Banjarmasin (Borneo)" ~ "Kalimantan Selatan",
+                            location=="Palangkaraya (Borneo)" ~ "Kalimantan Tengah",
+                            location=="North Laos" ~ "Louangphrabang",
+                            location=="Central Laos" ~ "Vientiane",
+                            location=="Kedah" ~ "Kedah",
+                            location=="Acheh-Kedah Yan" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor" ~ "Johor",
+                            location=="Johor Pontian" ~ "Johor",
+                            location=="Banjar Perak Kuala Kurau" ~ "Kedah",
+                            location=="Perak, Banjar Malay" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor Semerah Jawa" ~ "Johor",
+                            location=="Johor Muar Jawa" ~ "Johor",
+                            location=="Sabah" ~ "Johor",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Kelantan Kota Bahru" ~ "Kelantan",
+                            location=="Negeri Sembilan" ~ "Negeri Sembilan",
+                            location=="Minangkabau-Negeri Sembilan Lenggeng" ~ "Negeri Sembilan",
+                            location=="Kelantan RantauPanjang" ~ "Kelantan",
+                            location=="Perak, Rawa Malay" ~ "Perak",
+                            location=="Kota Kinabalu (Borneo)" ~ "Sabah",
+                            location=="Yangon" ~ "Yangon",
+                            location=="Pakokku" ~ "Mon",
+                            location=="Bataan" ~ "Bataan",
+                            location=="Zambales" ~ "Zambales",
+                            location=="Iriga" ~ "Camarines Sur",
+                            location=="Batan Archipelago" ~ "Bataan",
+                            location=="Cebu" ~ "Cebu",
+                            location=="Philippines Bohol" ~ "Bohol",
+                            location=="Luzon" ~ "Bulacan",
+                            location=="North Thailand" ~ "Chiang Mai",
+                            location=="Northeast Thailand" ~ "Samut Prakan",
+                            location=="Northern Thailand" ~ "Chiang Mai",
+                            location=="Central Thailand" ~ "Bangkok Metropolis",
+                            location=="Mergui Archipelago" ~ "Tanintharyi",
+                            location=="West Thailand" ~ "Surat Thani",
+                            location=="Baucau" ~ "Baucau",
+                            location=="Liquica" ~ "Liquica",
+                            location=="Cova Lima" ~ "Covalima",
+                            location=="Viqueque" ~ "Viqueque",
+                            location=="Aileu" ~ "Aileu",
+                            location=="Ermera" ~ "Ermera",
+                            location=="Dili" ~ "Dili",
+                            location=="Manufahi" ~ "Manufahi",
+                            ethnicity=="Cham" ~ "Ninh Thuan",
+                            ethnicity=="CoLao" ~ "Ha Giang",
+                            ethnicity=="Dao" ~ "Ha Giang",
+                            ethnicity=="Kinh" ~ "Ha Noi",
+                            ethnicity=="Stieng" ~ "Binh Phuoc",
+                            ethnicity=="Ede" ~ "Dak Lak",
+                            ethnicity=="Giarai" ~ "Gia Lai",
+                            ethnicity=="HaNhi" ~ "Lai Chau",
+                            ethnicity=="Hmong" ~ "Dien Bien",
+                            ethnicity=="Hui" ~ "Ha Giang",
+                            ethnicity=="LaChi" ~ "Ha Giang",
+                            ethnicity=="LaHu" ~ "Lai Chau",
+                            ethnicity=="LoLo" ~ "Ha Giang",
+                            ethnicity=="Mang" ~ "Lai Chau",
+                            ethnicity=="Nung" ~ "Lang Son",
+                            ethnicity=="PaThen" ~ "Ha Giang",
+                            ethnicity=="PhuLa" ~ "Lao Cai",
+                            ethnicity=="SiLa" ~ "Lai Chau",
+                            ethnicity=="Tay" ~ "Lang Son",
+                            ethnicity=="Thai" ~ "Son La",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Yao" ~ "Ha Giang",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Tay Nung" ~ "Lao Cai",
+                            TRUE ~ location),) %>% setDT()
+
+hap_ethnic_THA <- dat_ethnic_THA[, .N, by = .(haplo1, ethnicity, location)] %>% arrange(desc(N))
+hap_ethnic_THA1 <- dat_ethnic_THA[, .N, by = .(haplo1)] %>% arrange(desc(N))
+
+pre_ethnic_THA <- dat_ethnic_THA %>% 
+  group_by(ethnicity, haplo1) %>% 
+  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(ethnicity, haplo1, N1) %>%
+  group_by(ethnicity, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(ethnicity) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup()
+
+ethnicity_THA <- dat_ethnic_THA %>% 
+  mutate(haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1)) %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(country, ethnicity, location, haplo1, N1) %>%
+  group_by(country, ethnicity, location, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(country, ethnicity, location) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup() %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(sum=sum(N1), max=max(sum)) %>%
+  group_by(country, ethnicity, location) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo1_max=haplo1[order==1]) %>% ungroup %>%
+  dplyr::select(-country)
+
+ethnicity_THA_sf <- merge(ethnicity_THA, THA_sf, by=c("location"))
+ethnicity_THA_plot <- ethnicity_THA_sf %>% st_as_sf(crs = 4326)
+
+# Convert your dataset to an sf object
+THA_sf <- st_as_sf(THA_sf)
+
+# Check for empty geometries
+THA_sf <- THA_sf[!st_is_empty(THA_sf), ]
+
+locations <- THA_sf
+locations_coords <- st_coordinates(st_centroid(THA_sf)) %>%
+  data.frame(stringsAsFactors = FALSE) %>%
+  mutate(ID = locations$location)
+
+table(dat_ethnic_THA$location %in% locations$location)
+
+dat2 <- dat_ethnic_THA %>% filter(!location %in% locations$location)
+
+res <- ethnicity_THA %>%
+  dplyr::rename(ID=location) %>%
+  dplyr::rename(key=haplo1, value=N1) %>%
+  arrange(key)
+
+res <- res %>% left_join(locations_coords) %>% filter(!is.na(ID))
+
+# dt_res <- spread(res, key = key, value = value) %>% replace(is.na(.), 0)
+
+dt_res <- res %>% 
+  group_by(ethnicity, ID) %>% 
+  mutate(Var = paste0("Val", row_number())) %>% 
+  spread(key, value) %>% replace(is.na(.), 0) %>%
+  ungroup()
+
+DT <- dt_res %>% dplyr::select(-c(1:10))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+location <- dt_res$ID
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(location=order(ID)) %>% left_join(locations_coords) %>% dplyr::rename(x=X, y=Y)
+dt_x <- dt %>% dplyr::select(-c(location, ID))
+
+g_tha <- ggplot() + geom_sf(data=THA_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_THA_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_THA_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  guides(fill=guide_legend(nrow = 15, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.4, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Thailand")
+
+g_tha
+
+ggsave(filename = file.path("figures", "Haplo_location_Thailand.png"), width = 8, height = 17)
+
+ethnicity_THA_plot_max <- ethnicity_THA_plot %>% group_by(ethnicity) %>% slice(1)
+ethnicity_THA_max <- ethnicity_THA_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
+
+e_tha <- ggplot() + geom_sf(data=THA_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_THA_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_THA_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  annotate(geom = "table", x = 105.5, y = 5, label = list(ethnicity_THA_max), size = 2) +
+  guides(fill=guide_legend(nrow = 15, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.4, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Thailand")
+
+e_tha
+
+ggsave(filename = file.path("figures", "Haplo_ethnic_Thailand.png"), width = 8, height = 17)
+
+## Taiwan
+
+# SEA1_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1_sf, file = "data/SEA1_sf.RData")
+
+# SEA1p_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, china_CHN1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, taiwan_TWN1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1p_sf, file = "data/SEA1p_sf.RData")
+
+# load("data/SEA1_sf.RData")
+load("data/SEA1p_sf.RData")
+TAI_sf <- SEA1p_sf %>% dplyr::rename(country=NAME_0, location=NAME_1, type=ENGTYPE_1) %>% dplyr::filter(country=="Taiwan")
+TAI_sf$location <- stri_trans_general(TAI_sf$location, "Latin-ASCII")
+TAI_sf$location <- trimws(gsub("\\s+", " ", TAI_sf$location))
+TAI_sf <- TAI_sf %>% dplyr::select(country, location, type, geometry)
+
+library(readxl)
+# SEA <- read_excel("Changed_SEA_haplogroups.xlsx")
+SEA <- read_excel("Changed_SEA_haplogroups_new.xlsx") %>%
+  mutate(Ethnicity=ifelse(Ethnicity=="Yao", "Dao", 
+                          ifelse(Ethnicity=="Bru", "Bru (Brao)", 
+                                 ifelse(Ethnicity=="Aeta" | Ethnicity=="Agta", "Aeta (Agta)",
+                                        ifelse(Ethnicity=="Filipino" | Ethnicity=="Tagalog", "Filipino (or Tagalog)",
+                                               ifelse(Ethnicity=="Arakanese" | Ethnicity=="Rakhine", "Arakanese (or Rakhine)",
+                                                      ifelse(Ethnicity=="Kankanaey" | Ethnicity=="Igorot", "Kankanaey (or Igorot)",
+                                                             Ethnicity)))))))
+TAI <- SEA %>% filter(Country=="Thailand")
+
+ethnic_TAI <- TAI[,-c(1,3,4,7,8)] %>% dplyr::rename(country=Country, ethnicity=Ethnicity, location=Location, sum=`Sample size`)
+ethnic_TAI <- ethnic_TAI %>% 
+  mutate(across(where(is.character), ~na_if(., "-"))) %>%
+  mutate_at(c(4:609), as.numeric) %>%
+  mutate(across(where(is.numeric), ~replace_na(., 0))) %>% dplyr::select(-sum) %>% setDT()
+
+ethnic_TAI <- gather(ethnic_TAI, haplo, N, -country, -ethnicity, -location, factor_key=TRUE) %>% setDT()
+
+dat_ethnic_TAI <- ethnic_TAI %>%
+  mutate(haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", " A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
+         haplo1=ifelse(is.na(haplo1), haplo, haplo1),
+         haplo1=case_when(haplo1 %in% c("135", "156", "159", "167", "172", "175", "182", "187", "197", "246", "261", "263", "264", "266", "272", "299", "316", "318", "349", "372", "377", "422", "430", "436", "481", "487", "494", "499", "562", "566", "595", "604", "168", "30", "32", "50", "51", "53", "530", "62", "73", "78", "90", "563") ~ haplo, 
+                          TRUE ~ haplo1),
+         haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
+         haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("F1+16189"), "F1+", haplo1),
+         haplo1=ifelse(haplo %in% c("HV12b1"), "HV12", haplo1),
+         haplo1=ifelse(haplo %in% c("M1'20'51"), "M1'", haplo1),
+         haplo1=ifelse(haplo %in% c("M4''67"), "M4'", haplo1),
+         haplo1=ifelse(haplo %in% c("P1+152"), "P1+", haplo1),
+         haplo1=ifelse(haplo %in% c("P2*1", "P2*1a", "P2*2"), "P2*", haplo1),
+         haplo1=ifelse(haplo %in% c("Q1+@16223"), "Q1+", haplo1),
+         haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         haplo1=ifelse(haplo %in% c("R2+13500"), "R2+", haplo1),
+         haplo1=ifelse(haplo %in% c("R6+16129*"), "R6+", haplo1),
+         location=case_when(location=="Akar" ~ "Bengkulu",
+                            location=="Akar Jambat" ~ "Bengkulu",
+                            location=="Alor Island" ~ "Nusa Tenggara Timur",
+                            location=="Andaman Sea coast" ~ "Krabi",
+                            location=="Bangkok" ~ "Bangkok Metropolis",
+                            location=="Borneo" ~ "Kalimantan Timur",
+                            location=="Capul's island in Northern Samar" ~ "Northern Samar",
+                            location=="Columbio" ~ "Sultan Kudarat",
+                            location=="Dulag" ~ "Leyte",
+                            location=="East Malaysia on the island of Borneo" ~ "Sarawak",
+                            location=="Ibabao, Cordova, Cebu City" ~ "Cebu",
+                            location=="Jangkar" ~ "Jawa Timur",
+                            location=="Jemaring" ~ "Sumatera Selatan",
+                            location=="Kachin State" ~ "Kachin",
+                            location=="Kayin State" ~ "Kachin",
+                            location=="Kota Kinabalu" ~ "Sabah",
+                            location=="Lipa" ~ "Batangas",
+                            location=="Luzon, Visayas, Mindanao" ~ "Quezon",
+                            location=="Mataran (or Mataram)" ~ "Nusa Tenggara Barat",
+                            location=="Merpayang Pauna" ~ "Sumatera Selatan",
+                            location=="Mindanao" ~ "Davao del Sur",
+                            location=="Mon, Kayin State" ~ "Kachin",
+                            location=="North Thailand, Central Thailand (Kanchanaburi and Ratchaburi)" ~ "Ratchaburi",
+                            location=="Northern Mindanao" ~ "Bukidnon",
+                            location=="Nothern Luzon" ~ "Cagayan",
+                            location=="Pelagaran" ~ "Sumatera Selatan",
+                            location=="Pelagaran Jambat" ~ "Sumatera Selatan",
+                            location=="Palembang" ~ "Sumatera Selatan",
+                            location=="Pang Mapha" ~ "Mae Hong Son",
+                            location=="Papua New Guinea" ~ "Papua",
+                            location=="Peninsular Malaysia" ~ "Pahang",
+                            location=="Philippines" ~ "Metropolitan Manila",
+                            location=="President Quirino" ~ "Sultan Kudarat",
+                            location=="Ratanakiri" ~ "Rotanokiri",
+                            location=="Salak" ~ "Sumatera Utara",
+                            location=="Semende" ~ "Sumatera Selatan",
+                            location=="Singapore" ~ "Central",
+                            location=="Southern Mindanao" ~ "Davao del Sur",
+                            location=="Southern Thailand" & (ethnicity =="Maniq" | ethnicity == "Southern Thai_AN") ~ "Narathiwat",
+                            location=="Southern Thailand" & ethnicity == "Southern Thai_TK" ~ "Surat Thani",
+                            location=="Stung Treng" ~ "Stoeng Treng",
+                            location=="Tak, Mae Hong Son, and Kanchanaburi" ~ "Mae Hong Son",
+                            location=="Thailand" & ethnicity == "Taiwan" ~ "Taiwan",
+                            location=="Vietnam" & ethnicity == "Kinh, Cham, Ede, Giarai" ~ "Ninh Thuan",
+                            location=="Vietnam" & ethnicity == "Kinh, Muong, Khmer" ~ "Ho Chi Minh",
+                            location=="Vietnam" & ethnicity == "Kinh, Tay, Thai, Muong, Hmong" ~ "Hoa Binh",
+                            location=="Wallacea" ~ "Sulawesi Tengah",
+                            location=="China" ~ "Yunnan",
+                            location=="Lancang, China" ~ "Yunnan",
+                            location=="Dehong, China" ~ "Yunnan",
+                            location=="Yunnan, China" ~ "Yunnan",
+                            location=="Brunei (Borneo)" ~ "Brunei and Muara",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Prey Veng" ~ "Prey Veng",
+                            location=="Banteay Meanchey" ~ "Banteay Meanchey",
+                            location=="Kampong Thom" ~ "Kampong Thum",
+                            location=="Kampong Cham" ~ "Kampong Cham",
+                            location=="Kratie" ~ "Kracheh",
+                            location=="Takeo" ~ "Takev",
+                            location=="Battanbang" ~ "Batdambang",
+                            location=="Kampong Chahnang" ~ "Kampong Chhnang",
+                            location=="Pursat" ~ "Pouthisat",
+                            location=="Phnom Penh" ~ "Phnom Penh",
+                            location=="Kampot" ~ "Kampot",
+                            location=="Kandal" ~ "Kandal",
+                            location=="Oddar Meanchey" ~ "Otdar Mean Chey",
+                            location=="Koh Kong" ~ "Kaoh Kong",
+                            location=="Svay Rieng" ~ "Svay Rieng",
+                            location=="Alor" ~ "Nusa Tenggara Timur",
+                            location=="Ambon" ~ "Maluku",
+                            location=="Bali" ~ "Bali",
+                            location=="South Kalimantan" ~ "Kalimantan Selatan",
+                            location=="Padang" ~ "Sumatera Barat",
+                            location=="Sumatra" ~ "Sumatera Barat",
+                            location=="Java, Demak" ~ "Jawa Tengah",
+                            location=="Sumatra, Kutaradja" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="West New Guinea" ~ "Papua Barat",
+                            location=="Manado" ~ "Sulawesi Utara",
+                            location=="Sulawesi" ~ "Sulawesi Tengah",
+                            location=="Sulawesi, Manado" ~ "Sulawesi Utara",
+                            location=="Sumatra, Padang" ~ "Sumatera Barat",
+                            location=="Sumatra, Palembang" ~ "Sumatera Selatan",
+                            location=="Palangkaraya" ~ "Kalimantan Tengah",
+                            location=="South Borneo" ~ "Kalimantan Selatan",
+                            location=="Pagaralam" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="Toraja" ~ "Sulawesi Selatan",
+                            location=="Ujung Pandang" ~ "Sulawesi Selatan",
+                            location=="Waigapu (Sumba)" ~ "Nusa Tenggara Timur",
+                            location=="Sumba" ~ "Nusa Tenggara Timur",
+                            location=="Banjarmasin (Borneo)" ~ "Kalimantan Selatan",
+                            location=="Palangkaraya (Borneo)" ~ "Kalimantan Tengah",
+                            location=="North Laos" ~ "Louangphrabang",
+                            location=="Central Laos" ~ "Vientiane",
+                            location=="Kedah" ~ "Kedah",
+                            location=="Acheh-Kedah Yan" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor" ~ "Johor",
+                            location=="Johor Pontian" ~ "Johor",
+                            location=="Banjar Perak Kuala Kurau" ~ "Kedah",
+                            location=="Perak, Banjar Malay" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor Semerah Jawa" ~ "Johor",
+                            location=="Johor Muar Jawa" ~ "Johor",
+                            location=="Sabah" ~ "Johor",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Kelantan Kota Bahru" ~ "Kelantan",
+                            location=="Negeri Sembilan" ~ "Negeri Sembilan",
+                            location=="Minangkabau-Negeri Sembilan Lenggeng" ~ "Negeri Sembilan",
+                            location=="Kelantan RantauPanjang" ~ "Kelantan",
+                            location=="Perak, Rawa Malay" ~ "Perak",
+                            location=="Kota Kinabalu (Borneo)" ~ "Sabah",
+                            location=="Yangon" ~ "Yangon",
+                            location=="Pakokku" ~ "Mon",
+                            location=="Bataan" ~ "Bataan",
+                            location=="Zambales" ~ "Zambales",
+                            location=="Iriga" ~ "Camarines Sur",
+                            location=="Batan Archipelago" ~ "Bataan",
+                            location=="Cebu" ~ "Cebu",
+                            location=="Philippines Bohol" ~ "Bohol",
+                            location=="Luzon" ~ "Bulacan",
+                            location=="North Thailand" ~ "Chiang Mai",
+                            location=="Northeast Thailand" ~ "Samut Prakan",
+                            location=="Northern Thailand" ~ "Chiang Mai",
+                            location=="Central Thailand" ~ "Bangkok Metropolis",
+                            location=="Mergui Archipelago" ~ "Tanintharyi",
+                            location=="West Thailand" ~ "Surat Thani",
+                            location=="Baucau" ~ "Baucau",
+                            location=="Liquica" ~ "Liquica",
+                            location=="Cova Lima" ~ "Covalima",
+                            location=="Viqueque" ~ "Viqueque",
+                            location=="Aileu" ~ "Aileu",
+                            location=="Ermera" ~ "Ermera",
+                            location=="Dili" ~ "Dili",
+                            location=="Manufahi" ~ "Manufahi",
+                            ethnicity=="Cham" ~ "Ninh Thuan",
+                            ethnicity=="CoLao" ~ "Ha Giang",
+                            ethnicity=="Dao" ~ "Ha Giang",
+                            ethnicity=="Kinh" ~ "Ha Noi",
+                            ethnicity=="Stieng" ~ "Binh Phuoc",
+                            ethnicity=="Ede" ~ "Dak Lak",
+                            ethnicity=="Giarai" ~ "Gia Lai",
+                            ethnicity=="HaNhi" ~ "Lai Chau",
+                            ethnicity=="Hmong" ~ "Dien Bien",
+                            ethnicity=="Hui" ~ "Ha Giang",
+                            ethnicity=="LaChi" ~ "Ha Giang",
+                            ethnicity=="LaHu" ~ "Lai Chau",
+                            ethnicity=="LoLo" ~ "Ha Giang",
+                            ethnicity=="Mang" ~ "Lai Chau",
+                            ethnicity=="Nung" ~ "Lang Son",
+                            ethnicity=="PaThen" ~ "Ha Giang",
+                            ethnicity=="PhuLa" ~ "Lao Cai",
+                            ethnicity=="SiLa" ~ "Lai Chau",
+                            ethnicity=="Tay" ~ "Lang Son",
+                            ethnicity=="Thai" ~ "Son La",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Yao" ~ "Ha Giang",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Tay Nung" ~ "Lao Cai",
+                            TRUE ~ location),) %>% setDT()
+
+hap_ethnic_TAI <- dat_ethnic_TAI[, .N, by = .(haplo1, ethnicity, location)] %>% arrange(desc(N))
+hap_ethnic_TAI1 <- dat_ethnic_TAI[, .N, by = .(haplo1)] %>% arrange(desc(N))
+
+pre_ethnic_TAI <- dat_ethnic_TAI %>% 
+  group_by(ethnicity, haplo1) %>% 
+  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(ethnicity, haplo1, N1) %>%
+  group_by(ethnicity, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(ethnicity) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup()
+
+ethnicity_TAI <- dat_ethnic_TAI %>% 
+  mutate(haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1)) %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(country, ethnicity, location, haplo1, N1) %>%
+  group_by(country, ethnicity, location, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(country, ethnicity, location) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup() %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(sum=sum(N1), max=max(sum)) %>%
+  group_by(country, ethnicity, location) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo1_max=haplo1[order==1]) %>% ungroup %>%
+  dplyr::select(-country)
+
+ethnicity_TAI_sf <- merge(ethnicity_TAI, TAI_sf, by=c("location"))
+ethnicity_TAI_plot <- ethnicity_TAI_sf %>% st_as_sf(crs = 4326)
+
+# Convert your dataset to an sf object
+TAI_sf <- st_as_sf(TAI_sf)
+
+# Check for empty geometries
+TAI_sf <- TAI_sf[!st_is_empty(TAI_sf), ]
+
+locations <- TAI_sf
+locations_coords <- st_coordinates(st_centroid(TAI_sf)) %>%
+  data.frame(stringsAsFactors = FALSE) %>%
+  mutate(ID = locations$location)
+
+table(dat_ethnic_TAI$location %in% locations$location)
+
+dat2 <- dat_ethnic_TAI %>% filter(!location %in% locations$location)
+
+res <- ethnicity_TAI %>%
+  dplyr::rename(ID=location) %>%
+  dplyr::rename(key=haplo1, value=N1) %>%
+  arrange(key)
+
+res <- res %>% left_join(locations_coords) %>% filter(!is.na(ID))
+
+# dt_res <- spread(res, key = key, value = value) %>% replace(is.na(.), 0)
+
+dt_res <- res %>% 
+  group_by(ethnicity, ID) %>% 
+  mutate(Var = paste0("Val", row_number())) %>% 
+  spread(key, value) %>% replace(is.na(.), 0) %>%
+  ungroup()
+
+DT <- dt_res %>% dplyr::select(-c(1:10))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+location <- dt_res$ID
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(location=order(ID)) %>% left_join(locations_coords) %>% dplyr::rename(x=X, y=Y)
+dt_x <- dt %>% dplyr::select(-c(location, ID))
+
+g_tai <- ggplot() + geom_sf(data=TAI_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_TAI_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_TAI_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  guides(fill=guide_legend(nrow = 1, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Taiwan")
+
+g_tai
+
+ggsave(filename = file.path("figures", "Haplo_location_Taiwan.png"), width = 10, height = 10)
+
+ethnicity_TAI_plot_max <- ethnicity_TAI_plot %>% group_by(ethnicity) %>% slice(1)
+ethnicity_TAI_max <- ethnicity_TAI_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
+
+e_tai <- ggplot() + geom_sf(data=TAI_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_TAI_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_TAI_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  annotate(geom = "table", x = 118, y = 22, label = list(ethnicity_TAI_max), size = 3) +
+  guides(fill=guide_legend(nrow = 1, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Taiwan")
+
+e_tai
+
+ggsave(filename = file.path("figures", "Haplo_ethnic_Taiwan.png"), width = 10, height = 10)
+
+## Timor-Leste
+
+# SEA1_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1_sf, file = "data/SEA1_sf.RData")
+
+# SEA1p_sf <- rbind(brunei_BRN1_sf, indonesia_IDN1_sf, cambodia_KHM1_sf, china_CHN1_sf, laos_LAO1_sf, myanmar_MMR1_sf, malaysia_MYS1_sf, philippines_PHL1_sf, singapore_SGP1_sf,
+#                  thailand_THA1_sf, taiwan_TWN1_sf, easttimor_TLS1_sf, vietnam_VNM1_sf)
+# 
+# save(SEA1p_sf, file = "data/SEA1p_sf.RData")
+
+# load("data/SEA1_sf.RData")
+load("data/SEA1p_sf.RData")
+TIM_sf <- SEA1p_sf %>% dplyr::rename(country=NAME_0, location=NAME_1, type=ENGTYPE_1) %>% dplyr::filter(country=="Timor-Leste")
+TIM_sf$location <- stri_trans_general(TIM_sf$location, "Latin-ASCII")
+TIM_sf$location <- trimws(gsub("\\s+", " ", TIM_sf$location))
+TIM_sf <- TIM_sf %>% dplyr::select(country, location, type, geometry)
+
+library(readxl)
+# SEA <- read_excel("Changed_SEA_haplogroups.xlsx")
+SEA <- read_excel("Changed_SEA_haplogroups_new.xlsx") %>%
+  mutate(Ethnicity=ifelse(Ethnicity=="Yao", "Dao", 
+                          ifelse(Ethnicity=="Bru", "Bru (Brao)", 
+                                 ifelse(Ethnicity=="Aeta" | Ethnicity=="Agta", "Aeta (Agta)",
+                                        ifelse(Ethnicity=="Filipino" | Ethnicity=="Tagalog", "Filipino (or Tagalog)",
+                                               ifelse(Ethnicity=="Arakanese" | Ethnicity=="Rakhine", "Arakanese (or Rakhine)",
+                                                      ifelse(Ethnicity=="Kankanaey" | Ethnicity=="Igorot", "Kankanaey (or Igorot)",
+                                                             Ethnicity)))))))
+TIM <- SEA %>% filter(Country=="Timor-Leste")
+
+ethnic_TIM <- TIM[,-c(1,3,4,7,8)] %>% dplyr::rename(country=Country, ethnicity=Ethnicity, location=Location, sum=`Sample size`)
+ethnic_TIM <- ethnic_TIM %>% 
+  mutate(across(where(is.character), ~na_if(., "-"))) %>%
+  mutate_at(c(4:609), as.numeric) %>%
+  mutate(across(where(is.numeric), ~replace_na(., 0))) %>% dplyr::select(-sum) %>% setDT()
+
+ethnic_TIM <- gather(ethnic_TIM, haplo, N, -country, -ethnicity, -location, factor_key=TRUE) %>% setDT()
+
+dat_ethnic_TIM <- ethnic_TIM %>%
+  mutate(haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", " A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
+         haplo1=ifelse(is.na(haplo1), haplo, haplo1),
+         haplo1=case_when(haplo1 %in% c("135", "156", "159", "167", "172", "175", "182", "187", "197", "246", "261", "263", "264", "266", "272", "299", "316", "318", "349", "372", "377", "422", "430", "436", "481", "487", "494", "499", "562", "566", "595", "604", "168", "30", "32", "50", "51", "53", "530", "62", "73", "78", "90", "563") ~ haplo, 
+                          TRUE ~ haplo1),
+         haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
+         haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("F1+16189"), "F1+", haplo1),
+         haplo1=ifelse(haplo %in% c("HV12b1"), "HV12", haplo1),
+         haplo1=ifelse(haplo %in% c("M1'20'51"), "M1'", haplo1),
+         haplo1=ifelse(haplo %in% c("M4''67"), "M4'", haplo1),
+         haplo1=ifelse(haplo %in% c("P1+152"), "P1+", haplo1),
+         haplo1=ifelse(haplo %in% c("P2*1", "P2*1a", "P2*2"), "P2*", haplo1),
+         haplo1=ifelse(haplo %in% c("Q1+@16223"), "Q1+", haplo1),
+         haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         haplo1=ifelse(haplo %in% c("R2+13500"), "R2+", haplo1),
+         haplo1=ifelse(haplo %in% c("R6+16129*"), "R6+", haplo1),
+         location=case_when(location=="Akar" ~ "Bengkulu",
+                            location=="Akar Jambat" ~ "Bengkulu",
+                            location=="Alor Island" ~ "Nusa Tenggara Timur",
+                            location=="Andaman Sea coast" ~ "Krabi",
+                            location=="Bangkok" ~ "Bangkok Metropolis",
+                            location=="Borneo" ~ "Kalimantan Timur",
+                            location=="Capul's island in Northern Samar" ~ "Northern Samar",
+                            location=="Columbio" ~ "Sultan Kudarat",
+                            location=="Dulag" ~ "Leyte",
+                            location=="East Malaysia on the island of Borneo" ~ "Sarawak",
+                            location=="Ibabao, Cordova, Cebu City" ~ "Cebu",
+                            location=="Jangkar" ~ "Jawa Timur",
+                            location=="Jemaring" ~ "Sumatera Selatan",
+                            location=="Kachin State" ~ "Kachin",
+                            location=="Kayin State" ~ "Kachin",
+                            location=="Kota Kinabalu" ~ "Sabah",
+                            location=="Lipa" ~ "Batangas",
+                            location=="Luzon, Visayas, Mindanao" ~ "Quezon",
+                            location=="Mataran (or Mataram)" ~ "Nusa Tenggara Barat",
+                            location=="Merpayang Pauna" ~ "Sumatera Selatan",
+                            location=="Mindanao" ~ "Davao del Sur",
+                            location=="Mon, Kayin State" ~ "Kachin",
+                            location=="North Thailand, Central Thailand (Kanchanaburi and Ratchaburi)" ~ "Ratchaburi",
+                            location=="Northern Mindanao" ~ "Bukidnon",
+                            location=="Nothern Luzon" ~ "Cagayan",
+                            location=="Pelagaran" ~ "Sumatera Selatan",
+                            location=="Pelagaran Jambat" ~ "Sumatera Selatan",
+                            location=="Palembang" ~ "Sumatera Selatan",
+                            location=="Pang Mapha" ~ "Mae Hong Son",
+                            location=="Papua New Guinea" ~ "Papua",
+                            location=="Peninsular Malaysia" ~ "Pahang",
+                            location=="Philippines" ~ "Metropolitan Manila",
+                            location=="President Quirino" ~ "Sultan Kudarat",
+                            location=="Ratanakiri" ~ "Rotanokiri",
+                            location=="Salak" ~ "Sumatera Utara",
+                            location=="Semende" ~ "Sumatera Selatan",
+                            location=="Singapore" ~ "Central",
+                            location=="Southern Mindanao" ~ "Davao del Sur",
+                            location=="Southern Thailand" & (ethnicity =="Maniq" | ethnicity == "Southern Thai_AN") ~ "Narathiwat",
+                            location=="Southern Thailand" & ethnicity == "Southern Thai_TK" ~ "Surat Thani",
+                            location=="Stung Treng" ~ "Stoeng Treng",
+                            location=="Tak, Mae Hong Son, and Kanchanaburi" ~ "Mae Hong Son",
+                            location=="Thailand" & ethnicity == "Taiwan" ~ "Taiwan",
+                            location=="Vietnam" & ethnicity == "Kinh, Cham, Ede, Giarai" ~ "Ninh Thuan",
+                            location=="Vietnam" & ethnicity == "Kinh, Muong, Khmer" ~ "Ho Chi Minh",
+                            location=="Vietnam" & ethnicity == "Kinh, Tay, Thai, Muong, Hmong" ~ "Hoa Binh",
+                            location=="Wallacea" ~ "Sulawesi Tengah",
+                            location=="China" ~ "Yunnan",
+                            location=="Lancang, China" ~ "Yunnan",
+                            location=="Dehong, China" ~ "Yunnan",
+                            location=="Yunnan, China" ~ "Yunnan",
+                            location=="Brunei (Borneo)" ~ "Brunei and Muara",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Prey Veng" ~ "Prey Veng",
+                            location=="Banteay Meanchey" ~ "Banteay Meanchey",
+                            location=="Kampong Thom" ~ "Kampong Thum",
+                            location=="Kampong Cham" ~ "Kampong Cham",
+                            location=="Kratie" ~ "Kracheh",
+                            location=="Takeo" ~ "Takev",
+                            location=="Battanbang" ~ "Batdambang",
+                            location=="Kampong Chahnang" ~ "Kampong Chhnang",
+                            location=="Pursat" ~ "Pouthisat",
+                            location=="Phnom Penh" ~ "Phnom Penh",
+                            location=="Kampot" ~ "Kampot",
+                            location=="Kandal" ~ "Kandal",
+                            location=="Oddar Meanchey" ~ "Otdar Mean Chey",
+                            location=="Koh Kong" ~ "Kaoh Kong",
+                            location=="Svay Rieng" ~ "Svay Rieng",
+                            location=="Alor" ~ "Nusa Tenggara Timur",
+                            location=="Ambon" ~ "Maluku",
+                            location=="Bali" ~ "Bali",
+                            location=="South Kalimantan" ~ "Kalimantan Selatan",
+                            location=="Padang" ~ "Sumatera Barat",
+                            location=="Sumatra" ~ "Sumatera Barat",
+                            location=="Java, Demak" ~ "Jawa Tengah",
+                            location=="Sumatra, Kutaradja" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="West New Guinea" ~ "Papua Barat",
+                            location=="Manado" ~ "Sulawesi Utara",
+                            location=="Sulawesi" ~ "Sulawesi Tengah",
+                            location=="Sulawesi, Manado" ~ "Sulawesi Utara",
+                            location=="Sumatra, Padang" ~ "Sumatera Barat",
+                            location=="Sumatra, Palembang" ~ "Sumatera Selatan",
+                            location=="Palangkaraya" ~ "Kalimantan Tengah",
+                            location=="South Borneo" ~ "Kalimantan Selatan",
+                            location=="Pagaralam" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="Toraja" ~ "Sulawesi Selatan",
+                            location=="Ujung Pandang" ~ "Sulawesi Selatan",
+                            location=="Waigapu (Sumba)" ~ "Nusa Tenggara Timur",
+                            location=="Sumba" ~ "Nusa Tenggara Timur",
+                            location=="Banjarmasin (Borneo)" ~ "Kalimantan Selatan",
+                            location=="Palangkaraya (Borneo)" ~ "Kalimantan Tengah",
+                            location=="North Laos" ~ "Louangphrabang",
+                            location=="Central Laos" ~ "Vientiane",
+                            location=="Kedah" ~ "Kedah",
+                            location=="Acheh-Kedah Yan" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor" ~ "Johor",
+                            location=="Johor Pontian" ~ "Johor",
+                            location=="Banjar Perak Kuala Kurau" ~ "Kedah",
+                            location=="Perak, Banjar Malay" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor Semerah Jawa" ~ "Johor",
+                            location=="Johor Muar Jawa" ~ "Johor",
+                            location=="Sabah" ~ "Johor",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Kelantan Kota Bahru" ~ "Kelantan",
+                            location=="Negeri Sembilan" ~ "Negeri Sembilan",
+                            location=="Minangkabau-Negeri Sembilan Lenggeng" ~ "Negeri Sembilan",
+                            location=="Kelantan RantauPanjang" ~ "Kelantan",
+                            location=="Perak, Rawa Malay" ~ "Perak",
+                            location=="Kota Kinabalu (Borneo)" ~ "Sabah",
+                            location=="Yangon" ~ "Yangon",
+                            location=="Pakokku" ~ "Mon",
+                            location=="Bataan" ~ "Bataan",
+                            location=="Zambales" ~ "Zambales",
+                            location=="Iriga" ~ "Camarines Sur",
+                            location=="Batan Archipelago" ~ "Bataan",
+                            location=="Cebu" ~ "Cebu",
+                            location=="Philippines Bohol" ~ "Bohol",
+                            location=="Luzon" ~ "Bulacan",
+                            location=="North Thailand" ~ "Chiang Mai",
+                            location=="Northeast Thailand" ~ "Samut Prakan",
+                            location=="Northern Thailand" ~ "Chiang Mai",
+                            location=="Central Thailand" ~ "Bangkok Metropolis",
+                            location=="Mergui Archipelago" ~ "Tanintharyi",
+                            location=="West Thailand" ~ "Surat Thani",
+                            location=="Baucau" ~ "Baucau",
+                            location=="Liquica" ~ "Liquica",
+                            location=="Cova Lima" ~ "Covalima",
+                            location=="Viqueque" ~ "Viqueque",
+                            location=="Aileu" ~ "Aileu",
+                            location=="Ermera" ~ "Ermera",
+                            location=="Dili" ~ "Dili",
+                            location=="Manufahi" ~ "Manufahi",
+                            ethnicity=="Cham" ~ "Ninh Thuan",
+                            ethnicity=="CoLao" ~ "Ha Giang",
+                            ethnicity=="Dao" ~ "Ha Giang",
+                            ethnicity=="Kinh" ~ "Ha Noi",
+                            ethnicity=="Stieng" ~ "Binh Phuoc",
+                            ethnicity=="Ede" ~ "Dak Lak",
+                            ethnicity=="Giarai" ~ "Gia Lai",
+                            ethnicity=="HaNhi" ~ "Lai Chau",
+                            ethnicity=="Hmong" ~ "Dien Bien",
+                            ethnicity=="Hui" ~ "Ha Giang",
+                            ethnicity=="LaChi" ~ "Ha Giang",
+                            ethnicity=="LaHu" ~ "Lai Chau",
+                            ethnicity=="LoLo" ~ "Ha Giang",
+                            ethnicity=="Mang" ~ "Lai Chau",
+                            ethnicity=="Nung" ~ "Lang Son",
+                            ethnicity=="PaThen" ~ "Ha Giang",
+                            ethnicity=="PhuLa" ~ "Lao Cai",
+                            ethnicity=="SiLa" ~ "Lai Chau",
+                            ethnicity=="Tay" ~ "Lang Son",
+                            ethnicity=="Thai" ~ "Son La",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Yao" ~ "Ha Giang",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Tay Nung" ~ "Lao Cai",
+                            TRUE ~ location),) %>% setDT()
+
+hap_ethnic_TIM <- dat_ethnic_TIM[, .N, by = .(haplo1, ethnicity, location)] %>% arrange(desc(N))
+hap_ethnic_TIM1 <- dat_ethnic_TIM[, .N, by = .(haplo1)] %>% arrange(desc(N))
+
+pre_ethnic_TIM <- dat_ethnic_TIM %>% 
+  group_by(ethnicity, haplo1) %>% 
+  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(ethnicity, haplo1, N1) %>%
+  group_by(ethnicity, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(ethnicity) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup()
+
+ethnicity_TIM <- dat_ethnic_TIM %>% 
+  mutate(haplo=ifelse((is.na(haplo) | haplo==".."), "Unspecified", haplo),
+         haplo1=ifelse((is.na(haplo1) | haplo1==".."), "Unspecified", haplo1)) %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(N1=sum(N)) %>% ungroup() %>%
+  arrange(desc(N1), .by_group = TRUE) %>%
+  dplyr::select(country, ethnicity, location, haplo1, N1) %>%
+  group_by(country, ethnicity, location, haplo1) %>% dplyr::slice(1) %>% ungroup() %>%
+  group_by(country, ethnicity, location) %>% arrange(haplo1, .by_group = TRUE) %>% 
+  mutate(percent=(N1*100)/sum(N1)) %>% ungroup() %>%
+  group_by(country, ethnicity, location, haplo1) %>%  mutate(sum=sum(N1), max=max(sum)) %>%
+  group_by(country, ethnicity, location) %>% arrange(desc(max)) %>% mutate(order=order(max, decreasing = T), haplo1_max=haplo1[order==1]) %>% ungroup %>%
+  dplyr::select(-country)
+
+ethnicity_TIM_sf <- merge(ethnicity_TIM, TIM_sf, by=c("location"))
+ethnicity_TIM_plot <- ethnicity_TIM_sf %>% st_as_sf(crs = 4326)
+
+# Convert your dataset to an sf object
+TIM_sf <- st_as_sf(TIM_sf)
+
+# Check for empty geometries
+TIM_sf <- TIM_sf[!st_is_empty(TIM_sf), ]
+
+locations <- TIM_sf
+locations_coords <- st_coordinates(st_centroid(TIM_sf)) %>%
+  data.frame(stringsAsFactors = FALSE) %>%
+  mutate(ID = locations$location)
+
+table(dat_ethnic_TIM$location %in% locations$location)
+
+dat2 <- dat_ethnic_TIM %>% filter(!location %in% locations$location)
+
+res <- ethnicity_TIM %>%
+  dplyr::rename(ID=location) %>%
+  dplyr::rename(key=haplo1, value=N1) %>%
+  arrange(key)
+
+res <- res %>% left_join(locations_coords) %>% filter(!is.na(ID))
+
+# dt_res <- spread(res, key = key, value = value) %>% replace(is.na(.), 0)
+
+dt_res <- res %>% 
+  group_by(ethnicity, ID) %>% 
+  mutate(Var = paste0("Val", row_number())) %>% 
+  spread(key, value) %>% replace(is.na(.), 0) %>%
+  ungroup()
+
+DT <- dt_res %>% dplyr::select(-c(1:10))
+m<-as.matrix(DT)
+ID <- dt_res$ID
+location <- dt_res$ID
+dt <- aggregate(m, data.frame(ID),sum) %>% setDT()
+# cbind(id = x[, 1], x[, -1]/rowSums(x[, -1]))
+library(janitor)
+dt <- dt %>% 
+  adorn_percentages() %>% 
+  dplyr::mutate_if(is.numeric, funs(. * 100)) %>%
+  mutate(location=order(ID)) %>% left_join(locations_coords) %>% dplyr::rename(x=X, y=Y)
+dt_x <- dt %>% dplyr::select(-c(location, ID))
+
+g_tim <- ggplot() + geom_sf(data=TIM_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_TIM_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_TIM_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.1), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  guides(fill=guide_legend(nrow = 1, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Timor-Leste")
+
+g_tim
+
+ggsave(filename = file.path("figures", "Haplo_location_Timor-Leste.png"), width = 15, height = 8)
+
+ethnicity_TIM_plot_max <- ethnicity_TIM_plot %>% group_by(ethnicity) %>% slice(1)
+ethnicity_TIM_max <- ethnicity_TIM_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
+
+e_tim <- ggplot() + geom_sf(data=TIM_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_TIM_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_TIM_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.1), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  annotate(geom = "table", x = 124, y = -8.6, label = list(ethnicity_TIM_max), size = 3) +
+  guides(fill=guide_legend(nrow = 1, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Timor-Leste")
+
+e_tim
+
+ggsave(filename = file.path("figures", "Haplo_ethnic_Timor-Leste.png"), width = 15, height = 8)
 
 ## Vietnam
 
@@ -10896,10 +13904,11 @@ dt <- dt %>%
   mutate(location=order(ID)) %>% left_join(locations_coords) %>% dplyr::rename(x=X, y=Y)
 dt_x <- dt %>% dplyr::select(-c(location, ID))
 
+
 g_vn <- ggplot() + geom_sf(data=VN_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_VN_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
   geom_sf_text(data=ethnicity_VN_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
-  geom_scatterpie(aes(x=x, y=y, r=0.6), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.5) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
   guides(fill=guide_legend(nrow = 6, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
@@ -10916,6 +13925,53 @@ g_vn
 
 ggsave(filename = file.path("figures", "Haplo_location_Vietnam.png"), width = 10, height = 15)
 
+g_vn2 <- ggplot() + geom_sf(data=VN_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_VN_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_VN_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.5) +
+  guides(fill=guide_legend(nrow = 6, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Vietnam")
+
+g_vn2
+
+ggsave(filename = file.path("figures", "Haplo_location_Vietnam2.png"), width = 10, height = 15)
+
+
+library(ggpmisc)
+library(scatterpie)
+
+ethnicity_VN_plot_max <- ethnicity_VN_plot %>% group_by(ethnicity) %>% slice(1)
+ethnicity_VN_max <- ethnicity_VN_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
+
+e_vn <- ggplot() + geom_sf(data=VN_sf, aes(fill="white"), alpha=0.001) + 
+  geom_sf(data=ethnicity_VN_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
+  geom_sf_text(data=ethnicity_VN_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  annotate(geom = "table", x = 106, y = 17, label = list(ethnicity_VN_max), size = 2.5) +
+  guides(fill=guide_legend(nrow = 6, byrow=TRUE)) +
+  scale_fill_discrete(name="") +
+  theme_bw() +
+  theme(plot.title = element_text(size=20, face = "bold"),
+        text = element_text(size=12), 
+        axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        legend.text=element_text(size=10), 
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "bottom") +
+  ggtitle("Vietnam")
+
+e_vn
+
+ggsave(filename = file.path("figures", "Haplo_ethnic_Vietnam.png"), width = 10, height = 15)  
 
 
 ################ SUBCLADES #######################
