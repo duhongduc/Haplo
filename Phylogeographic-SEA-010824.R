@@ -10957,16 +10957,16 @@ g_cam <- ggplot() + geom_sf(data=CAM_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
-        legend.key.size = unit(1, "cm"),
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Cambodia")
 
 g_cam
 
-ggsave(filename = file.path("figures", "Haplo_location_Cambodia_new.png"), width = 20, height = 20)
+ggsave(filename = file.path("figures", "Haplo_location_Cambodia_new.png"), width = 24, height = 25)
 
 ethnicity_CAM_plot_max <- ethnicity_CAM_plot %>% group_by(ethnicity) %>% slice(1)
 ethnicity_CAM_max <- ethnicity_CAM_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
@@ -10981,16 +10981,16 @@ e_cam <- ggplot() + geom_sf(data=CAM_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
-        legend.key.size = unit(1, "cm"),
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Cambodia")
 
 e_cam
 
-ggsave(filename = file.path("figures", "Haplo_ethnic_Cambodia_new.png"), width = 20, height = 20)
+ggsave(filename = file.path("figures", "Haplo_ethnic_Cambodia_new.png"), width = 24, height = 25)
 
 ## Indonesia
 
@@ -11625,16 +11625,16 @@ g_lao <- ggplot() + geom_sf(data=LAO_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
         legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Laos")
 
 g_lao
 
-ggsave(filename = file.path("figures", "Haplo_location_Laos_new.png"), width = 20, height = 26)
+ggsave(filename = file.path("figures", "Haplo_location_Laos_new.png"), width = 22, height = 26)
 
 ethnicity_LAO_plot_max <- ethnicity_LAO_plot %>% group_by(ethnicity) %>% slice(1)
 ethnicity_LAO_max <- ethnicity_LAO_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
@@ -11649,16 +11649,16 @@ e_lao <- ggplot() + geom_sf(data=LAO_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
         legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Laos")
 
 e_lao
 
-ggsave(filename = file.path("figures", "Haplo_ethnic_Laos_new.png"), width = 20, height = 26)
+ggsave(filename = file.path("figures", "Haplo_ethnic_Laos_new.png"), width = 22, height = 26)
 
 ## Malaysia
 
@@ -13289,9 +13289,9 @@ g_tai <- ggplot() + geom_sf(data=TAI_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
         legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Taiwan")
@@ -13313,9 +13313,9 @@ e_tai <- ggplot() + geom_sf(data=TAI_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
         legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Taiwan")
