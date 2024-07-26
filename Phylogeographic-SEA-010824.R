@@ -11628,13 +11628,13 @@ g_lao <- ggplot() + geom_sf(data=LAO_sf, aes(fill="white"), alpha=0.001) +
         axis.text.x = element_text(size=20), 
         axis.text.y = element_text(size=20), 
         legend.text=element_text(size=20), 
-        legend.key.size = unit(1, "cm"),
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Laos")
 
 g_lao
 
-ggsave(filename = file.path("figures", "Haplo_location_Laos_new.png"), width = 20, height = 24)
+ggsave(filename = file.path("figures", "Haplo_location_Laos_new.png"), width = 20, height = 26)
 
 ethnicity_LAO_plot_max <- ethnicity_LAO_plot %>% group_by(ethnicity) %>% slice(1)
 ethnicity_LAO_max <- ethnicity_LAO_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
@@ -11652,13 +11652,13 @@ e_lao <- ggplot() + geom_sf(data=LAO_sf, aes(fill="white"), alpha=0.001) +
         axis.text.x = element_text(size=20), 
         axis.text.y = element_text(size=20), 
         legend.text=element_text(size=20), 
-        legend.key.size = unit(1, "cm"),
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Laos")
 
 e_lao
 
-ggsave(filename = file.path("figures", "Haplo_ethnic_Laos_new.png"), width = 20, height = 24)
+ggsave(filename = file.path("figures", "Haplo_ethnic_Laos_new.png"), width = 20, height = 26)
 
 ## Malaysia
 
