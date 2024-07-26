@@ -12295,10 +12295,10 @@ g_mya <- ggplot() + geom_sf(data=MYA_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
-        legend.key.size = unit(1, "cm"),
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Myanmar")
 
@@ -12319,10 +12319,10 @@ e_mya <- ggplot() + geom_sf(data=MYA_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
-        legend.key.size = unit(1, "cm"),
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Myanmar")
 
