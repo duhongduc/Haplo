@@ -234,7 +234,7 @@ library(writexl)
 
 gt_table <- dat %>% select(Country, `Language family`, Ethnicity, haplo) %>% 
   tbl_summary(by=Country, statistic = list(all_categorical() ~ "{n} ({p}%)",
-                                             all_continuous() ~ "{median} ({p25}, {p75})"),
+                                           all_continuous() ~ "{median} ({p25}, {p75})"),
               missing = "no", 
               percent = "column") %>% 
   add_n() %>% 
@@ -5924,9 +5924,9 @@ vietnam <- vietnam_hap1 %>%
   geom_bar(stat="identity", width = 1, alpha=1) +
   guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
   geom_label_repel(aes(label = paste(haplogroup1, " (", percent, "%", ")", sep = "")), 
-             size = 3.5,
-             position = position_stack(vjust = .3),
-             show.legend = FALSE) +
+                   size = 3.5,
+                   position = position_stack(vjust = .3),
+                   show.legend = FALSE) +
   coord_polar(theta = "y", start = 0) + theme_void() +
   ggtitle("Vietnam (n=706)") +
   scale_fill_manual(values = Haplocolors) +
@@ -6648,7 +6648,7 @@ write_xlsx(dat_e, "SEA_ethnicity_new.xlsx")
 
 e <- read_excel("SEA_ethnicity_new.xlsx")
 e <- as.data.frame(e)
-  
+
 ### New variable for the difference between each value and the mean
 
 e <- e %>%
@@ -7390,12 +7390,12 @@ df <- data.frame(Ethnic = row.names(df), df)
 row.names(df) <- NULL
 
 df <- df %>% mutate(Ethnic=ifelse(Ethnic=="Yao", "Dao", 
-                                     ifelse(Ethnic=="Bru", "Bru (Brao)", 
-                                            ifelse(Ethnic=="Aeta" | Ethnic=="Agta", "Aeta (Agta)",
-                                                   ifelse(Ethnic=="Filipino" | Ethnic=="Tagalog", "Filipino (or Tagalog)",
-                                                          ifelse(Ethnic=="Arakanese" | Ethnic=="Rakhine", "Arakanese (or Rakhine)",
-                                                                 ifelse(Ethnic=="Kankanaey" | Ethnic=="Igorot", "Kankanaey (or Igorot)",
-                                                                        Ethnic)))))))
+                                  ifelse(Ethnic=="Bru", "Bru (Brao)", 
+                                         ifelse(Ethnic=="Aeta" | Ethnic=="Agta", "Aeta (Agta)",
+                                                ifelse(Ethnic=="Filipino" | Ethnic=="Tagalog", "Filipino (or Tagalog)",
+                                                       ifelse(Ethnic=="Arakanese" | Ethnic=="Rakhine", "Arakanese (or Rakhine)",
+                                                              ifelse(Ethnic=="Kankanaey" | Ethnic=="Igorot", "Kankanaey (or Igorot)",
+                                                                     Ethnic)))))))
 
 df <- df %>% mutate(across(2:606, ~ as.numeric(.x)))
 
@@ -8042,7 +8042,7 @@ ggscatter(mds_lang, x = "Dim.1", y = "Dim.2",
           ellipse.type = "convex",
           repel = TRUE,
           palette = c(Austroasiatic="#fa0f0c", `Austroasiatic, Austronesian`="#996666", Austronesian="#9900ff", `Hmong-Mien`="#0099ff", Mayan="#660000", `Sino-Tibetan`="#336699", `Tai-Kadai`="#339900", `Trans–New Guinea`="#66ccff", Unknown="lightgrey"))
-          
+
 ggsave(filename = file.path("figures", "ethnic_K10_language_new_new.png"), width = 15, height = 10)
 
 # K-means clustering (K=6)
@@ -10632,7 +10632,7 @@ g_bru <- ggplot() + geom_sf(data=BRU_sf, aes(fill="white"), alpha=0.001) +
 
 g_bru
 
-ggsave(filename = file.path("figures", "Haplo_location_Brunei_new.png"), width = 20, height = 20)
+ggsave(filename = file.path("figures", "Haplo_location_Brunei_new.png"), width = 20, height = 18)
 
 ethnicity_BRU_plot_max <- ethnicity_BRU_plot %>% group_by(ethnicity) %>% slice(1)
 ethnicity_BRU_max <- ethnicity_BRU_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
@@ -10656,7 +10656,7 @@ e_bru <- ggplot() + geom_sf(data=BRU_sf, aes(fill="white"), alpha=0.001) +
 
 e_bru
 
-ggsave(filename = file.path("figures", "Haplo_ethnic_Brunei_new.png"), width = 20, height = 20)
+ggsave(filename = file.path("figures", "Haplo_ethnic_Brunei_new.png"), width = 20, height = 17)
 
 ## Cambodia
 
@@ -10704,7 +10704,16 @@ dat_ethnic_CAM <- ethnic_CAM %>%
                           TRUE ~ haplo1),
          haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
          haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("F1+16189"), "F1+", haplo1),
+         haplo1=ifelse(haplo %in% c("HV12b1"), "HV12", haplo1),
+         haplo1=ifelse(haplo %in% c("M1'20'51"), "M1'", haplo1),
+         haplo1=ifelse(haplo %in% c("M4''67"), "M4'", haplo1),
+         haplo1=ifelse(haplo %in% c("P1+152"), "P1+", haplo1),
+         haplo1=ifelse(haplo %in% c("P2*1", "P2*1a", "P2*2"), "P2*", haplo1),
+         haplo1=ifelse(haplo %in% c("Q1+@16223"), "Q1+", haplo1),
          haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         haplo1=ifelse(haplo %in% c("R2+13500"), "R2+", haplo1),
+         haplo1=ifelse(haplo %in% c("R6+16129*"), "R6+", haplo1),
          location=case_when(location=="Akar" ~ "Bengkulu",
                             location=="Akar Jambat" ~ "Bengkulu",
                             location=="Alor Island" ~ "Nusa Tenggara Timur",
@@ -10941,47 +10950,47 @@ dt_x <- dt %>% dplyr::select(-c(location, ID))
 
 g_cam <- ggplot() + geom_sf(data=CAM_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_CAM_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_CAM_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
-  geom_scatterpie(aes(x=x, y=y, r=0.2), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
-  guides(fill=guide_legend(nrow = 6, byrow=TRUE)) +
+  geom_sf_text(data=ethnicity_CAM_plot, mapping=aes(label = location), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.2), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  guides(fill=guide_legend(nrow = 4, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.5, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Cambodia")
 
 g_cam
 
-ggsave(filename = file.path("figures", "Haplo_location_Cambodia.png"), width = 10, height = 12)
+ggsave(filename = file.path("figures", "Haplo_location_Cambodia_new.png"), width = 20, height = 20)
 
 ethnicity_CAM_plot_max <- ethnicity_CAM_plot %>% group_by(ethnicity) %>% slice(1)
 ethnicity_CAM_max <- ethnicity_CAM_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
 
 e_cam <- ggplot() + geom_sf(data=CAM_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_CAM_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_CAM_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
-  geom_scatterpie(aes(x=x, y=y, r=0.2), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
-  annotate(geom = "table", x = 108, y = 9.5, label = list(ethnicity_CAM_max), size = 3) +
-  guides(fill=guide_legend(nrow = 6, byrow=TRUE)) +
+  geom_sf_text(data=ethnicity_CAM_plot, mapping=aes(label = ethnicity), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.2), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  annotate(geom = "table", x = 108, y = 10, label = list(ethnicity_CAM_max), size = 7) +
+  guides(fill=guide_legend(nrow = 4, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.5, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Cambodia")
 
 e_cam
 
-ggsave(filename = file.path("figures", "Haplo_ethnic_Cambodia.png"), width = 10, height = 12)
+ggsave(filename = file.path("figures", "Haplo_ethnic_Cambodia_new.png"), width = 20, height = 20)
 
 ## Indonesia
 
@@ -11275,47 +11284,47 @@ dt_x <- dt %>% dplyr::select(-c(location, ID))
 
 g_ind <- ggplot() + geom_sf(data=IND_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_IND_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_IND_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_sf_text(data=ethnicity_IND_plot, mapping=aes(label = location), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
   geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
   guides(fill=guide_legend(nrow = 4, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.5, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Indonesia")
 
 g_ind
 
-ggsave(filename = file.path("figures", "Haplo_location_Indonesia.png"), width = 15, height = 10)
+ggsave(filename = file.path("figures", "Haplo_location_Indonesia_new.png"), width = 30, height = 16)
 
 ethnicity_IND_plot_max <- ethnicity_IND_plot %>% group_by(ethnicity) %>% slice(1)
 ethnicity_IND_max <- ethnicity_IND_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
 
 e_ind <- ggplot() + geom_sf(data=IND_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_IND_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_IND_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_sf_text(data=ethnicity_IND_plot, mapping=aes(label = ethnicity), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
   geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
-  annotate(geom = "table", x = 90, y = -20, label = list(ethnicity_IND_max), size = 2) +
+  annotate(geom = "table", x = 90, y = -20, label = list(ethnicity_IND_max), size = 5) +
   guides(fill=guide_legend(nrow = 4, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.5, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Indonesia")
 
 e_ind
 
-ggsave(filename = file.path("figures", "Haplo_ethnic_Indonesia.png"), width = 15, height = 10)
+ggsave(filename = file.path("figures", "Haplo_ethnic_Indonesia_new.png"), width = 30, height = 16)
 
 ## Laos
 
@@ -11363,7 +11372,16 @@ dat_ethnic_LAO <- ethnic_LAO %>%
                           TRUE ~ haplo1),
          haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
          haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("F1+16189"), "F1+", haplo1),
+         haplo1=ifelse(haplo %in% c("HV12b1"), "HV12", haplo1),
+         haplo1=ifelse(haplo %in% c("M1'20'51"), "M1'", haplo1),
+         haplo1=ifelse(haplo %in% c("M4''67"), "M4'", haplo1),
+         haplo1=ifelse(haplo %in% c("P1+152"), "P1+", haplo1),
+         haplo1=ifelse(haplo %in% c("P2*1", "P2*1a", "P2*2"), "P2*", haplo1),
+         haplo1=ifelse(haplo %in% c("Q1+@16223"), "Q1+", haplo1),
          haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         haplo1=ifelse(haplo %in% c("R2+13500"), "R2+", haplo1),
+         haplo1=ifelse(haplo %in% c("R6+16129*"), "R6+", haplo1),
          location=case_when(location=="Akar" ~ "Bengkulu",
                             location=="Akar Jambat" ~ "Bengkulu",
                             location=="Alor Island" ~ "Nusa Tenggara Timur",
@@ -11600,47 +11618,47 @@ dt_x <- dt %>% dplyr::select(-c(location, ID))
 
 g_lao <- ggplot() + geom_sf(data=LAO_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_LAO_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_LAO_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
-  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
-  guides(fill=guide_legend(nrow = 3, byrow=TRUE)) +
+  geom_sf_text(data=ethnicity_LAO_plot, mapping=aes(label = location), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.5, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Laos")
 
 g_lao
 
-ggsave(filename = file.path("figures", "Haplo_location_Laos.png"), width = 10, height = 12)
+ggsave(filename = file.path("figures", "Haplo_location_Laos_new.png"), width = 20, height = 24)
 
 ethnicity_LAO_plot_max <- ethnicity_LAO_plot %>% group_by(ethnicity) %>% slice(1)
 ethnicity_LAO_max <- ethnicity_LAO_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
 
 e_lao <- ggplot() + geom_sf(data=LAO_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_LAO_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_LAO_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
-  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
-  annotate(geom = "table", x = 101, y = 16, label = list(ethnicity_LAO_max), size = 3) +
-  guides(fill=guide_legend(nrow = 3, byrow=TRUE)) +
+  geom_sf_text(data=ethnicity_LAO_plot, mapping=aes(label = ethnicity), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  annotate(geom = "table", x = 101, y = 16, label = list(ethnicity_LAO_max), size = 9) +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.5, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Laos")
 
 e_lao
 
-ggsave(filename = file.path("figures", "Haplo_ethnic_Laos.png"), width = 10, height = 12)
+ggsave(filename = file.path("figures", "Haplo_ethnic_Laos_new.png"), width = 20, height = 24)
 
 ## Malaysia
 
@@ -11688,7 +11706,16 @@ dat_ethnic_MAL <- ethnic_MAL %>%
                           TRUE ~ haplo1),
          haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
          haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("F1+16189"), "F1+", haplo1),
+         haplo1=ifelse(haplo %in% c("HV12b1"), "HV12", haplo1),
+         haplo1=ifelse(haplo %in% c("M1'20'51"), "M1'", haplo1),
+         haplo1=ifelse(haplo %in% c("M4''67"), "M4'", haplo1),
+         haplo1=ifelse(haplo %in% c("P1+152"), "P1+", haplo1),
+         haplo1=ifelse(haplo %in% c("P2*1", "P2*1a", "P2*2"), "P2*", haplo1),
+         haplo1=ifelse(haplo %in% c("Q1+@16223"), "Q1+", haplo1),
          haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         haplo1=ifelse(haplo %in% c("R2+13500"), "R2+", haplo1),
+         haplo1=ifelse(haplo %in% c("R6+16129*"), "R6+", haplo1),
          location=case_when(location=="Akar" ~ "Bengkulu",
                             location=="Akar Jambat" ~ "Bengkulu",
                             location=="Alor Island" ~ "Nusa Tenggara Timur",
@@ -11925,47 +11952,47 @@ dt_x <- dt %>% dplyr::select(-c(location, ID))
 
 g_mal <- ggplot() + geom_sf(data=MAL_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_MAL_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_MAL_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
-  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
-  guides(fill=guide_legend(nrow = 3, byrow=TRUE)) +
+  geom_sf_text(data=ethnicity_MAL_plot, mapping=aes(label = location), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.5, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Malaysia")
 
 g_mal
 
-ggsave(filename = file.path("figures", "Haplo_location_Malaysia.png"), width = 15, height = 10)
+ggsave(filename = file.path("figures", "Haplo_location_Malaysia_new.png"), width = 30, height = 13)
 
 ethnicity_MAL_plot_max <- ethnicity_MAL_plot %>% group_by(ethnicity) %>% slice(1)
 ethnicity_MAL_max <- ethnicity_MAL_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
 
 e_mal <- ggplot() + geom_sf(data=MAL_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_MAL_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_MAL_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
-  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
-  annotate(geom = "table", x = 110.5, y = 7, label = list(ethnicity_MAL_max), size = 2.5) +
-  guides(fill=guide_legend(nrow = 3, byrow=TRUE)) +
+  geom_sf_text(data=ethnicity_MAL_plot, mapping=aes(label = ethnicity), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  annotate(geom = "table", x = 110.5, y = 7, label = list(ethnicity_MAL_max), size = 5) +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.5, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Malaysia")
 
 e_mal
 
-ggsave(filename = file.path("figures", "Haplo_ethnic_Malaysia.png"), width = 15, height = 10)
+ggsave(filename = file.path("figures", "Haplo_ethnic_Malaysia_new.png"), width = 30, height = 13)
 
 ## Myanmar
 
@@ -11999,7 +12026,7 @@ SEA <- read_excel("Changed_SEA_haplogroups_new.xlsx") %>%
                                                              Ethnicity)))))))
 MYA <- SEA %>% filter(Country=="Myanmar") %>%
   mutate(Location=ifelse(Location=="Yunnan, China", "Yunnan", Location))
-  
+
 ethnic_MYA <- MYA[,-c(1,3,4,7,8)] %>% dplyr::rename(country=Country, ethnicity=Ethnicity, location=Location, sum=`Sample size`)
 ethnic_MYA <- ethnic_MYA %>% 
   mutate(across(where(is.character), ~na_if(., "-"))) %>%
@@ -12015,7 +12042,16 @@ dat_ethnic_MYA <- ethnic_MYA %>%
                           TRUE ~ haplo1),
          haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
          haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("F1+16189"), "F1+", haplo1),
+         haplo1=ifelse(haplo %in% c("HV12b1"), "HV12", haplo1),
+         haplo1=ifelse(haplo %in% c("M1'20'51"), "M1'", haplo1),
+         haplo1=ifelse(haplo %in% c("M4''67"), "M4'", haplo1),
+         haplo1=ifelse(haplo %in% c("P1+152"), "P1+", haplo1),
+         haplo1=ifelse(haplo %in% c("P2*1", "P2*1a", "P2*2"), "P2*", haplo1),
+         haplo1=ifelse(haplo %in% c("Q1+@16223"), "Q1+", haplo1),
          haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         haplo1=ifelse(haplo %in% c("R2+13500"), "R2+", haplo1),
+         haplo1=ifelse(haplo %in% c("R6+16129*"), "R6+", haplo1),
          location=case_when(location=="Akar" ~ "Bengkulu",
                             location=="Akar Jambat" ~ "Bengkulu",
                             location=="Alor Island" ~ "Nusa Tenggara Timur",
@@ -12252,47 +12288,47 @@ dt_x <- dt %>% dplyr::select(-c(location, ID))
 
 g_mya <- ggplot() + geom_sf(data=MYA_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_MYA_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_MYA_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
-  geom_scatterpie(aes(x=x, y=y, r=0.6), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  geom_sf_text(data=ethnicity_MYA_plot, mapping=aes(label = location), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.8), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
   guides(fill=guide_legend(nrow = 6, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.5, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Myanmar")
 
 g_mya
 
-ggsave(filename = file.path("figures", "Haplo_location_Myanmar.png"), width = 10, height = 15)
+ggsave(filename = file.path("figures", "Haplo_location_Myanmar_new.png"), width = 18, height = 30)
 
 ethnicity_MYA_plot_max <- ethnicity_MYA_plot %>% group_by(ethnicity) %>% slice(1)
 ethnicity_MYA_max <- ethnicity_MYA_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
 
 e_mya <- ggplot() + geom_sf(data=MYA_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_MYA_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_MYA_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
-  geom_scatterpie(aes(x=x, y=y, r=0.6), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
-  annotate(geom = "table", x = 106, y = 20, label = list(ethnicity_MYA_max), size = 3) +
+  geom_sf_text(data=ethnicity_MYA_plot, mapping=aes(label = ethnicity), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.8), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  annotate(geom = "table", x = 106, y = 20, label = list(ethnicity_MYA_max), size = 7) +
   guides(fill=guide_legend(nrow = 6, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.5, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Myanmar")
 
 e_mya
 
-ggsave(filename = file.path("figures", "Haplo_ethnic_Myanmar.png"), width = 10, height = 15)
+ggsave(filename = file.path("figures", "Haplo_ethnic_Myanmar_new.png"), width = 18, height = 30)
 
 
 ## Philippines
@@ -12578,48 +12614,47 @@ dt_x <- dt %>% dplyr::select(-c(location, ID))
 
 g_phi <- ggplot() + geom_sf(data=PHI_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_PHI_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_PHI_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
-  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
-  guides(fill=guide_legend(nrow = 5, byrow=TRUE)) +
+  geom_sf_text(data=ethnicity_PHI_plot, mapping=aes(label = location), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  guides(fill=guide_legend(nrow = 4, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.5, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Philippines")
 
 g_phi
 
-ggsave(filename = file.path("figures", "Haplo_location_Philippines.png"), width = 10, height = 15)
+ggsave(filename = file.path("figures", "Haplo_location_Philippines_new.png"), width = 18, height = 28)
 
 ethnicity_PHI_plot_max <- ethnicity_PHI_plot %>% group_by(ethnicity) %>% slice(1)
 ethnicity_PHI_max <- ethnicity_PHI_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
 
 e_phi <- ggplot() + geom_sf(data=PHI_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_PHI_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_PHI_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
-  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
-  annotate(geom = "table", x = 126.5, y = 20, label = list(ethnicity_PHI_max), size = 2) +
-  guides(fill=guide_legend(nrow = 5, byrow=TRUE)) +
+  geom_sf_text(data=ethnicity_PHI_plot, mapping=aes(label = ethnicity), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
+  annotate(geom = "table", x = 128.9, y = 20, label = list(ethnicity_PHI_max), size = 6) +
+  guides(fill=guide_legend(nrow = 4, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.5, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Philippines")
 
 e_phi
 
-ggsave(filename = file.path("figures", "Haplo_ethnic_Philippines.png"), width = 10, height = 15)
-
+ggsave(filename = file.path("figures", "Haplo_ethnic_Philippines_new.png"), width = 18, height = 28)
 
 ## Thailand
 
@@ -12913,47 +12948,47 @@ dt_x <- dt %>% dplyr::select(-c(location, ID))
 
 g_tha <- ggplot() + geom_sf(data=THA_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_THA_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_THA_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_sf_text(data=ethnicity_THA_plot, mapping=aes(label = location), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
   geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
   guides(fill=guide_legend(nrow = 15, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.4, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Thailand")
 
 g_tha
 
-ggsave(filename = file.path("figures", "Haplo_location_Thailand.png"), width = 8, height = 17)
+ggsave(filename = file.path("figures", "Haplo_location_Thailand_new.png"), width = 16, height = 34)
 
 ethnicity_THA_plot_max <- ethnicity_THA_plot %>% group_by(ethnicity) %>% slice(1)
 ethnicity_THA_max <- ethnicity_THA_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
 
 e_tha <- ggplot() + geom_sf(data=THA_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_THA_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_THA_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_sf_text(data=ethnicity_THA_plot, mapping=aes(label = ethnicity), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
   geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
-  annotate(geom = "table", x = 105.5, y = 5, label = list(ethnicity_THA_max), size = 2) +
+  annotate(geom = "table", x = 106.5, y = 7, label = list(ethnicity_THA_max), size = 6) +
   guides(fill=guide_legend(nrow = 15, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.4, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Thailand")
 
 e_tha
 
-ggsave(filename = file.path("figures", "Haplo_ethnic_Thailand.png"), width = 8, height = 17)
+ggsave(filename = file.path("figures", "Haplo_ethnic_Thailand_new.png"), width = 18, height = 34)
 
 ## Taiwan
 
@@ -13247,47 +13282,47 @@ dt_x <- dt %>% dplyr::select(-c(location, ID))
 
 g_tai <- ggplot() + geom_sf(data=TAI_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_TAI_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_TAI_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_sf_text(data=ethnicity_TAI_plot, mapping=aes(label = location), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
   geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
   guides(fill=guide_legend(nrow = 1, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.5, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Taiwan")
 
 g_tai
 
-ggsave(filename = file.path("figures", "Haplo_location_Taiwan.png"), width = 10, height = 10)
+ggsave(filename = file.path("figures", "Haplo_location_Taiwan_new.png"), width = 18, height = 20)
 
 ethnicity_TAI_plot_max <- ethnicity_TAI_plot %>% group_by(ethnicity) %>% slice(1)
 ethnicity_TAI_max <- ethnicity_TAI_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
 
 e_tai <- ggplot() + geom_sf(data=TAI_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_TAI_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_TAI_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_sf_text(data=ethnicity_TAI_plot, mapping=aes(label = ethnicity), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
   geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
-  annotate(geom = "table", x = 118, y = 22, label = list(ethnicity_TAI_max), size = 3) +
+  annotate(geom = "table", x = 118, y = 22, label = list(ethnicity_TAI_max), size = 7) +
   guides(fill=guide_legend(nrow = 1, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.5, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Taiwan")
 
 e_tai
 
-ggsave(filename = file.path("figures", "Haplo_ethnic_Taiwan.png"), width = 10, height = 10)
+ggsave(filename = file.path("figures", "Haplo_ethnic_Taiwan_new.png"), width = 18, height = 20)
 
 ## Timor-Leste
 
@@ -13581,47 +13616,47 @@ dt_x <- dt %>% dplyr::select(-c(location, ID))
 
 g_tim <- ggplot() + geom_sf(data=TIM_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_TIM_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_TIM_plot, mapping=aes(label = location), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_sf_text(data=ethnicity_TIM_plot, mapping=aes(label = location), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
   geom_scatterpie(aes(x=x, y=y, r=0.1), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
   guides(fill=guide_legend(nrow = 1, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.5, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Timor-Leste")
 
 g_tim
 
-ggsave(filename = file.path("figures", "Haplo_location_Timor-Leste.png"), width = 15, height = 8)
+ggsave(filename = file.path("figures", "Haplo_location_Timor-Leste_new.png"), width = 30, height = 15)
 
 ethnicity_TIM_plot_max <- ethnicity_TIM_plot %>% group_by(ethnicity) %>% slice(1)
 ethnicity_TIM_max <- ethnicity_TIM_plot_max %>% st_drop_geometry() %>% select(ethnicity, haplo1_max) %>% rename(Ethnicity=ethnicity, `Dominant Haplogroup`=haplo1_max) %>% setDT()
 
 e_tim <- ggplot() + geom_sf(data=TIM_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_TIM_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
-  geom_sf_text(data=ethnicity_TIM_plot, mapping=aes(label = ethnicity), stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
+  geom_sf_text(data=ethnicity_TIM_plot, mapping=aes(label = ethnicity), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
   geom_scatterpie(aes(x=x, y=y, r=0.1), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
-  annotate(geom = "table", x = 124, y = -8.6, label = list(ethnicity_TIM_max), size = 3) +
+  annotate(geom = "table", x = 124, y = -8.6, label = list(ethnicity_TIM_max), size = 6) +
   guides(fill=guide_legend(nrow = 1, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
-  theme(plot.title = element_text(size=20, face = "bold"),
-        text = element_text(size=12), 
-        axis.text.x = element_text(size=10), 
-        axis.text.y = element_text(size=10), 
-        legend.text=element_text(size=10), 
-        legend.key.size = unit(0.5, "cm"),
+  theme(plot.title = element_text(size=40, face = "bold"),
+        text = element_text(size=24), 
+        axis.text.x = element_text(size=20), 
+        axis.text.y = element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Timor-Leste")
 
 e_tim
 
-ggsave(filename = file.path("figures", "Haplo_ethnic_Timor-Leste.png"), width = 15, height = 8)
+ggsave(filename = file.path("figures", "Haplo_ethnic_Timor-Leste_new.png"), width = 30, height = 15)
 
 ## Vietnam
 
@@ -13669,7 +13704,16 @@ dat_ethnic_VN <- ethnic_VN %>%
                           TRUE ~ haplo1),
          haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
          haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("F1+16189"), "F1+", haplo1),
+         haplo1=ifelse(haplo %in% c("HV12b1"), "HV12", haplo1),
+         haplo1=ifelse(haplo %in% c("M1'20'51"), "M1'", haplo1),
+         haplo1=ifelse(haplo %in% c("M4''67"), "M4'", haplo1),
+         haplo1=ifelse(haplo %in% c("P1+152"), "P1+", haplo1),
+         haplo1=ifelse(haplo %in% c("P2*1", "P2*1a", "P2*2"), "P2*", haplo1),
+         haplo1=ifelse(haplo %in% c("Q1+@16223"), "Q1+", haplo1),
          haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         haplo1=ifelse(haplo %in% c("R2+13500"), "R2+", haplo1),
+         haplo1=ifelse(haplo %in% c("R6+16129*"), "R6+", haplo1),
          location=case_when(location=="Akar" ~ "Bengkulu",
                             location=="Akar Jambat" ~ "Bengkulu",
                             location=="Alor Island" ~ "Nusa Tenggara Timur",
@@ -13904,11 +13948,10 @@ dt <- dt %>%
   mutate(location=order(ID)) %>% left_join(locations_coords) %>% dplyr::rename(x=X, y=Y)
 dt_x <- dt %>% dplyr::select(-c(location, ID))
 
-
 g_vn <- ggplot() + geom_sf(data=VN_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_VN_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
   geom_sf_text(data=ethnicity_VN_plot, mapping=aes(label = location), size=9, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
-  geom_scatterpie(aes(x=x, y=y, r=0.5), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  geom_scatterpie(aes(x=x, y=y, r=0.5), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
   guides(fill=guide_legend(nrow = 9, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
@@ -13923,7 +13966,7 @@ g_vn <- ggplot() + geom_sf(data=VN_sf, aes(fill="white"), alpha=0.001) +
 
 g_vn
 
-ggsave(filename = file.path("figures", "Haplo_location_Vietnam_new.png"), width = 15, height = 30)
+ggsave(filename = file.path("figures", "Haplo_location_Vietnam_new.png"), width = 14, height = 30)
 
 g_vn2 <- ggplot() + geom_sf(data=VN_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_VN_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
@@ -13955,7 +13998,7 @@ ethnicity_VN_max <- ethnicity_VN_plot_max %>% st_drop_geometry() %>% select(ethn
 e_vn <- ggplot() + geom_sf(data=VN_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_VN_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
   geom_sf_text(data=ethnicity_VN_plot, mapping=aes(label = ethnicity), size=8, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
-  geom_scatterpie(aes(x=x, y=y, r=0.5), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  geom_scatterpie(aes(x=x, y=y, r=0.5), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
   annotate(geom = "table", x = 106, y = 17, label = list(ethnicity_VN_max), size = 5) +
   guides(fill=guide_legend(nrow = 9, byrow=TRUE)) +
   scale_fill_discrete(name="") +
@@ -13971,7 +14014,7 @@ e_vn <- ggplot() + geom_sf(data=VN_sf, aes(fill="white"), alpha=0.001) +
 
 e_vn
 
-ggsave(filename = file.path("figures", "Haplo_ethnic_Vietnam_new.png"), width = 15, height = 30)  
+ggsave(filename = file.path("figures", "Haplo_ethnic_Vietnam_new.png"), width = 14, height = 30)  
 
 
 ################ SUBCLADES #######################
