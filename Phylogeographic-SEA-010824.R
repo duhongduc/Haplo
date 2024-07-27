@@ -10617,16 +10617,16 @@ dt_x <- dt %>% dplyr::select(-c(location, ID))
 g_bru <- ggplot() + geom_sf(data=BRU_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_BRU_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
   geom_sf_text(data=ethnicity_BRU_plot, mapping=aes(label = location), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
-  geom_scatterpie(aes(x=x, y=y, r=0.1), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  geom_scatterpie(aes(x=x, y=y, r=0.1), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
   guides(fill=guide_legend(nrow = 1, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
-        legend.key.size = unit(1, "cm"),
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Brunei")
 
@@ -10647,10 +10647,10 @@ e_bru <- ggplot() + geom_sf(data=BRU_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
-        legend.key.size = unit(1, "cm"),
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Brunei")
 
@@ -11291,10 +11291,10 @@ g_ind <- ggplot() + geom_sf(data=IND_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
-        legend.key.size = unit(1, "cm"),
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Indonesia")
 
@@ -11315,16 +11315,16 @@ e_ind <- ggplot() + geom_sf(data=IND_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
-        legend.key.size = unit(1, "cm"),
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Indonesia")
 
 e_ind
 
-ggsave(filename = file.path("figures", "Haplo_ethnic_Indonesia_new.png"), width = 30, height = 16)
+ggsave(filename = file.path("figures", "Haplo_ethnic_Indonesia_new.png"), width = 30, height = 18)
 
 ## Laos
 
@@ -11959,10 +11959,10 @@ g_mal <- ggplot() + geom_sf(data=MAL_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
-        legend.key.size = unit(1, "cm"),
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Malaysia")
 
@@ -11983,10 +11983,10 @@ e_mal <- ggplot() + geom_sf(data=MAL_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
-        legend.key.size = unit(1, "cm"),
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Malaysia")
 
@@ -12377,7 +12377,16 @@ dat_ethnic_PHI <- ethnic_PHI %>%
                           TRUE ~ haplo1),
          haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
          haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("F1+16189"), "F1+", haplo1),
+         haplo1=ifelse(haplo %in% c("HV12b1"), "HV12", haplo1),
+         haplo1=ifelse(haplo %in% c("M1'20'51"), "M1'", haplo1),
+         haplo1=ifelse(haplo %in% c("M4''67"), "M4'", haplo1),
+         haplo1=ifelse(haplo %in% c("P1+152"), "P1+", haplo1),
+         haplo1=ifelse(haplo %in% c("P2*1", "P2*1a", "P2*2"), "P2*", haplo1),
+         haplo1=ifelse(haplo %in% c("Q1+@16223"), "Q1+", haplo1),
          haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         haplo1=ifelse(haplo %in% c("R2+13500"), "R2+", haplo1),
+         haplo1=ifelse(haplo %in% c("R6+16129*"), "R6+", haplo1),
          location=case_when(location=="Akar" ~ "Bengkulu",
                             location=="Akar Jambat" ~ "Bengkulu",
                             location=="Alor Island" ~ "Nusa Tenggara Timur",
@@ -12621,9 +12630,9 @@ g_phi <- ggplot() + geom_sf(data=PHI_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
         legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Philippines")
@@ -12645,9 +12654,9 @@ e_phi <- ggplot() + geom_sf(data=PHI_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
         legend.key.size = unit(1, "cm"),
         legend.position = "bottom") +
   ggtitle("Philippines")
@@ -13623,10 +13632,10 @@ g_tim <- ggplot() + geom_sf(data=TIM_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
-        legend.key.size = unit(1, "cm"),
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Timor-Leste")
 
@@ -13647,10 +13656,10 @@ e_tim <- ggplot() + geom_sf(data=TIM_sf, aes(fill="white"), alpha=0.001) +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
-        legend.key.size = unit(1, "cm"),
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Timor-Leste")
 

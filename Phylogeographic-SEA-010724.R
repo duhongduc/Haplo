@@ -10617,16 +10617,16 @@ dt_x <- dt %>% dplyr::select(-c(location, ID))
 g_bru <- ggplot() + geom_sf(data=BRU_sf, aes(fill="white"), alpha=0.001) + 
   geom_sf(data=ethnicity_BRU_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
   geom_sf_text(data=ethnicity_BRU_plot, mapping=aes(label = location), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
-  geom_scatterpie(aes(x=x, y=y, r=0.1), data=dt_x, cols = colnames(dt_x)[1:218], color=NA, alpha=0.6) +
+  geom_scatterpie(aes(x=x, y=y, r=0.1), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
   guides(fill=guide_legend(nrow = 1, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
         text = element_text(size=24), 
-        axis.text.x = element_text(size=20), 
-        axis.text.y = element_text(size=20), 
-        legend.text=element_text(size=20), 
-        legend.key.size = unit(1, "cm"),
+        axis.text.x = element_text(size=24), 
+        axis.text.y = element_text(size=24), 
+        legend.text=element_text(size=24), 
+        legend.key.size = unit(1.5, "cm"),
         legend.position = "bottom") +
   ggtitle("Brunei")
 
