@@ -11780,7 +11780,7 @@ e_ind <- ggplot() + geom_sf(data=IND_sf, aes(fill="white"), alpha=0.001) +
   geom_sf(data=ethnicity_IND_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
   geom_sf_text(data=ethnicity_IND_plot, mapping=aes(label = ethnicity), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
   geom_scatterpie(aes(x=x, y=y, r=1), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
-  annotate(geom = "table", x = 90, y = -20, label = list(ethnicity_IND_max), size = 5) +
+  annotate(geom = "table", x = 88, y = -20, label = list(ethnicity_IND_max), size = 6) +
   guides(fill=guide_legend(nrow = 4, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
@@ -12448,7 +12448,7 @@ e_mal <- ggplot() + geom_sf(data=MAL_sf, aes(fill="white"), alpha=0.001) +
   geom_sf(data=ethnicity_MAL_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
   geom_sf_text(data=ethnicity_MAL_plot, mapping=aes(label = ethnicity), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
   geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
-  annotate(geom = "table", x = 110.5, y = 7, label = list(ethnicity_MAL_max), size = 5) +
+  annotate(geom = "table", x = 111, y = 7.3, label = list(ethnicity_MAL_max), size = 6.5) +
   guides(fill=guide_legend(nrow = 2, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
@@ -13119,7 +13119,7 @@ e_phi <- ggplot() + geom_sf(data=PHI_sf, aes(fill="white"), alpha=0.001) +
   geom_sf(data=ethnicity_PHI_plot, aes(fill=haplo1_max), lwd=0, alpha=0.6) +
   geom_sf_text(data=ethnicity_PHI_plot, mapping=aes(label = ethnicity), size=10, stat = "sf_coordinates", hjust=0.5, vjust=0.5, check_overlap = T) +
   geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
-  annotate(geom = "table", x = 128.9, y = 20, label = list(ethnicity_PHI_max), size = 6) +
+  annotate(geom = "table", x = 130, y = 20, label = list(ethnicity_PHI_max), size = 6.5) +
   guides(fill=guide_legend(nrow = 4, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
