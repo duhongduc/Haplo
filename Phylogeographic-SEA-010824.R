@@ -15929,6 +15929,350 @@ ggplot() +
 
 ggsave(filename = file.path("figures", "F1a-Kriging.png"), width = 42, height = 33)
 
+# Haplogroup F1f
+
+library(sf)
+library(ggplot2)
+library(data.table)
+library(dplyr)
+
+# Calculate the overall proportion of haplogroup F1a
+prop.F1f <- (sum(dat_f$haplogroup3 == "F1f" & !is.na(dat_f$count), na.rm = TRUE) / sum(dat_f$count, na.rm = TRUE)) * 100
+
+# Process the data
+F1f <- dat_f %>% rename(location=Location, ethnicity=Ethnicity)  %>%
+  mutate(haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", " A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
+         haplo1=ifelse(is.na(haplo1), haplo, haplo1),
+         haplo1=case_when(haplo1 %in% c("135", "156", "159", "167", "172", "175", "182", "187", "197", "246", "261", "263", "264", "266", "272", "299", "316", "318", "349", "372", "377", "422", "430", "436", "481", "487", "494", "499", "562", "566", "595", "604", "168", "30", "32", "50", "51", "53", "530", "62", "73", "78", "90", "563") ~ haplo, 
+                          TRUE ~ haplo1),
+         haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
+         haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("F1+16189"), "F1+", haplo1),
+         haplo1=ifelse(haplo %in% c("HV12b1"), "HV12", haplo1),
+         haplo1=ifelse(haplo %in% c("M1'20'51"), "M1'", haplo1),
+         haplo1=ifelse(haplo %in% c("M4''67"), "M4'", haplo1),
+         haplo1=ifelse(haplo %in% c("P1+152"), "P1+", haplo1),
+         haplo1=ifelse(haplo %in% c("P2*1", "P2*1a", "P2*2"), "P2*", haplo1),
+         haplo1=ifelse(haplo %in% c("Q1+@16223"), "Q1+", haplo1),
+         haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         haplo1=ifelse(haplo %in% c("R2+13500"), "R2+", haplo1),
+         haplo1=ifelse(haplo %in% c("R6+16129*"), "R6+", haplo1),
+         location=case_when(location=="Akar" ~ "Bengkulu",
+                            location=="Akar Jambat" ~ "Bengkulu",
+                            location=="Alor Island" ~ "Nusa Tenggara Timur",
+                            location=="Andaman Sea coast" ~ "Krabi",
+                            location=="Bangkok" ~ "Bangkok Metropolis",
+                            location=="Borneo" ~ "Kalimantan Timur",
+                            location=="Capul's island in Northern Samar" ~ "Northern Samar",
+                            location=="Columbio" ~ "Sultan Kudarat",
+                            location=="Dulag" ~ "Leyte",
+                            location=="East Malaysia on the island of Borneo" ~ "Sarawak",
+                            location=="Ibabao, Cordova, Cebu City" ~ "Cebu",
+                            location=="Jangkar" ~ "Jawa Timur",
+                            location=="Jemaring" ~ "Sumatera Selatan",
+                            location=="Kachin State" ~ "Kachin",
+                            location=="Kayin State" ~ "Kachin",
+                            location=="Kota Kinabalu" ~ "Sabah",
+                            location=="Lipa" ~ "Batangas",
+                            location=="Luzon, Visayas, Mindanao" ~ "Quezon",
+                            location=="Mataran (or Mataram)" ~ "Nusa Tenggara Barat",
+                            location=="Merpayang Pauna" ~ "Sumatera Selatan",
+                            location=="Mindanao" ~ "Davao del Sur",
+                            location=="Mon, Kayin State" ~ "Kachin",
+                            location=="North Thailand, Central Thailand (Kanchanaburi and Ratchaburi)" ~ "Ratchaburi",
+                            location=="Northern Mindanao" ~ "Bukidnon",
+                            location=="Nothern Luzon" ~ "Cagayan",
+                            location=="Pelagaran" ~ "Sumatera Selatan",
+                            location=="Pelagaran Jambat" ~ "Sumatera Selatan",
+                            location=="Palembang" ~ "Sumatera Selatan",
+                            location=="Pang Mapha" ~ "Mae Hong Son",
+                            location=="Papua New Guinea" ~ "Papua",
+                            location=="Peninsular Malaysia" ~ "Pahang",
+                            location=="Philippines" ~ "Metropolitan Manila",
+                            location=="President Quirino" ~ "Sultan Kudarat",
+                            location=="Ratanakiri" ~ "Rotanokiri",
+                            location=="Salak" ~ "Sumatera Utara",
+                            location=="Semende" ~ "Sumatera Selatan",
+                            location=="Singapore" ~ "Central",
+                            location=="Southern Mindanao" ~ "Davao del Sur",
+                            location=="Southern Thailand" & (ethnicity =="Maniq" | ethnicity == "Southern Thai_AN") ~ "Narathiwat",
+                            location=="Southern Thailand" & ethnicity == "Southern Thai_TK" ~ "Surat Thani",
+                            location=="Stung Treng" ~ "Stoeng Treng",
+                            location=="Tak, Mae Hong Son, and Kanchanaburi" ~ "Mae Hong Son",
+                            location=="Thailand" & ethnicity == "Taiwan" ~ "Taiwan",
+                            location=="Vietnam" & ethnicity == "Kinh, Cham, Ede, Giarai" ~ "Ninh Thuan",
+                            location=="Vietnam" & ethnicity == "Kinh, Muong, Khmer" ~ "Ho Chi Minh",
+                            location=="Vietnam" & ethnicity == "Kinh, Tay, Thai, Muong, Hmong" ~ "Hoa Binh",
+                            location=="Wallacea" ~ "Sulawesi Tengah",
+                            location=="China" ~ "Yunnan",
+                            location=="Lancang, China" ~ "Yunnan",
+                            location=="Dehong, China" ~ "Yunnan",
+                            location=="Yunnan, China" ~ "Yunnan",
+                            location=="Brunei (Borneo)" ~ "Brunei and Muara",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Prey Veng" ~ "Prey Veng",
+                            location=="Banteay Meanchey" ~ "Banteay Meanchey",
+                            location=="Kampong Thom" ~ "Kampong Thum",
+                            location=="Kampong Cham" ~ "Kampong Cham",
+                            location=="Kratie" ~ "Kracheh",
+                            location=="Takeo" ~ "Takev",
+                            location=="Battanbang" ~ "Batdambang",
+                            location=="Kampong Chahnang" ~ "Kampong Chhnang",
+                            location=="Pursat" ~ "Pouthisat",
+                            location=="Phnom Penh" ~ "Phnom Penh",
+                            location=="Kampot" ~ "Kampot",
+                            location=="Kandal" ~ "Kandal",
+                            location=="Oddar Meanchey" ~ "Otdar Mean Chey",
+                            location=="Koh Kong" ~ "Kaoh Kong",
+                            location=="Svay Rieng" ~ "Svay Rieng",
+                            location=="Alor" ~ "Nusa Tenggara Timur",
+                            location=="Ambon" ~ "Maluku",
+                            location=="Bali" ~ "Bali",
+                            location=="South Kalimantan" ~ "Kalimantan Selatan",
+                            location=="Padang" ~ "Sumatera Barat",
+                            location=="Sumatra" ~ "Sumatera Barat",
+                            location=="Java, Demak" ~ "Jawa Tengah",
+                            location=="Sumatra, Kutaradja" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="West New Guinea" ~ "Papua Barat",
+                            location=="Manado" ~ "Sulawesi Utara",
+                            location=="Sulawesi" ~ "Sulawesi Tengah",
+                            location=="Sulawesi, Manado" ~ "Sulawesi Utara",
+                            location=="Sumatra, Padang" ~ "Sumatera Barat",
+                            location=="Sumatra, Palembang" ~ "Sumatera Selatan",
+                            location=="Palangkaraya" ~ "Kalimantan Tengah",
+                            location=="South Borneo" ~ "Kalimantan Selatan",
+                            location=="Pagaralam" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="Toraja" ~ "Sulawesi Selatan",
+                            location=="Ujung Pandang" ~ "Sulawesi Selatan",
+                            location=="Waigapu (Sumba)" ~ "Nusa Tenggara Timur",
+                            location=="Sumba" ~ "Nusa Tenggara Timur",
+                            location=="Banjarmasin (Borneo)" ~ "Kalimantan Selatan",
+                            location=="Palangkaraya (Borneo)" ~ "Kalimantan Tengah",
+                            location=="North Laos" ~ "Louangphrabang",
+                            location=="Central Laos" ~ "Vientiane",
+                            location=="Kedah" ~ "Kedah",
+                            location=="Acheh-Kedah Yan" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor" ~ "Johor",
+                            location=="Johor Pontian" ~ "Johor",
+                            location=="Banjar Perak Kuala Kurau" ~ "Kedah",
+                            location=="Perak, Banjar Malay" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor Semerah Jawa" ~ "Johor",
+                            location=="Johor Muar Jawa" ~ "Johor",
+                            location=="Sabah" ~ "Johor",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Kelantan Kota Bahru" ~ "Kelantan",
+                            location=="Negeri Sembilan" ~ "Negeri Sembilan",
+                            location=="Minangkabau-Negeri Sembilan Lenggeng" ~ "Negeri Sembilan",
+                            location=="Kelantan RantauPanjang" ~ "Kelantan",
+                            location=="Perak, Rawa Malay" ~ "Perak",
+                            location=="Kota Kinabalu (Borneo)" ~ "Sabah",
+                            location=="Yangon" ~ "Yangon",
+                            location=="Pakokku" ~ "Mon",
+                            location=="Bataan" ~ "Bataan",
+                            location=="Zambales" ~ "Zambales",
+                            location=="Iriga" ~ "Camarines Sur",
+                            location=="Batan Archipelago" ~ "Bataan",
+                            location=="Cebu" ~ "Cebu",
+                            location=="Philippines Bohol" ~ "Bohol",
+                            location=="Luzon" ~ "Bulacan",
+                            location=="North Thailand" ~ "Chiang Mai",
+                            location=="Northeast Thailand" ~ "Samut Prakan",
+                            location=="Northern Thailand" ~ "Chiang Mai",
+                            location=="Central Thailand" ~ "Bangkok Metropolis",
+                            location=="Mergui Archipelago" ~ "Tanintharyi",
+                            location=="West Thailand" ~ "Surat Thani",
+                            location=="Baucau" ~ "Baucau",
+                            location=="Liquica" ~ "Liquica",
+                            location=="Cova Lima" ~ "Covalima",
+                            location=="Viqueque" ~ "Viqueque",
+                            location=="Aileu" ~ "Aileu",
+                            location=="Ermera" ~ "Ermera",
+                            location=="Dili" ~ "Dili",
+                            location=="Manufahi" ~ "Manufahi",
+                            ethnicity=="Cham" ~ "Ninh Thuan",
+                            ethnicity=="CoLao" ~ "Ha Giang",
+                            ethnicity=="Dao" ~ "Ha Giang",
+                            ethnicity=="Kinh" ~ "Ha Noi",
+                            ethnicity=="Stieng" ~ "Binh Phuoc",
+                            ethnicity=="Ede" ~ "Dak Lak",
+                            ethnicity=="Giarai" ~ "Gia Lai",
+                            ethnicity=="HaNhi" ~ "Lai Chau",
+                            ethnicity=="Hmong" ~ "Dien Bien",
+                            ethnicity=="Hui" ~ "Ha Giang",
+                            ethnicity=="LaChi" ~ "Ha Giang",
+                            ethnicity=="LaHu" ~ "Lai Chau",
+                            ethnicity=="LoLo" ~ "Ha Giang",
+                            ethnicity=="Mang" ~ "Lai Chau",
+                            ethnicity=="Nung" ~ "Lang Son",
+                            ethnicity=="PaThen" ~ "Ha Giang",
+                            ethnicity=="PhuLa" ~ "Lao Cai",
+                            ethnicity=="SiLa" ~ "Lai Chau",
+                            ethnicity=="Tay" ~ "Lang Son",
+                            ethnicity=="Thai" ~ "Son La",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Yao" ~ "Ha Giang",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Tay Nung" ~ "Lao Cai",
+                            TRUE ~ location)) %>%
+  mutate(haplogroup4 = ifelse(haplogroup3 == "F1f", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  group_by(location) %>%
+  mutate(prop.pop = (sum(haplogroup4 == "F1f" & !is.na(count), na.rm = TRUE) / sum(count, na.rm = TRUE)) * 100) %>%
+  ungroup() %>%
+  filter(haplogroup4 == "F1f") %>%
+  group_by(location) %>%
+  slice(1) %>% setDT()
+
+# Add the overall proportion to the data
+F1f <- F1f %>%
+  mutate(prop.F1f = prop.F1f)
+
+# Ensure columns have the correct data types
+F1f_sf <- merge(F1f, SEA1_sf, by = c("location"))
+F1f_sf$prop.pop <- as.numeric(F1f_sf$prop.pop)
+F1f_sf$prop.F1f <- as.numeric(F1f_sf$prop.F1f)
+
+# Convert to sf object
+F1f_plot <- F1f_sf %>% dplyr::select(prop.pop, prop.F1f, geometry) %>% st_as_sf(crs = 4326)
+
+# Check for NULL values
+if (any(is.null(F1f_plot$prop.pop)) || any(is.null(F1f_plot$prop.F1f))) {
+  stop("There are NULL values in the data.")
+}
+
+# Plotting
+ggplot() +
+  geom_sf() +
+  geom_sf(data = SEA1_sf, fill = "white", alpha = 0.001) +
+  geom_sf(data = F1f_plot, aes(fill = prop.pop), lwd = 0) +
+  annotate(geom = "text", x = 130, y = 23, color = "red", size = 18, label = paste0(round(F1f_plot$prop.F1f[1], 1), "% population")) +
+  scale_fill_viridis("Percent (%)", direction = -1, option = "viridis") +
+  theme_bw() +
+  theme(
+    text = element_text(size = 45),
+    axis.text.x = element_text(size = 30),
+    axis.text.y = element_text(size = 30),
+    legend.text = element_text(size = 30),
+    legend.key.size = unit(2, "cm")
+  ) +
+  ggtitle("Haplogroup F1f")
+
+ggsave(filename = file.path("figures", "F1f-PerPop-location.png"), width = 42, height = 33)
+
+# Contour
+
+F1f_sf <- dat_sf %>% mutate(haplogroup4 = ifelse(haplogroup3 == "F1f", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  group_by(location) %>%
+  mutate(prop.pop = (sum(haplogroup4 == "F1f" & !is.na(count), na.rm = TRUE) / sum(count, na.rm = TRUE)) * 100,
+         ind=sum(haplogroup4 == "F1f" & !is.na(count), na.rm = TRUE),
+         pop=sum(count, na.rm = TRUE)) %>%
+  ungroup()
+
+prop.F1f <- (sum(dat_sf$haplogroup3 == "F1f" & !is.na(dat_sf$count), na.rm = TRUE) / sum(dat_sf$count, na.rm = TRUE)) * 100
+
+F1f_sf <- F1f_sf %>% mutate(prop.F1f = prop.F1f) %>% filter(haplogroup3=="F1f")
+
+F1f_f <- F1f_sf %>% select(location, ind, pop, prop.pop, geometry) %>% st_as_sf(crs = 4326)
+F1f_f <- sf::st_transform(F1f_f, 2154)
+F1f_plot <- F1f_sf %>% select(prop.pop, prop.F1f, geometry) %>% st_as_sf(crs = 4326)
+# Convert to Spatial class
+F1f_sf2 <- F1f_sf %>% select(location, ind, pop, prop.pop, geometry) %>% st_as_sf(crs = 4326)
+F1f_sf2 <- sf::st_transform(F1f_sf2, 2154)
+F1f_sp <- as(F1f_sf2, Class = "Spatial")
+
+# Compute the potentials of population on a regular grid (50km span)
+# function = exponential, beta = 2, span = 50 km
+poppot <- stewart(knownpts = F1f_sp, 
+                  varname = "pop", 
+                  typefct = "exponential", 
+                  span = 10000, 
+                  beta = 2, 
+                  resolution = 50000, 
+                  mask = F1f_sp, 
+                  returnclass = "sf")
+
+# Compute the potentials of haplogroup on a regular grid (50km span)
+# function = exponential, beta = 2, span = 50 km
+happot <- stewart(knownpts = F1f_sp, 
+                  varname = "ind", 
+                  typefct = "exponential", 
+                  span = 10000, 
+                  beta = 2, 
+                  resolution = 50000, 
+                  mask = F1f_sp, 
+                  returnclass = "sf")
+
+
+# Create the ratio variable
+# Handle NaN
+"/" <- function(x,y) ifelse(y==0,0,base:::"/"(x,y))
+poppot$OUTPUT2 <- happot$OUTPUT * 100 / poppot$OUTPUT
+
+# Discretize the variable
+bv <- quantile(F1f_sf$prop.pop, seq(from = 0, to = 1, length.out = 9))
+
+# Create an isopleth layer
+pot <- isopoly(x = poppot, var = "OUTPUT2",
+               breaks = bv, 
+               mask = F1f_sp, 
+               returnclass = "sf")
+
+ggplot() + geom_sf(data = SEA1_sf, fill = "white", alpha = 0.001) + 
+  geom_sf(data=pot, aes(fill=min), lwd=0) +
+  scale_fill_viridis("Percent (%)", direction = -1, option = "viridis") +
+  theme_bw() +
+  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
+  annotate(geom="text", x=130, y=23, color="red", size=18, label= paste(round(F1f_plot$prop.F1f[1],1), "% population", sep = "")) +
+  ggtitle("Haplogroup F1f") +
+  coord_sf(crs = 4326)
+ggsave(filename = file.path("figures", "F1f-Contour.png"), width = 42, height = 33)
+
+# Kriging
+
+# library(dplyr)
+# library(sf)
+# library(ggplot2)
+# library(viridis)
+# library(automap)
+# library(gstat)
+# library(terra)
+# library("gstat")   # geostatistics
+# library("mapview") # map plot
+# library("sf")      # spatial vector data
+# library("stars")   # spatial-temporal data
+# library("terra")   # raster data handling 
+# library("ggplot2") # plotting
+# mapviewOptions(fgb = FALSE)
+
+F1f_plot <- F1f_sf %>% dplyr::select(prop.pop, prop.F1f, geometry) %>% st_as_sf(crs = 4326)
+
+# ordinary kriging
+F1f.ok <- gstat::krige(prop.pop ~ 1, F1f_plot, SEA1_sf)
+
+# Convert the result back to sf object
+F1fKrige_sf <- st_as_sf(F1f.ok)
+
+ggplot() +
+  geom_sf(data = SEA1_sf, fill = "white", alpha = 0.001) +
+  geom_sf(data = F1fKrige_sf, aes(fill = var1.pred), lwd = 0) +
+  annotate(geom = "text", x = 130, y = 23, color = "red", size = 18, label = paste0(round(F1f_plot$prop.F1f[1], 1), "% population")) +
+  scale_fill_viridis("Percent (%)", direction = -1, option = "viridis") +
+  theme_bw() +
+  theme(
+    text = element_text(size = 45),
+    axis.text.x = element_text(size = 30),
+    axis.text.y = element_text(size = 30),
+    legend.text = element_text(size = 30),
+    legend.key.size = unit(2, "cm")
+  ) +
+  ggtitle("Haplogroup F1f")
+
+ggsave(filename = file.path("figures", "F1f-Kriging.png"), width = 42, height = 33)
+
 # Haplogroup M
 
 library(sf)
@@ -16615,6 +16959,694 @@ ggplot() +
   ggtitle("Haplogroup M7")
 
 ggsave(filename = file.path("figures", "M7-Kriging.png"), width = 42, height = 33)
+
+# Haplogroup M7b
+
+library(sf)
+library(ggplot2)
+library(data.table)
+library(dplyr)
+
+# Calculate the overall proportion of haplogroup M7b
+prop.M7b <- (sum(dat_f$haplogroup3 == "M7b" & !is.na(dat_f$count), na.rm = TRUE) / sum(dat_f$count, na.rm = TRUE)) * 100
+
+# Process the data
+M7b <- dat_f %>% rename(location=Location, ethnicity=Ethnicity)  %>%
+  mutate(haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", " A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
+         haplo1=ifelse(is.na(haplo1), haplo, haplo1),
+         haplo1=case_when(haplo1 %in% c("135", "156", "159", "167", "172", "175", "182", "187", "197", "246", "261", "263", "264", "266", "272", "299", "316", "318", "349", "372", "377", "422", "430", "436", "481", "487", "494", "499", "562", "566", "595", "604", "168", "30", "32", "50", "51", "53", "530", "62", "73", "78", "90", "563") ~ haplo, 
+                          TRUE ~ haplo1),
+         haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
+         haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("F1+16189"), "F1+", haplo1),
+         haplo1=ifelse(haplo %in% c("HV12b1"), "HV12", haplo1),
+         haplo1=ifelse(haplo %in% c("M1'20'51"), "M1'", haplo1),
+         haplo1=ifelse(haplo %in% c("M4''67"), "M4'", haplo1),
+         haplo1=ifelse(haplo %in% c("P1+152"), "P1+", haplo1),
+         haplo1=ifelse(haplo %in% c("P2*1", "P2*1a", "P2*2"), "P2*", haplo1),
+         haplo1=ifelse(haplo %in% c("Q1+@16223"), "Q1+", haplo1),
+         haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         haplo1=ifelse(haplo %in% c("R2+13500"), "R2+", haplo1),
+         haplo1=ifelse(haplo %in% c("R6+16129*"), "R6+", haplo1),
+         location=case_when(location=="Akar" ~ "Bengkulu",
+                            location=="Akar Jambat" ~ "Bengkulu",
+                            location=="Alor Island" ~ "Nusa Tenggara Timur",
+                            location=="Andaman Sea coast" ~ "Krabi",
+                            location=="Bangkok" ~ "Bangkok Metropolis",
+                            location=="Borneo" ~ "Kalimantan Timur",
+                            location=="Capul's island in Northern Samar" ~ "Northern Samar",
+                            location=="Columbio" ~ "Sultan Kudarat",
+                            location=="Dulag" ~ "Leyte",
+                            location=="East Malaysia on the island of Borneo" ~ "Sarawak",
+                            location=="Ibabao, Cordova, Cebu City" ~ "Cebu",
+                            location=="Jangkar" ~ "Jawa Timur",
+                            location=="Jemaring" ~ "Sumatera Selatan",
+                            location=="Kachin State" ~ "Kachin",
+                            location=="Kayin State" ~ "Kachin",
+                            location=="Kota Kinabalu" ~ "Sabah",
+                            location=="Lipa" ~ "Batangas",
+                            location=="Luzon, Visayas, Mindanao" ~ "Quezon",
+                            location=="Mataran (or Mataram)" ~ "Nusa Tenggara Barat",
+                            location=="Merpayang Pauna" ~ "Sumatera Selatan",
+                            location=="Mindanao" ~ "Davao del Sur",
+                            location=="Mon, Kayin State" ~ "Kachin",
+                            location=="North Thailand, Central Thailand (Kanchanaburi and Ratchaburi)" ~ "Ratchaburi",
+                            location=="Northern Mindanao" ~ "Bukidnon",
+                            location=="Nothern Luzon" ~ "Cagayan",
+                            location=="Pelagaran" ~ "Sumatera Selatan",
+                            location=="Pelagaran Jambat" ~ "Sumatera Selatan",
+                            location=="Palembang" ~ "Sumatera Selatan",
+                            location=="Pang Mapha" ~ "Mae Hong Son",
+                            location=="Papua New Guinea" ~ "Papua",
+                            location=="Peninsular Malaysia" ~ "Pahang",
+                            location=="Philippines" ~ "Metropolitan Manila",
+                            location=="President Quirino" ~ "Sultan Kudarat",
+                            location=="Ratanakiri" ~ "Rotanokiri",
+                            location=="Salak" ~ "Sumatera Utara",
+                            location=="Semende" ~ "Sumatera Selatan",
+                            location=="Singapore" ~ "Central",
+                            location=="Southern Mindanao" ~ "Davao del Sur",
+                            location=="Southern Thailand" & (ethnicity =="Maniq" | ethnicity == "Southern Thai_AN") ~ "Narathiwat",
+                            location=="Southern Thailand" & ethnicity == "Southern Thai_TK" ~ "Surat Thani",
+                            location=="Stung Treng" ~ "Stoeng Treng",
+                            location=="Tak, Mae Hong Son, and Kanchanaburi" ~ "Mae Hong Son",
+                            location=="Thailand" & ethnicity == "Taiwan" ~ "Taiwan",
+                            location=="Vietnam" & ethnicity == "Kinh, Cham, Ede, Giarai" ~ "Ninh Thuan",
+                            location=="Vietnam" & ethnicity == "Kinh, Muong, Khmer" ~ "Ho Chi Minh",
+                            location=="Vietnam" & ethnicity == "Kinh, Tay, Thai, Muong, Hmong" ~ "Hoa Binh",
+                            location=="Wallacea" ~ "Sulawesi Tengah",
+                            location=="China" ~ "Yunnan",
+                            location=="Lancang, China" ~ "Yunnan",
+                            location=="Dehong, China" ~ "Yunnan",
+                            location=="Yunnan, China" ~ "Yunnan",
+                            location=="Brunei (Borneo)" ~ "Brunei and Muara",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Prey Veng" ~ "Prey Veng",
+                            location=="Banteay Meanchey" ~ "Banteay Meanchey",
+                            location=="Kampong Thom" ~ "Kampong Thum",
+                            location=="Kampong Cham" ~ "Kampong Cham",
+                            location=="Kratie" ~ "Kracheh",
+                            location=="Takeo" ~ "Takev",
+                            location=="Battanbang" ~ "Batdambang",
+                            location=="Kampong Chahnang" ~ "Kampong Chhnang",
+                            location=="Pursat" ~ "Pouthisat",
+                            location=="Phnom Penh" ~ "Phnom Penh",
+                            location=="Kampot" ~ "Kampot",
+                            location=="Kandal" ~ "Kandal",
+                            location=="Oddar Meanchey" ~ "Otdar Mean Chey",
+                            location=="Koh Kong" ~ "Kaoh Kong",
+                            location=="Svay Rieng" ~ "Svay Rieng",
+                            location=="Alor" ~ "Nusa Tenggara Timur",
+                            location=="Ambon" ~ "Maluku",
+                            location=="Bali" ~ "Bali",
+                            location=="South Kalimantan" ~ "Kalimantan Selatan",
+                            location=="Padang" ~ "Sumatera Barat",
+                            location=="Sumatra" ~ "Sumatera Barat",
+                            location=="Java, Demak" ~ "Jawa Tengah",
+                            location=="Sumatra, Kutaradja" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="West New Guinea" ~ "Papua Barat",
+                            location=="Manado" ~ "Sulawesi Utara",
+                            location=="Sulawesi" ~ "Sulawesi Tengah",
+                            location=="Sulawesi, Manado" ~ "Sulawesi Utara",
+                            location=="Sumatra, Padang" ~ "Sumatera Barat",
+                            location=="Sumatra, Palembang" ~ "Sumatera Selatan",
+                            location=="Palangkaraya" ~ "Kalimantan Tengah",
+                            location=="South Borneo" ~ "Kalimantan Selatan",
+                            location=="Pagaralam" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="Toraja" ~ "Sulawesi Selatan",
+                            location=="Ujung Pandang" ~ "Sulawesi Selatan",
+                            location=="Waigapu (Sumba)" ~ "Nusa Tenggara Timur",
+                            location=="Sumba" ~ "Nusa Tenggara Timur",
+                            location=="Banjarmasin (Borneo)" ~ "Kalimantan Selatan",
+                            location=="Palangkaraya (Borneo)" ~ "Kalimantan Tengah",
+                            location=="North Laos" ~ "Louangphrabang",
+                            location=="Central Laos" ~ "Vientiane",
+                            location=="Kedah" ~ "Kedah",
+                            location=="Acheh-Kedah Yan" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor" ~ "Johor",
+                            location=="Johor Pontian" ~ "Johor",
+                            location=="Banjar Perak Kuala Kurau" ~ "Kedah",
+                            location=="Perak, Banjar Malay" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor Semerah Jawa" ~ "Johor",
+                            location=="Johor Muar Jawa" ~ "Johor",
+                            location=="Sabah" ~ "Johor",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Kelantan Kota Bahru" ~ "Kelantan",
+                            location=="Negeri Sembilan" ~ "Negeri Sembilan",
+                            location=="Minangkabau-Negeri Sembilan Lenggeng" ~ "Negeri Sembilan",
+                            location=="Kelantan RantauPanjang" ~ "Kelantan",
+                            location=="Perak, Rawa Malay" ~ "Perak",
+                            location=="Kota Kinabalu (Borneo)" ~ "Sabah",
+                            location=="Yangon" ~ "Yangon",
+                            location=="Pakokku" ~ "Mon",
+                            location=="Bataan" ~ "Bataan",
+                            location=="Zambales" ~ "Zambales",
+                            location=="Iriga" ~ "Camarines Sur",
+                            location=="Batan Archipelago" ~ "Bataan",
+                            location=="Cebu" ~ "Cebu",
+                            location=="Philippines Bohol" ~ "Bohol",
+                            location=="Luzon" ~ "Bulacan",
+                            location=="North Thailand" ~ "Chiang Mai",
+                            location=="Northeast Thailand" ~ "Samut Prakan",
+                            location=="Northern Thailand" ~ "Chiang Mai",
+                            location=="Central Thailand" ~ "Bangkok Metropolis",
+                            location=="Mergui Archipelago" ~ "Tanintharyi",
+                            location=="West Thailand" ~ "Surat Thani",
+                            location=="Baucau" ~ "Baucau",
+                            location=="Liquica" ~ "Liquica",
+                            location=="Cova Lima" ~ "Covalima",
+                            location=="Viqueque" ~ "Viqueque",
+                            location=="Aileu" ~ "Aileu",
+                            location=="Ermera" ~ "Ermera",
+                            location=="Dili" ~ "Dili",
+                            location=="Manufahi" ~ "Manufahi",
+                            ethnicity=="Cham" ~ "Ninh Thuan",
+                            ethnicity=="CoLao" ~ "Ha Giang",
+                            ethnicity=="Dao" ~ "Ha Giang",
+                            ethnicity=="Kinh" ~ "Ha Noi",
+                            ethnicity=="Stieng" ~ "Binh Phuoc",
+                            ethnicity=="Ede" ~ "Dak Lak",
+                            ethnicity=="Giarai" ~ "Gia Lai",
+                            ethnicity=="HaNhi" ~ "Lai Chau",
+                            ethnicity=="Hmong" ~ "Dien Bien",
+                            ethnicity=="Hui" ~ "Ha Giang",
+                            ethnicity=="LaChi" ~ "Ha Giang",
+                            ethnicity=="LaHu" ~ "Lai Chau",
+                            ethnicity=="LoLo" ~ "Ha Giang",
+                            ethnicity=="Mang" ~ "Lai Chau",
+                            ethnicity=="Nung" ~ "Lang Son",
+                            ethnicity=="PaThen" ~ "Ha Giang",
+                            ethnicity=="PhuLa" ~ "Lao Cai",
+                            ethnicity=="SiLa" ~ "Lai Chau",
+                            ethnicity=="Tay" ~ "Lang Son",
+                            ethnicity=="Thai" ~ "Son La",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Yao" ~ "Ha Giang",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Tay Nung" ~ "Lao Cai",
+                            TRUE ~ location)) %>%
+  mutate(haplogroup4 = ifelse(haplogroup3 == "M7b", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  group_by(location) %>%
+  mutate(prop.pop = (sum(haplogroup4 == "M7b" & !is.na(count), na.rm = TRUE) / sum(count, na.rm = TRUE)) * 100) %>%
+  ungroup() %>%
+  filter(haplogroup4 == "M7b") %>%
+  group_by(location) %>%
+  slice(1) %>% setDT()
+
+# Add the overall proportion to the data
+M7b <- M7b %>%
+  mutate(prop.M7b = prop.M7b)
+
+# Ensure columns have the correct data types
+M7b_sf <- merge(M7b, SEA1_sf, by = c("location"))
+M7b_sf$prop.pop <- as.numeric(M7b_sf$prop.pop)
+M7b_sf$prop.M7b <- as.numeric(M7b_sf$prop.M7b)
+
+# Convert to sf object
+M7b_plot <- M7b_sf %>% dplyr::select(prop.pop, prop.M7b, geometry) %>% st_as_sf(crs = 4326)
+
+# Check for NULL values
+if (any(is.null(M7b_plot$prop.pop)) || any(is.null(M7b_plot$prop.M7b))) {
+  stop("There are NULL values in the data.")
+}
+
+# Plotting
+ggplot() +
+  geom_sf() +
+  geom_sf(data = SEA1_sf, fill = "white", alpha = 0.001) +
+  geom_sf(data = M7b_plot, aes(fill = prop.pop), lwd = 0) +
+  annotate(geom = "text", x = 130, y = 23, color = "red", size = 18, label = paste0(round(M7b_plot$prop.M7b[1], 1), "% population")) +
+  scale_fill_viridis("Percent (%)", direction = -1, option = "viridis") +
+  theme_bw() +
+  theme(
+    text = element_text(size = 45),
+    axis.text.x = element_text(size = 30),
+    axis.text.y = element_text(size = 30),
+    legend.text = element_text(size = 30),
+    legend.key.size = unit(2, "cm")
+  ) +
+  ggtitle("Haplogroup M7b")
+
+ggsave(filename = file.path("figures", "M7b-PerPop-location.png"), width = 42, height = 33)
+
+# Contour
+
+M7b_sf <- dat_sf %>% mutate(haplogroup4 = ifelse(haplogroup3 == "M7b", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  group_by(location) %>%
+  mutate(prop.pop = (sum(haplogroup4 == "M7b" & !is.na(count), na.rm = TRUE) / sum(count, na.rm = TRUE)) * 100,
+         ind=sum(haplogroup4 == "M7b" & !is.na(count), na.rm = TRUE),
+         pop=sum(count, na.rm = TRUE)) %>%
+  ungroup()
+
+prop.M7b <- (sum(dat_sf$haplogroup3 == "M7b" & !is.na(dat_sf$count), na.rm = TRUE) / sum(dat_sf$count, na.rm = TRUE)) * 100
+
+M7b_sf <- M7b_sf %>% mutate(prop.M7b = prop.M7b) %>% filter(haplogroup3=="M7b")
+
+M7b_f <- M7b_sf %>% select(location, ind, pop, prop.pop, geometry) %>% st_as_sf(crs = 4326)
+M7b_f <- sf::st_transform(M7b_f, 2154)
+M7b_plot <- M7b_sf %>% select(prop.pop, prop.M7b, geometry) %>% st_as_sf(crs = 4326)
+# Convert to Spatial class
+M7b_sf2 <- M7b_sf %>% select(location, ind, pop, prop.pop, geometry) %>% st_as_sf(crs = 4326)
+M7b_sf2 <- sf::st_transform(M7b_sf2, 2154)
+M7b_sp <- as(M7b_sf2, Class = "Spatial")
+
+# Compute the potentials of population on a regular grid (50km span)
+# function = exponential, beta = 2, span = 50 km
+poppot <- stewart(knownpts = M7b_sp, 
+                  varname = "pop", 
+                  typefct = "exponential", 
+                  span = 75000, 
+                  beta = 2, 
+                  resolution = 50000, 
+                  mask = M7b_sp, 
+                  returnclass = "sf")
+
+# Compute the potentials of haplogroup on a regular grid (50km span)
+# function = exponential, beta = 2, span = 50 km
+happot <- stewart(knownpts = M7b_sp, 
+                  varname = "ind", 
+                  typefct = "exponential", 
+                  span = 75000, 
+                  beta = 2, 
+                  resolution = 50000, 
+                  mask = M7b_sp, 
+                  returnclass = "sf")
+
+
+# Create the ratio variable
+# Handle NaN
+"/" <- function(x,y) ifelse(y==0,0,base:::"/"(x,y))
+poppot$OUTPUT2 <- happot$OUTPUT * 100 / poppot$OUTPUT
+
+# Discretize the variable
+bv <- quantile(M7b_sf$prop.pop, seq(from = 0, to = 1, length.out = 9))
+
+# Create an isopleth layer
+pot <- isopoly(x = poppot, var = "OUTPUT2",
+               breaks = bv, 
+               mask = M7b_sp, 
+               returnclass = "sf")
+
+ggplot() + geom_sf(data = SEA1_sf, fill = "white", alpha = 0.001) + 
+  geom_sf(data=pot, aes(fill=min), lwd=0) +
+  scale_fill_viridis("Percent (%)", direction = -1, option = "viridis") +
+  theme_bw() +
+  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
+  annotate(geom="text", x=130, y=23, color="red", size=18, label= paste(round(M7b_plot$prop.M7b[1],1), "% population", sep = "")) +
+  ggtitle("Haplogroup M7b") +
+  coord_sf(crs = 4326)
+ggsave(filename = file.path("figures", "M7b-Contour.png"), width = 42, height = 33)
+
+# Kriging
+
+# library(dplyr)
+# library(sf)
+# library(ggplot2)
+# library(viridis)
+# library(automap)
+# library(gstat)
+# library(terra)
+# library("gstat")   # geostatistics
+# library("mapview") # map plot
+# library("sf")      # spatial vector data
+# library("stars")   # spatial-temporal data
+# library("terra")   # raster data handling 
+# library("ggplot2") # plotting
+# mapviewOptions(fgb = FALSE)
+
+M7b_plot <- M7b_sf %>% dplyr::select(prop.pop, prop.M7b, geometry) %>% st_as_sf(crs = 4326)
+
+# ordinary kriging
+M7b.ok <- gstat::krige(prop.pop ~ 1, M7b_plot, SEA1_sf)
+
+# Convert the result back to sf object
+M7bKrige_sf <- st_as_sf(M7b.ok)
+
+ggplot() +
+  geom_sf(data = SEA1_sf, fill = "white", alpha = 0.001) +
+  geom_sf(data = M7bKrige_sf, aes(fill = var1.pred), lwd = 0) +
+  annotate(geom = "text", x = 130, y = 23, color = "red", size = 18, label = paste0(round(M7b_plot$prop.M7b[1], 1), "% population")) +
+  scale_fill_viridis("Percent (%)", direction = -1, option = "viridis") +
+  theme_bw() +
+  theme(
+    text = element_text(size = 45),
+    axis.text.x = element_text(size = 30),
+    axis.text.y = element_text(size = 30),
+    legend.text = element_text(size = 30),
+    legend.key.size = unit(2, "cm")
+  ) +
+  ggtitle("Haplogroup M7b")
+
+ggsave(filename = file.path("figures", "M7b-Kriging.png"), width = 42, height = 33)
+
+# Haplogroup M7c
+
+library(sf)
+library(ggplot2)
+library(data.table)
+library(dplyr)
+
+# Calculate the overall proportion of haplogroup M7b
+prop.M7c <- (sum(dat_f$haplogroup3 == "M7c" & !is.na(dat_f$count), na.rm = TRUE) / sum(dat_f$count, na.rm = TRUE)) * 100
+
+# Process the data
+M7c <- dat_f %>% rename(location=Location, ethnicity=Ethnicity)  %>%
+  mutate(haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", " A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
+         haplo1=ifelse(is.na(haplo1), haplo, haplo1),
+         haplo1=case_when(haplo1 %in% c("135", "156", "159", "167", "172", "175", "182", "187", "197", "246", "261", "263", "264", "266", "272", "299", "316", "318", "349", "372", "377", "422", "430", "436", "481", "487", "494", "499", "562", "566", "595", "604", "168", "30", "32", "50", "51", "53", "530", "62", "73", "78", "90", "563") ~ haplo, 
+                          TRUE ~ haplo1),
+         haplo1=ifelse(haplo %in% c("A+152", "A+152+16362", "A+152+16362+200"), "A+", haplo1),
+         haplo1=ifelse(haplo %in% c("B4+16261"), "B4+", haplo1),
+         haplo1=ifelse(haplo %in% c("F1+16189"), "F1+", haplo1),
+         haplo1=ifelse(haplo %in% c("HV12b1"), "HV12", haplo1),
+         haplo1=ifelse(haplo %in% c("M1'20'51"), "M1'", haplo1),
+         haplo1=ifelse(haplo %in% c("M4''67"), "M4'", haplo1),
+         haplo1=ifelse(haplo %in% c("P1+152"), "P1+", haplo1),
+         haplo1=ifelse(haplo %in% c("P2*1", "P2*1a", "P2*2"), "P2*", haplo1),
+         haplo1=ifelse(haplo %in% c("Q1+@16223"), "Q1+", haplo1),
+         haplo1=ifelse(haplo %in% c("R+16189"), "R+", haplo1),
+         haplo1=ifelse(haplo %in% c("R2+13500"), "R2+", haplo1),
+         haplo1=ifelse(haplo %in% c("R6+16129*"), "R6+", haplo1),
+         location=case_when(location=="Akar" ~ "Bengkulu",
+                            location=="Akar Jambat" ~ "Bengkulu",
+                            location=="Alor Island" ~ "Nusa Tenggara Timur",
+                            location=="Andaman Sea coast" ~ "Krabi",
+                            location=="Bangkok" ~ "Bangkok Metropolis",
+                            location=="Borneo" ~ "Kalimantan Timur",
+                            location=="Capul's island in Northern Samar" ~ "Northern Samar",
+                            location=="Columbio" ~ "Sultan Kudarat",
+                            location=="Dulag" ~ "Leyte",
+                            location=="East Malaysia on the island of Borneo" ~ "Sarawak",
+                            location=="Ibabao, Cordova, Cebu City" ~ "Cebu",
+                            location=="Jangkar" ~ "Jawa Timur",
+                            location=="Jemaring" ~ "Sumatera Selatan",
+                            location=="Kachin State" ~ "Kachin",
+                            location=="Kayin State" ~ "Kachin",
+                            location=="Kota Kinabalu" ~ "Sabah",
+                            location=="Lipa" ~ "Batangas",
+                            location=="Luzon, Visayas, Mindanao" ~ "Quezon",
+                            location=="Mataran (or Mataram)" ~ "Nusa Tenggara Barat",
+                            location=="Merpayang Pauna" ~ "Sumatera Selatan",
+                            location=="Mindanao" ~ "Davao del Sur",
+                            location=="Mon, Kayin State" ~ "Kachin",
+                            location=="North Thailand, Central Thailand (Kanchanaburi and Ratchaburi)" ~ "Ratchaburi",
+                            location=="Northern Mindanao" ~ "Bukidnon",
+                            location=="Nothern Luzon" ~ "Cagayan",
+                            location=="Pelagaran" ~ "Sumatera Selatan",
+                            location=="Pelagaran Jambat" ~ "Sumatera Selatan",
+                            location=="Palembang" ~ "Sumatera Selatan",
+                            location=="Pang Mapha" ~ "Mae Hong Son",
+                            location=="Papua New Guinea" ~ "Papua",
+                            location=="Peninsular Malaysia" ~ "Pahang",
+                            location=="Philippines" ~ "Metropolitan Manila",
+                            location=="President Quirino" ~ "Sultan Kudarat",
+                            location=="Ratanakiri" ~ "Rotanokiri",
+                            location=="Salak" ~ "Sumatera Utara",
+                            location=="Semende" ~ "Sumatera Selatan",
+                            location=="Singapore" ~ "Central",
+                            location=="Southern Mindanao" ~ "Davao del Sur",
+                            location=="Southern Thailand" & (ethnicity =="Maniq" | ethnicity == "Southern Thai_AN") ~ "Narathiwat",
+                            location=="Southern Thailand" & ethnicity == "Southern Thai_TK" ~ "Surat Thani",
+                            location=="Stung Treng" ~ "Stoeng Treng",
+                            location=="Tak, Mae Hong Son, and Kanchanaburi" ~ "Mae Hong Son",
+                            location=="Thailand" & ethnicity == "Taiwan" ~ "Taiwan",
+                            location=="Vietnam" & ethnicity == "Kinh, Cham, Ede, Giarai" ~ "Ninh Thuan",
+                            location=="Vietnam" & ethnicity == "Kinh, Muong, Khmer" ~ "Ho Chi Minh",
+                            location=="Vietnam" & ethnicity == "Kinh, Tay, Thai, Muong, Hmong" ~ "Hoa Binh",
+                            location=="Wallacea" ~ "Sulawesi Tengah",
+                            location=="China" ~ "Yunnan",
+                            location=="Lancang, China" ~ "Yunnan",
+                            location=="Dehong, China" ~ "Yunnan",
+                            location=="Yunnan, China" ~ "Yunnan",
+                            location=="Brunei (Borneo)" ~ "Brunei and Muara",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Seim Riep (or Siem Reap)" ~ "Siemreab",
+                            location=="Prey Veng" ~ "Prey Veng",
+                            location=="Banteay Meanchey" ~ "Banteay Meanchey",
+                            location=="Kampong Thom" ~ "Kampong Thum",
+                            location=="Kampong Cham" ~ "Kampong Cham",
+                            location=="Kratie" ~ "Kracheh",
+                            location=="Takeo" ~ "Takev",
+                            location=="Battanbang" ~ "Batdambang",
+                            location=="Kampong Chahnang" ~ "Kampong Chhnang",
+                            location=="Pursat" ~ "Pouthisat",
+                            location=="Phnom Penh" ~ "Phnom Penh",
+                            location=="Kampot" ~ "Kampot",
+                            location=="Kandal" ~ "Kandal",
+                            location=="Oddar Meanchey" ~ "Otdar Mean Chey",
+                            location=="Koh Kong" ~ "Kaoh Kong",
+                            location=="Svay Rieng" ~ "Svay Rieng",
+                            location=="Alor" ~ "Nusa Tenggara Timur",
+                            location=="Ambon" ~ "Maluku",
+                            location=="Bali" ~ "Bali",
+                            location=="South Kalimantan" ~ "Kalimantan Selatan",
+                            location=="Padang" ~ "Sumatera Barat",
+                            location=="Sumatra" ~ "Sumatera Barat",
+                            location=="Java, Demak" ~ "Jawa Tengah",
+                            location=="Sumatra, Kutaradja" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="West New Guinea" ~ "Papua Barat",
+                            location=="Manado" ~ "Sulawesi Utara",
+                            location=="Sulawesi" ~ "Sulawesi Tengah",
+                            location=="Sulawesi, Manado" ~ "Sulawesi Utara",
+                            location=="Sumatra, Padang" ~ "Sumatera Barat",
+                            location=="Sumatra, Palembang" ~ "Sumatera Selatan",
+                            location=="Palangkaraya" ~ "Kalimantan Tengah",
+                            location=="South Borneo" ~ "Kalimantan Selatan",
+                            location=="Pagaralam" ~ "Sumatera Selatan",
+                            location=="Java" ~ "Jawa Tengah",
+                            location=="Toraja" ~ "Sulawesi Selatan",
+                            location=="Ujung Pandang" ~ "Sulawesi Selatan",
+                            location=="Waigapu (Sumba)" ~ "Nusa Tenggara Timur",
+                            location=="Sumba" ~ "Nusa Tenggara Timur",
+                            location=="Banjarmasin (Borneo)" ~ "Kalimantan Selatan",
+                            location=="Palangkaraya (Borneo)" ~ "Kalimantan Tengah",
+                            location=="North Laos" ~ "Louangphrabang",
+                            location=="Central Laos" ~ "Vientiane",
+                            location=="Kedah" ~ "Kedah",
+                            location=="Acheh-Kedah Yan" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor" ~ "Johor",
+                            location=="Johor Pontian" ~ "Johor",
+                            location=="Banjar Perak Kuala Kurau" ~ "Kedah",
+                            location=="Perak, Banjar Malay" ~ "Kedah",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Johor Semerah Jawa" ~ "Johor",
+                            location=="Johor Muar Jawa" ~ "Johor",
+                            location=="Sabah" ~ "Johor",
+                            location=="Kelantan" ~ "Kelantan",
+                            location=="Kelantan Kota Bahru" ~ "Kelantan",
+                            location=="Negeri Sembilan" ~ "Negeri Sembilan",
+                            location=="Minangkabau-Negeri Sembilan Lenggeng" ~ "Negeri Sembilan",
+                            location=="Kelantan RantauPanjang" ~ "Kelantan",
+                            location=="Perak, Rawa Malay" ~ "Perak",
+                            location=="Kota Kinabalu (Borneo)" ~ "Sabah",
+                            location=="Yangon" ~ "Yangon",
+                            location=="Pakokku" ~ "Mon",
+                            location=="Bataan" ~ "Bataan",
+                            location=="Zambales" ~ "Zambales",
+                            location=="Iriga" ~ "Camarines Sur",
+                            location=="Batan Archipelago" ~ "Bataan",
+                            location=="Cebu" ~ "Cebu",
+                            location=="Philippines Bohol" ~ "Bohol",
+                            location=="Luzon" ~ "Bulacan",
+                            location=="North Thailand" ~ "Chiang Mai",
+                            location=="Northeast Thailand" ~ "Samut Prakan",
+                            location=="Northern Thailand" ~ "Chiang Mai",
+                            location=="Central Thailand" ~ "Bangkok Metropolis",
+                            location=="Mergui Archipelago" ~ "Tanintharyi",
+                            location=="West Thailand" ~ "Surat Thani",
+                            location=="Baucau" ~ "Baucau",
+                            location=="Liquica" ~ "Liquica",
+                            location=="Cova Lima" ~ "Covalima",
+                            location=="Viqueque" ~ "Viqueque",
+                            location=="Aileu" ~ "Aileu",
+                            location=="Ermera" ~ "Ermera",
+                            location=="Dili" ~ "Dili",
+                            location=="Manufahi" ~ "Manufahi",
+                            ethnicity=="Cham" ~ "Ninh Thuan",
+                            ethnicity=="CoLao" ~ "Ha Giang",
+                            ethnicity=="Dao" ~ "Ha Giang",
+                            ethnicity=="Kinh" ~ "Ha Noi",
+                            ethnicity=="Stieng" ~ "Binh Phuoc",
+                            ethnicity=="Ede" ~ "Dak Lak",
+                            ethnicity=="Giarai" ~ "Gia Lai",
+                            ethnicity=="HaNhi" ~ "Lai Chau",
+                            ethnicity=="Hmong" ~ "Dien Bien",
+                            ethnicity=="Hui" ~ "Ha Giang",
+                            ethnicity=="LaChi" ~ "Ha Giang",
+                            ethnicity=="LaHu" ~ "Lai Chau",
+                            ethnicity=="LoLo" ~ "Ha Giang",
+                            ethnicity=="Mang" ~ "Lai Chau",
+                            ethnicity=="Nung" ~ "Lang Son",
+                            ethnicity=="PaThen" ~ "Ha Giang",
+                            ethnicity=="PhuLa" ~ "Lao Cai",
+                            ethnicity=="SiLa" ~ "Lai Chau",
+                            ethnicity=="Tay" ~ "Lang Son",
+                            ethnicity=="Thai" ~ "Son La",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Yao" ~ "Ha Giang",
+                            ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
+                            ethnicity=="Tay Nung" ~ "Lao Cai",
+                            TRUE ~ location)) %>%
+  mutate(haplogroup4 = ifelse(haplogroup3 == "M7c", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  group_by(location) %>%
+  mutate(prop.pop = (sum(haplogroup4 == "M7c" & !is.na(count), na.rm = TRUE) / sum(count, na.rm = TRUE)) * 100) %>%
+  ungroup() %>%
+  filter(haplogroup4 == "M7c") %>%
+  group_by(location) %>%
+  slice(1) %>% setDT()
+
+# Add the overall proportion to the data
+M7c <- M7c %>%
+  mutate(prop.M7c = prop.M7c)
+
+# Ensure columns have the correct data types
+M7c_sf <- merge(M7c, SEA1_sf, by = c("location"))
+M7c_sf$prop.pop <- as.numeric(M7c_sf$prop.pop)
+M7c_sf$prop.M7c <- as.numeric(M7c_sf$prop.M7c)
+
+# Convert to sf object
+M7c_plot <- M7c_sf %>% dplyr::select(prop.pop, prop.M7c, geometry) %>% st_as_sf(crs = 4326)
+
+# Check for NULL values
+if (any(is.null(M7c_plot$prop.pop)) || any(is.null(M7c_plot$prop.M7c))) {
+  stop("There are NULL values in the data.")
+}
+
+# Plotting
+ggplot() +
+  geom_sf() +
+  geom_sf(data = SEA1_sf, fill = "white", alpha = 0.001) +
+  geom_sf(data = M7c_plot, aes(fill = prop.pop), lwd = 0) +
+  annotate(geom = "text", x = 130, y = 23, color = "red", size = 18, label = paste0(round(M7c_plot$prop.M7c[1], 1), "% population")) +
+  scale_fill_viridis("Percent (%)", direction = -1, option = "viridis") +
+  theme_bw() +
+  theme(
+    text = element_text(size = 45),
+    axis.text.x = element_text(size = 30),
+    axis.text.y = element_text(size = 30),
+    legend.text = element_text(size = 30),
+    legend.key.size = unit(2, "cm")
+  ) +
+  ggtitle("Haplogroup M7c")
+
+ggsave(filename = file.path("figures", "M7c-PerPop-location.png"), width = 42, height = 33)
+
+# Contour
+
+M7c_sf <- dat_sf %>% mutate(haplogroup4 = ifelse(haplogroup3 == "M7c", str_extract(haplo, "^([A-Z])\\d\\w"), haplogroup3)) %>%
+  group_by(location) %>%
+  mutate(prop.pop = (sum(haplogroup4 == "M7c" & !is.na(count), na.rm = TRUE) / sum(count, na.rm = TRUE)) * 100,
+         ind=sum(haplogroup4 == "M7c" & !is.na(count), na.rm = TRUE),
+         pop=sum(count, na.rm = TRUE)) %>%
+  ungroup()
+
+prop.M7c <- (sum(dat_sf$haplogroup3 == "M7c" & !is.na(dat_sf$count), na.rm = TRUE) / sum(dat_sf$count, na.rm = TRUE)) * 100
+
+M7c_sf <- M7c_sf %>% mutate(prop.M7c = prop.M7c) %>% filter(haplogroup3=="M7c")
+
+M7c_f <- M7c_sf %>% select(location, ind, pop, prop.pop, geometry) %>% st_as_sf(crs = 4326)
+M7c_f <- sf::st_transform(M7c_f, 2154)
+M7c_plot <- M7c_sf %>% select(prop.pop, prop.M7c, geometry) %>% st_as_sf(crs = 4326)
+# Convert to Spatial class
+M7c_sf2 <- M7c_sf %>% select(location, ind, pop, prop.pop, geometry) %>% st_as_sf(crs = 4326)
+M7c_sf2 <- sf::st_transform(M7c_sf2, 2154)
+M7c_sp <- as(M7c_sf2, Class = "Spatial")
+
+# Compute the potentials of population on a regular grid (50km span)
+# function = exponential, beta = 2, span = 50 km
+poppot <- stewart(knownpts = M7c_sp, 
+                  varname = "pop", 
+                  typefct = "exponential", 
+                  span = 10000, 
+                  beta = 2, 
+                  resolution = 50000, 
+                  mask = M7c_sp, 
+                  returnclass = "sf")
+
+# Compute the potentials of haplogroup on a regular grid (50km span)
+# function = exponential, beta = 2, span = 50 km
+happot <- stewart(knownpts = M7c_sp, 
+                  varname = "ind", 
+                  typefct = "exponential", 
+                  span = 10000, 
+                  beta = 2, 
+                  resolution = 50000, 
+                  mask = M7c_sp, 
+                  returnclass = "sf")
+
+
+# Create the ratio variable
+# Handle NaN
+"/" <- function(x,y) ifelse(y==0,0,base:::"/"(x,y))
+poppot$OUTPUT2 <- happot$OUTPUT * 100 / poppot$OUTPUT
+
+# Discretize the variable
+bv <- quantile(M7c_sf$prop.pop, seq(from = 0, to = 1, length.out = 9))
+
+# Create an isopleth layer
+pot <- isopoly(x = poppot, var = "OUTPUT2",
+               breaks = bv, 
+               mask = M7c_sp, 
+               returnclass = "sf")
+
+ggplot() + geom_sf(data = SEA1_sf, fill = "white", alpha = 0.001) + 
+  geom_sf(data=pot, aes(fill=min), lwd=0) +
+  scale_fill_viridis("Percent (%)", direction = -1, option = "viridis") +
+  theme_bw() +
+  theme(text = element_text(size=45), axis.text.x = element_text(size=30), axis.text.y = element_text(size=30), legend.text=element_text(size=30), legend.key.size = unit(2, "cm")) +
+  annotate(geom="text", x=130, y=23, color="red", size=18, label= paste(round(M7c_plot$prop.M7c[1],1), "% population", sep = "")) +
+  ggtitle("Haplogroup M7c") +
+  coord_sf(crs = 4326)
+ggsave(filename = file.path("figures", "M7c-Contour.png"), width = 42, height = 33)
+
+# Kriging
+
+# library(dplyr)
+# library(sf)
+# library(ggplot2)
+# library(viridis)
+# library(automap)
+# library(gstat)
+# library(terra)
+# library("gstat")   # geostatistics
+# library("mapview") # map plot
+# library("sf")      # spatial vector data
+# library("stars")   # spatial-temporal data
+# library("terra")   # raster data handling 
+# library("ggplot2") # plotting
+# mapviewOptions(fgb = FALSE)
+
+M7c_plot <- M7c_sf %>% dplyr::select(prop.pop, prop.M7c, geometry) %>% st_as_sf(crs = 4326)
+
+# ordinary kriging
+M7c.ok <- gstat::krige(prop.pop ~ 1, M7c_plot, SEA1_sf)
+
+# Convert the result back to sf object
+M7cKrige_sf <- st_as_sf(M7c.ok)
+
+ggplot() +
+  geom_sf(data = SEA1_sf, fill = "white", alpha = 0.001) +
+  geom_sf(data = M7cKrige_sf, aes(fill = var1.pred), lwd = 0) +
+  annotate(geom = "text", x = 130, y = 23, color = "red", size = 18, label = paste0(round(M7c_plot$prop.M7c[1], 1), "% population")) +
+  scale_fill_viridis("Percent (%)", direction = -1, option = "viridis") +
+  theme_bw() +
+  theme(
+    text = element_text(size = 45),
+    axis.text.x = element_text(size = 30),
+    axis.text.y = element_text(size = 30),
+    legend.text = element_text(size = 30),
+    legend.key.size = unit(2, "cm")
+  ) +
+  ggtitle("Haplogroup M7c")
+
+ggsave(filename = file.path("figures", "M7c-Kriging.png"), width = 42, height = 33)
 
 # Haplogroup B
 
