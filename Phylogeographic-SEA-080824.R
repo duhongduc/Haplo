@@ -13272,7 +13272,7 @@ e_phi <- ggplot() + geom_sf(data=PHI_sf, aes(fill="white"), alpha=0.001) +
   # geom_label(aes(x = longitude, y = latitude,  label = ethnicity), data = ethnicity_PHI_plot, size = 8, hjust=-0.1, vjust=0.5, position=position_jitter(width=-1.5,height=1.5), label.size = 0.5) +
   geom_scatterpie(aes(x=x, y=y, r=0.4), data=dt_x, cols = colnames(dt_x)[1:216], color=NA, alpha=0.6) +
   # annotate(geom = "table", x = 130, y = 20, label = list(ethnicity_PHI_max), size = 6.5) +
-  guides(fill=guide_legend(nrow = 4, byrow=TRUE)) +
+  guides(fill=guide_legend(nrow = 5, byrow=TRUE)) +
   scale_fill_discrete(name="") +
   theme_bw() +
   theme(plot.title = element_text(size=40, face = "bold"),
@@ -13286,7 +13286,7 @@ e_phi <- ggplot() + geom_sf(data=PHI_sf, aes(fill="white"), alpha=0.001) +
 
 e_phi
 
-ggsave(filename = file.path("figures", "Haplo_ethnic_Philippines_new_new.png"), width = 18, height = 28)
+ggsave(filename = file.path("figures", "Haplo_ethnic_Philippines_new_new.png"), width = 16, height = 28)
 
 ## Thailand
 
