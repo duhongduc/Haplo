@@ -10347,7 +10347,7 @@ dat_country_SEA <- pre_SEA %>% dplyr::rename(country=Country, ethnicity=Ethnicit
                             ethnicity=="Yao" ~ "Ha Giang",
                             ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
                             ethnicity=="Tay Nung" ~ "Lao Cai",
-                            TRUE ~ location),) %>% setDT()
+                            TRUE ~ location),) %>% arrange(ID) %>% setDT()
 
 library(writexl)
 write_xlsx(dat_country_SEA, "CompleteFull_exchanged_location.xlsx")
