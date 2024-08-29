@@ -10169,7 +10169,7 @@ pre_SEA <- SEA %>%
   mutate(order1=order(max1, decreasing = T), haplo1_max=haplo1[order1==1]) %>%
   ungroup() %>% setDT()
 
-dat_country_SEA <- country_SEA %>%
+dat_country_SEA <- pre_SEA %>% dplyr::rename(country=Country, ethnicity=Ethnicity, location=Location) %>%
   mutate(haplo1=ifelse(!(haplo %in% c("A+152", "A+152+16362", " A+152+16362+200", "R+16189")), str_extract(haplo, "^([A-Z])\\d\\w"), haplo),
          haplo1=ifelse(is.na(haplo1), haplo, haplo1),
          haplo1=case_when(haplo1 %in% c("135", "156", "159", "167", "172", "175", "182", "187", "197", "246", "261", "263", "264", "266", "272", "299", "316", "318", "349", "372", "377", "422", "430", "436", "481", "487", "494", "499", "562", "566", "595", "604", "168", "30", "32", "50", "51", "53", "530", "62", "73", "78", "90", "563") ~ haplo, 
@@ -10348,6 +10348,9 @@ dat_country_SEA <- country_SEA %>%
                             ethnicity=="Kinh, Tay, Dao, Hmong, Muong, Hoa, Khmer, Nung" ~ "Ha Noi",
                             ethnicity=="Tay Nung" ~ "Lao Cai",
                             TRUE ~ location),) %>% setDT()
+
+library(writexl)
+write_xlsx(dat_country_SEA, "CompleteFull_exchanged_location.xlsx")
 
 country_SEA_sf <- merge(pre_SEA, SEA1_sf, by=c("location"))
 country_SEA_plot <- country_SEA_sf %>% st_as_sf(crs = 4326)
